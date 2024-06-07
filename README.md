@@ -1,1 +1,0 @@
-# RAD - EXAM EASE
