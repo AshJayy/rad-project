@@ -9,6 +9,17 @@ export default {
   ],
   theme: {
     extend: {},
+    colors: {
+      'dark-blue': {
+        DEFAULT: '#00072D'
+      },
+      'mid-blue': {
+        DEFAULT: '#064998'
+      },
+      'light-blue': {
+        DEFAULT: '#E2ECF3'
+      },
+    }
   },
   plugins: [
     flowbite.plugin(),

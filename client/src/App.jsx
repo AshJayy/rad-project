@@ -6,6 +6,8 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import Subscribe from './pages/Subscribe'
 import Header from './components/Header'
+import Pricing from './pages/Pricing'
+import About from './pages/About'
 
 function App() {
 
@@ -13,12 +15,14 @@ function App() {
     <BrowserRouter>
       <Header />
         <Routes>
-        <Route path="home" element={<Home />} />
-        <Route path="freetrial" element={<FreeTrial />} />
-        <Route path="exam" element={<Exam />} />
-        <Route path="signin" element={<SignIn />} />
-        <Route path="signup" element={<SignUp />} />
-        <Route path="subscribe" element={<Subscribe />} />
+          <Route path="/" element={<Home />} />
+          <Route path="freetrial" element={<FreeTrial />} />
+          <Route path="exam" element={<Exam />} />
+          <Route path="signin" element={<SignIn />} />
+          <Route path="signup" element={<SignUp />} />
+          <Route path="subscribe" element={<Subscribe />} />
+          <Route path="pricing" element={<Pricing />} />
+          <Route path="about" element={<About />} />
         </Routes>
     </BrowserRouter>
   )
