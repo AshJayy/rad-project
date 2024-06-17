@@ -1,7 +1,7 @@
 import Logo from "./Logo";
+import { Link } from "react-router-dom";
 import { Button, Dropdown, Navbar } from "flowbite-react";
 import { HiChevronDown } from "react-icons/hi";
-import { Link } from "react-router-dom";
 
 export default function Header() {
   const dropDownItems = [
@@ -36,8 +36,8 @@ export default function Header() {
             }
             >
               {dropDownItems.map((item, index) => (
-                <Link to={item.path}>
-                  <Dropdown.Item key={index}>{item.name}</Dropdown.Item>
+                <Link key={index} to={item.path}>
+                  <Dropdown.Item>{item.name}</Dropdown.Item>
                 </Link>
               ))}
             </Dropdown>
@@ -45,12 +45,12 @@ export default function Header() {
             <Navbar.Toggle />
 
             <Navbar.Collapse>
-              <Navbar.Link>
+              <Navbar.Link as={'div'}>
                 <Link to={'/pricing'} className="text-sm font-medium text-dark-blue hover:text-mid-blue">
                   Pricing
                 </Link>
               </Navbar.Link>
-              <Navbar.Link>
+              <Navbar.Link as={'div'}>
                 <Link to={'/about'} className="text-sm font-medium text-dark-blue hover:text-mid-blue">
                   About
                 </Link>
