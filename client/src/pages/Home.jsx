@@ -26,19 +26,19 @@ export default function Home() {
 
   const reviews = [
     {
-      review: '\"ExamEase has been a game-changer for my exam prep. The extensive question banks and detailed reports have really helped me identify and improve my weak areas.\"',
+      review: "ExamEase has been a game-changer for my exam prep. The extensive question banks and detailed reports have really helped me identify and improve my weak areas.",
       name: "Maria S",
       company: "University Student",
       bg: "#064a98cc"
     },
     {
-      review: '\"I love how I can customize my exams and track my progress in real-time. The feedback is immediate and the explanations are very clear.\"',
+      review: "I love how I can customize my exams and track my progress in real-time. The feedback is immediate and the explanations are very clear.",
       name: "John D.",
       company: "MBA Candidate",
       bg: "#067E98c4"
     },
     {
-      review: '\"ExamEase’s user-friendly interface makes it so easy to navigate and manage my study sessions. The unique exam generation feature ensures I\’m always challenged.\"',
+      review: "ExamEase's user-friendly interface makes it so easy to navigate and manage my study sessions. The unique exam generation feature ensures I'm always challenged.",
       name: "Liam T.",
       company: "Medical Student",
       bg: "#066C98cc"
@@ -46,7 +46,6 @@ export default function Home() {
   ];
 
   const [visibleFAQ, setVisibleFAQ] = useState(null);
-
   const faq = [
     {
       q: "What subscription plans are available?",
@@ -85,6 +84,32 @@ export default function Home() {
         </div>
       </div>
     )
+  }
+
+  const FAQ = ({index, question}) => {
+    return (
+      <div key={index} className={`w-[30rem] bg-white drop-shadow-xl ${visibleFAQ == index ? "rounded-3xl" : "rounded-full"}`}>
+        <button
+          className=" px-8 py-3 text-sm font-bold text-left"
+          onClick={() => visibleFAQ === index ? setVisibleFAQ(null) : setVisibleFAQ(index)}
+        >
+          + {question.q}
+        </button>
+        {visibleFAQ === index &&
+          <div className="px-8 pb-3 text-sm">
+            <p>
+              {question.a}
+              {question.link &&
+                <Link to={question.link} className="text-mid-blue px-2 opacity-100 hover:opacity-50">
+                  Learn more
+                  <HiChevronRight className="inline-block" />
+                </Link>
+              }
+            </p>
+          </div>
+        }
+      </div>
+)
   }
 
   return (
@@ -126,9 +151,9 @@ export default function Home() {
 
       <section id="reviews" className="p-24 flex flex-wrap gap-16 justify-center lg:justify-between">
         {reviews.map((review, index) => (
-          <div key={index} className={`w-80 lg:w-[25vw] h-80 flex flex-col gap-4 items-center justify-center p-8 text-sm rounded-xl drop-shadow-lg bg-[${review.bg}] text-white text-center`}>
-            <p className="shadow-none">{review.review}</p>
-            <p className="text-light-blue shadow-none">{review.name}, {review.company}t</p>
+          <div key={index} className={`w-80 lg:w-[25vw] h-80 flex flex-col gap-4 items-center justify-center p-8 text-sm rounded-xl drop-shadow-lg text-white text-center`} style={{"background-color": review.bg}}>
+            <p className="shadow-none">"{review.review}"</p>
+            <p className="text-light-blue shadow-none">{review.name}, {review.company}</p>
           </div>
         ))}
       </section>
@@ -137,27 +162,7 @@ export default function Home() {
         <h1 className="font-semibold">frequently asked questions (FAQs)</h1>
         <div className="flex flex-col gap-4">
           {faq.map((question, index) => (
-            <div key={index} className={`w-[30rem] bg-white drop-shadow-xl ${visibleFAQ == index ? "rounded-3xl" : "rounded-full"}`}>
-              <button
-                className=" px-8 py-3 text-sm font-bold text-left"
-                onClick={() => visibleFAQ === index ? setVisibleFAQ(null) : setVisibleFAQ(index)}
-              >
-                + {question.q}
-              </button>
-              {visibleFAQ === index &&
-                <div className="px-8 pb-3 text-sm">
-                  <p>
-                    {question.a}
-                    {question.link &&
-                      <Link to={question.link} className="text-mid-blue px-2 opacity-100 hover:opacity-50">
-                        Learn more
-                        <HiChevronRight className="inline-block" />
-                      </Link>
-                    }
-                  </p>
-                </div>
-              }
-            </div>
+            <FAQ question={question} index={index} />
           ))}
         </div>
       </section>
