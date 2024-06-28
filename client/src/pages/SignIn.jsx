@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Button,Label, TextInput } from 'flowbite-react';
 import { Link } from 'react-router-dom';
-
+import { useDispatch } from 'react-redux';
+import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,15 +19,19 @@ const SignIn = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-
+      dispatch(signInStart());
+      
       if (response.ok) {
         const data = await response.json();
         console.log('Sign-in successful', data);
+        dispatch(signInSuccess(data));
       } else {
         console.log('Sign-in failed');
+        dispatch(signInFailure());
       }
     } catch (error) {
       console.error('Error:', error);
+      dispatch(signInFailure());
     }
   };
 
@@ -43,6 +49,7 @@ const SignIn = () => {
               value={email}
               required
               className="w-full"
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="mb-4">
@@ -54,6 +61,7 @@ const SignIn = () => {
               value={password}
               required
               className="w-full"
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <Button type="submit" className="w-full bg-mid-blue"  >
