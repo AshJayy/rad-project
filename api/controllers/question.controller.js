@@ -2,7 +2,7 @@ import Question from '../models/question.model.js'
 import { errorHandler } from '../utils/error.js'
 
 export const createQuestion = async (req, res, next) => {
-   if (!req.user.isAdmin) {
+   if (!req.user.userLevel == 1 && !req.user.userLevel == 2) {
       return next(errorHandler(403, 'You are not allowed to create a question'));
    }
    const { bank, content, options, correctAnswer, justification } = req.body;
