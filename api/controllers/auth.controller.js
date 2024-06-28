@@ -27,7 +27,7 @@ export const signup = async (req, res, next) => {
    }
 };
 
-/*export const signin = async (req, res, next) => {
+export const signin = async (req, res, next) => {
    const { email, password } = req.body;
 
    if (!email || !password || email === '' || password === '') {
@@ -45,7 +45,7 @@ export const signup = async (req, res, next) => {
       }
 
       const token = jwt.sign(
-         { id: validUser._id, isAdmin: validUser.isAdmin },
+         { id: validUser._id, userLevel: validUser.userLevel },
          process.env.JWT_SECRET
        );
 
@@ -58,6 +58,7 @@ export const signup = async (req, res, next) => {
    }
 };
 
+/*
 export const google = async (req, res, next) => {
    const {email, name, googlePhotoUrl} = req.body;
    try {
