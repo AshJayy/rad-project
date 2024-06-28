@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import questionRoutes from './routes/question.route.js'
 import userRoutes from './routes/user.route.js'
+import authRoutes from './routes/auth.route.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.listen(3000, () => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/question', questionRoutes);
 
 
