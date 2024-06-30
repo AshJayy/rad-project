@@ -58,7 +58,7 @@ export const signin = async (req, res, next) => {
    }
 };
 
-/*
+
 export const google = async (req, res, next) => {
    const {email, name, googlePhotoUrl} = req.body;
    try {
@@ -66,7 +66,7 @@ export const google = async (req, res, next) => {
       if(user){
          //check for an existing user
          const token = jwt.sign(
-            { id: user._id, isAdmin: user.isAdmin },
+            { id: user._id, userLevel: validUser.userLevel },
             process.env.JWT_SECRET
          );
          const {password, ...rest} = user._doc;
@@ -86,7 +86,7 @@ export const google = async (req, res, next) => {
          
          await newUser.save();
          const token = jwt.sign(
-            { id: newUser._id, isAdmin: newUser.isAdmin },
+            { id: newUser._id, userLevel: newUser.userLevel },
             process.env.JWT_SECRET
          );
          const {password, ...rest} = newUser._doc;
@@ -98,4 +98,4 @@ export const google = async (req, res, next) => {
    } catch (error) {
       
    }
-}*/
+}

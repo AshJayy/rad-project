@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Button,Label, TextInput } from 'flowbite-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
+import OAuth from '../components/OAuth';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,11 +24,10 @@ const SignIn = () => {
       });
       dispatch(signInStart());
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Sign-in successful', data);
-        dispatch(signInSuccess(data));
-      } else {
+      if(res.ok){
+          dispatch(signInSuccess(data));
+          navigate('/');
+        } else {
         console.log('Sign-in failed');
         dispatch(signInFailure());
       }
@@ -67,10 +69,11 @@ const SignIn = () => {
           <Button type="submit" className="w-full bg-mid-blue"  >
             sign In
           </Button>
+          <OAuth/>
         </form>
         <div className="flex gap-2 text-sm mt-5">
           <span>Don't have an account?</span>
-          <Link to="/sign-up" className="text-blue-500">Sign Up</Link>
+          <Link to="/signup" className="text-blue-500">Sign Up</Link>
         </div>
       </div>
       <div className="flex-1 hidden md:flex justify-center items-center bg-mid-blue rounded-lg pd-100 relative">
