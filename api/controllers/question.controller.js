@@ -26,3 +26,37 @@ export const createQuestion = async (req, res, next) => {
       next(error);
    }
 };
+
+export const getFreeTrial = async (req, res, next) => {
+   try {
+      const getFromBank = async (bank, limit) => {
+         const questionSet = await Question.find({
+            bank: bank,
+            isActive: true
+         })
+         .sort({createdAt: 1})
+         .limit(limit)
+         return questionSet
+      }
+
+      var questions = []
+
+      const questionSets = await Promise.all([
+         getFromBank(1, 1),
+         getFromBank(2, 1),
+         getFromBank(3, 1),
+         getFromBank(4, 1),
+         getFromBank(5, 1),
+         getFromBank(6, 1),
+      ]);
+
+      questionSets.forEach(set => {
+         questions = questions.concat(set);
+      });
+
+      res.status(200).json(questions);
+
+   } catch (error) {
+      next(error)
+   }
+}
