@@ -66,7 +66,7 @@ export const google = async (req, res, next) => {
       if(user){
          //check for an existing user
          const token = jwt.sign(
-            { id: user._id, userLevel: validUser.userLevel },
+            { id: user._id },
             process.env.JWT_SECRET
          );
          const {password, ...rest} = user._doc;
@@ -86,7 +86,7 @@ export const google = async (req, res, next) => {
          
          await newUser.save();
          const token = jwt.sign(
-            { id: newUser._id, userLevel: newUser.userLevel },
+            { id: newUser._id },
             process.env.JWT_SECRET
          );
          const {password, ...rest} = newUser._doc;
