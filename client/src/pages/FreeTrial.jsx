@@ -55,7 +55,9 @@ export default function FreeTrial() {
 
   if(completed){
     return (
-      <p>completed</p>
+      <div>
+        completed
+      </div>
     )
   }
 
@@ -75,7 +77,12 @@ export default function FreeTrial() {
             <div className="w-full flex justify-end">
               {questions.length > 0 && questions.map((question, index) => (
                 <div className="flex items-center">
-                  <button key={index} className={`w-10 h-10 rounded-full ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}>{index + 1}</button>
+                  <button 
+                    key={index} 
+                    onClick={() => setQuestionNo(index)}
+                    className={`w-10 h-10 rounded-full ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}>
+                      {index + 1}
+                  </button>
                   <div className={`h-2 w-12 mx-[-4px] ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}></div>
                 </div>
               ))}
