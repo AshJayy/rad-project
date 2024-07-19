@@ -60,3 +60,37 @@ export const getFreeTrial = async (req, res, next) => {
       next(error)
    }
 }
+
+export const getQuestions = async (req, res, next) => {// get questions for exam
+   try {
+      const getFromBank = async (bank, limit) => {
+         const questionSet = await Question.find({
+            bank: bank,
+            isActive: true
+         })
+         .sort({createdAt: 1})
+         .limit(limit)
+         return questionSet
+      }
+
+      var questions = []
+
+      const questionSets = await Promise.all([// returns an array of questions when fullfilled
+         getFromBank(1, 40),
+         getFromBank(2, 30),
+         getFromBank(3, 20),
+         getFromBank(4, 20),
+         getFromBank(5, 20),
+         getFromBank(6, 20),
+      ]);
+
+      questionSets.forEach(set => {
+         questions = questions.concat(set);
+      });
+
+      res.status(200).json(questions);
+
+   } catch (error) {
+      next(error)
+   }
+}
