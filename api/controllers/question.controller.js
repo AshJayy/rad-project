@@ -128,3 +128,23 @@ export const editQuestion = async (req, res, next) => {
       next(error);
    }
 }
+
+export const deleteQuestion = async (req, res, next) => {
+   // if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to delete questions
+   //    return next(errorHandler(403, 'You are not allowed to delete a question'));
+   // }
+
+   const questionId = req.params.questionId;
+
+   try {
+      const deletedQuestion = await Question.findByIdAndDelete(questionId);
+
+      if (!deletedQuestion) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      res.status(200).json('Question deleted successfully');
+   } catch (error) {
+      next(error);
+   }
+}
