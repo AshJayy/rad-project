@@ -94,3 +94,37 @@ export const getQuestions = async (req, res, next) => {// get questions for exam
       next(error)
    }
 }
+
+export const editQuestion = async (req, res, next) => {
+   // if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to edit questions
+   //    return next(errorHandler(403, 'You are not allowed to edit a question'));
+   // }
+
+   const { bank, content, options, correctAnswer, justification } = req.body;
+   const questionId = req.body._id;
+
+   // Making sure all fields are filled
+   if (!bank || !content || !Array.isArray(options) || options.length === 0 || !correctAnswer || !questionId) {
+      return next(errorHandler(400, 'Please provide all required fields'));
+   }
+
+   try {
+      const updatedQuestion = await Question.findByIdAndUpdate(questionId, {
+         $set: {
+            bank,
+            content,
+            options,
+            correctAnswer,
+            justification
+         }
+      }, { new: true });
+
+      if (!updatedQuestion) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      res.status(200).json(updatedQuestion);
+   } catch (error) {
+      next(error);
+   }
+}
