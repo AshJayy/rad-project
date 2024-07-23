@@ -1,7 +1,10 @@
 import Logo from "./Logo";
-import { Link } from "react-router-dom";
-import { Button, Dropdown, Navbar } from "flowbite-react";
+import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
 import { HiChevronDown } from "react-icons/hi";
+import { useSelector, useDispatch } from "react-redux";
+import { signoutSuccess } from "../redux/user/userSlice";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 
 export default function Header() {
   const dropDownItems = [
@@ -18,12 +21,34 @@ export default function Header() {
       path: "#"
     },
   ]
+
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector((state) => state.user);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/users/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
-    <Navbar className="px-10 py-6">
+    <Navbar className="px-10 py-6 sticky top-0 z-10 backdrop-blur-lg bg-opacity-70">
         <div className="flex gap-16 items-center">
           <Logo />
 
-          <div className="flex gap-8">
+          <div className="flex gap-8 ">
 
             <Dropdown
               label=""
@@ -60,9 +85,42 @@ export default function Header() {
 
         </div>
 
-        <div className="flex gap-8 items-center text-sm">
-
+        <div className="flex gap-4 items-center text-sm">
+        {currentUser ? (
+          <>
+          <span className="block text-sm">Hi, {currentUser.username}</span>
+          <Dropdown
+            arrowIcon={false}
+            inline
+            label={
+              <Avatar alt="user" img={currentUser.profilePicture} rounded className="border-blue-500"/>
+            }
+          >
+            <Dropdown.Header>
+              
+              <span className="block text-sm font-medium truncate">
+                {currentUser.email}
+              </span>
+            </Dropdown.Header>
+            {currentUser.userLevel > 0 && (
+              <>
+              
+              <Link to={"/dashboard?tab=dash"}>
+                <Dropdown.Item>Dashboard</Dropdown.Item>
+              </Link>
+              <Dropdown.Divider />
+              </>
+            )}
+            <Link to={"/dashboard?tab=profile"}>
+              <Dropdown.Item>Profile</Dropdown.Item>
+            </Link>
+            <Dropdown.Divider />
+            <Dropdown.Item onClick={handleSignout}>Sign Out</Dropdown.Item>
+          </Dropdown>
+          </>
+        ) : (
           <span><Link to={'/signin'}>Log In</Link></span>
+        )}
 
           <Button className="bg-mid-blue" pill>
             <Link to={'/freetrial'}>Start free trial</Link>
