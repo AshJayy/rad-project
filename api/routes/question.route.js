@@ -6,7 +6,6 @@ import { get } from 'mongoose';
 const router = express.Router();
 
 router.post('/create', verifyToken, createQuestion);
-router.post('/createBulk', verifyToken, createQuestions);//to insert questions in bulk for testing purposes
 router.get('/freetrial', getFreeTrial);
 router.get('/getquestions', getQuestions);
 router.put('/editquestion', editQuestion); //verifyToken should be added later
