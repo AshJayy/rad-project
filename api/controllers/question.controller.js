@@ -27,6 +27,7 @@ export const createQuestion = async (req, res, next) => {
    }
 };
 
+
 export const getFreeTrial = async (req, res, next) => {
    try {
       const getFromBank = async (bank, limit) => {
