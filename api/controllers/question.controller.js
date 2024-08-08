@@ -105,7 +105,7 @@ export const editQuestion = async (req, res, next) => {
    const questionId = req.body._id;
 
    // Making sure all fields are filled
-   if (!bank || !content || !Array.isArray(options) || options.length === 0 || !correctAnswer || !questionId) {
+   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null || !questionId) {
       return next(errorHandler(400, 'Please provide all required fields'));
    }
 
