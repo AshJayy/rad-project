@@ -9,7 +9,7 @@ export default function Question({question, questionIdx, handleAnswers}) {
             <div className="ml-10 p-1" key={index}>
                 <Radio
                     id={`op${index}`}
-                    checked={index == question.choice}
+                    defaultChecked={index == question.choice}
                     onClick={() => handleAnswers(questionIdx, index)}
                 />
                 <Label htmlFor={`op${index}`} className="px-2">{option}</Label>
