@@ -65,12 +65,12 @@ export default function DashSidebar() {
               </Sidebar.Item>
             </Link>
           )}
-          {currentUser.userLevel == 0 && (
+          {currentUser.userLevel >= 0 && (
             <Link to="/dashboard?tab=profile">
               <Sidebar.Item
                 active={tab === "profile"}
                 icon={FaRegUser}
-                label={currentUser > 0 ? "Admin" : "Student"}
+                label={currentUser.userLevel > 0 ? "Admin" : "Student"}
                 labelColor="purple"
                 as="div"
                 className="border shadow-md"
