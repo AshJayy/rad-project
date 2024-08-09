@@ -1,4 +1,4 @@
-import { Button, Label, List, Radio, Spinner } from "flowbite-react";
+import { Button, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { AiFillClockCircle } from "react-icons/ai";
 import { HiChevronRight } from "react-icons/hi";
@@ -93,9 +93,8 @@ export default function FreeTrial() {
           {!loading &&
             <div className="w-full flex justify-end">
               {questions.length > 0 && questions.map((question, index) => (
-                <div className="flex items-center">
+                <div className="flex items-center" key={index}>
                   <button
-                    key={index}
                     onClick={() => setquestionIdx(index)}
                     className={`w-10 h-10 rounded-full ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}>
                       {index + 1}
