@@ -2,13 +2,16 @@ import { Button, Label, List, Radio, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { AiFillClockCircle } from "react-icons/ai";
 import { HiChevronRight } from "react-icons/hi";
+import Question from "../components/Question";
+import Answers from "./Answers";
 
 export default function FreeTrial() {
 
   const [questions, setQuestions] = useState([]);
-  const [questionNo, setQuestionNo] = useState(0)
+  const [questionIdx, setquestionIdx] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [marks, setMarks] = useState(0);
 
   useEffect(() => {
     try {
@@ -49,6 +52,20 @@ export default function FreeTrial() {
     setQuestions(updatedQuestions);
   };
 
+  useEffect(() => { // calculate marks got from the quizz
+    const getMarks = () => {
+      const marks = questions.reduce((acc, question) => {
+        if(question.choice === question.correctAnswer){
+          return acc + 1
+        }
+        return acc
+      }, 0)
+      return marks
+    }
+    const marks = getMarks() / questions.length * 100;
+    setMarks(marks.toFixed(0))
+  }, [completed])
+
   const handleSubmit = () => {
     setCompleted(true);
   }
@@ -56,7 +73,7 @@ export default function FreeTrial() {
   if(completed){
     return (
       <div>
-        completed
+        <Answers questions={questions} marks={marks} />
       </div>
     )
   }
@@ -76,10 +93,9 @@ export default function FreeTrial() {
           {!loading &&
             <div className="w-full flex justify-end">
               {questions.length > 0 && questions.map((question, index) => (
-                <div className="flex items-center">
-                  <button 
-                    key={index} 
-                    onClick={() => setQuestionNo(index)}
+                <div className="flex items-center" key={index}>
+                  <button
+                    onClick={() => setquestionIdx(index)}
                     className={`w-10 h-10 rounded-full ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}>
                       {index + 1}
                   </button>
@@ -90,32 +106,21 @@ export default function FreeTrial() {
           }
         </div>
         {!loading && questions.length > 0 ? (
-          <div id="questions" className="py-8 px-12 text-sm rounded-3xl drop-shadow-md bg-light-blue">
-            <p className="p-2">{questionNo + 1}. {questions[questionNo].content}</p>
-            <div>
-              {questions[questionNo].options.map((option, index) => (
-                <div className="ml-10 p-1">
-                  <Radio
-                    id={`op${index}`}
-                    key={index}
-                    checked={index == questions[questionNo].choice}
-                    onClick={() => handleAnswers(questionNo, index)}
-                  />
-                  <Label htmlFor={`op${index}`} className="px-2">{option}</Label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Question
+            question={questions[questionIdx]}
+            questionIdx={questionIdx}
+            handleAnswers={handleAnswers}
+          />
         ) : (
           <div>
             <Spinner />
           </div>
         )}
-        {questionNo <= questions.length - 2 ? (
+        {questionIdx <= questions.length - 2 ? (
           <Button
             className="self-end pl-4 bg-mid-blue"
             pill
-            onClick={() => setQuestionNo(questionNo + 1)}
+            onClick={() => setquestionIdx(questionIdx + 1)}
           >
             <span className="flex flex-row items-center gap-3">
               Next Question

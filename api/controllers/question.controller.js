@@ -27,37 +27,6 @@ export const createQuestion = async (req, res, next) => {
    }
 };
 
-export const createQuestions = async (req, res, next) => {
-   if (!req.user.userLevel == 1 && !req.user.userLevel == 2) {
-     return next(errorHandler(403, 'You are not allowed to create questions'));
-   }
- 
-   const { questions } = req.body;
- 
-   if (!questions || !Array.isArray(questions) || questions.length === 0) {
-     return next(errorHandler(400, 'Please provide a list of questions'));
-   }
- 
-   const newQuestions = questions.map(({ bank, content, options, correctAnswer, justification }) => {
-     if (!bank || !content || !options || !correctAnswer) {
-       throw errorHandler(400, 'Please provide all required fields for each question');
-     }
-     return new Question({
-       bank,
-       content,
-       options,
-       correctAnswer,
-       justification: justification || ''
-     });
-   });
- 
-   try {
-     const savedQuestions = await Question.insertMany(newQuestions);
-     res.status(201).json(savedQuestions);
-   } catch (error) {
-     next(error);
-   }
- };//to insert questions in bulk for testing purposes
 
 export const getFreeTrial = async (req, res, next) => {
    try {
