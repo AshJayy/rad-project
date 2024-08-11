@@ -1,14 +1,18 @@
 import { Alert, Button, Label, List, Radio, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { AiFillClockCircle } from "react-icons/ai";
 import { HiChevronRight, HiOutlinePencilAlt, HiOutlinePencil } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
 
 export default function Exam() {
+  const { currentUser } = useSelector((state) => state.user);
+  
   const [questions, setQuestions] = useState([]);
   const [questionIdx, setQuestionIdx] = useState(0)
   const [completed, setCompleted] = useState(false)
+  const [examStatus, setExamStatus] = useState("unsaved")
   const [loading, setLoading] = useState(false)
   const [marks, setMarks] = useState(0);
 
@@ -26,7 +30,6 @@ export default function Exam() {
             ...question,
             choice: -1,
           }))
-          // modifiedData[1].choice = 2
           setQuestions(modifiedData);
           setLoading(false);
         }
@@ -48,8 +51,40 @@ export default function Exam() {
       }, 0)
       return marks
     }
-    const marks = getMarks() / questions.length * 100;
-    setMarks(marks.toFixed(0))
+    const addExam = async () => {
+      setLoading(true);
+      const questionsData = questions.map(({ choice, _id }) => {
+        return { questionID: _id, answer: choice };
+      });
+      try {
+        const res = await fetch("/api/exam/addexam", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: currentUser._id,
+            examNo: 0,
+            questions: questionsData,
+            totalMarks: marks,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          console.log("Error saving exam results");
+          setLoading(false);
+        } else {
+          setLoading(false);
+          setExamStatus("saved");
+        }
+      } catch (error) {
+        setLoading(false);
+        console.log("Error saving exam results", error);
+      }
+    };
+    const marks = ((getMarks() / questions.length) * 100).toFixed(0);
+    setMarks(marks);
+    addExam();
   }, [completed])
 
   const handleAnswers = (qNo, selectedIndex) => { //update state with selected answers
@@ -69,7 +104,7 @@ export default function Exam() {
     setCompleted(true);
   }
 
-  if(completed){ // page after submitting answers
+  if(examStatus == "saved"){ // page after submitting answers
     return (
       <Answers questions={questions} marks={marks} />
     )

@@ -3,19 +3,23 @@ import Question from "./question.model";
 
 const examSchema = new mongoose.Schema(
   {
-    attendeeName: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
     },
+    examNo: {
+      type: Number,
+      required: true
+    },
     questions: [
       {
-        questionId: {
+        questionID: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Question",
           required: true
         },
-        answer: {
+        choice: {
           type: Number,
           required: true
         }
