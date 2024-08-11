@@ -4,6 +4,7 @@ import { AiFillClockCircle } from "react-icons/ai";
 import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
+import { FcQuestions } from "react-icons/fc";
 
 export default function FreeTrial() {
 
@@ -52,22 +53,56 @@ export default function FreeTrial() {
     setQuestions(updatedQuestions);
   };
 
-  useEffect(() => { // calculate marks got from the quizz
-    const getMarks = () => {
-      const marks = questions.reduce((acc, question) => {
-        if(question.choice === question.correctAnswer){
-          return acc + 1
-        }
-        return acc
-      }, 0)
-      return marks
-    }
-    const marks = getMarks() / questions.length * 100;
-    setMarks(marks.toFixed(0))
-  }, [completed])
+  const calculateMarks = () => {
+    const totalMarks = questions.reduce((acc, question) => {
+      if (question.choice === question.correctAnswer) {
+        return acc + 1;
+      }
+      return acc;
+    }, 0);
+    return (totalMarks / questions.length) * 100;
+  };
 
-  const handleSubmit = () => {
+  const addExamination = async (marks) => {
+    try {
+        const res = await fetch('/api/exam/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ questions, marks }),
+        });
+
+        if (!res.ok) {
+            console.error('Error in adding examination details:', res.status, res.statusText);
+            return;
+        }
+
+        // Check if the response body is empty before parsing
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : null;
+
+        if (data) {
+            console.log('Examination added successfully:', data);
+        } else {
+            console.log('No data returned from the server.');
+        }
+    } catch (error) {
+        console.error('An error occurred while adding examination details:', error);
+    }
+};
+
+
+  const handleSubmit = async () => {
     setCompleted(true);
+    const marks = calculateMarks();
+    setMarks(marks.toFixed(0))
+
+    try {
+      await addExamination(marks);
+    } finally {
+      setCompleted(true);
+    }
   }
 
   if(completed){
