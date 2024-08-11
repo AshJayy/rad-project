@@ -6,7 +6,7 @@ const router = express.Router();
 // TODO: add verify token
 router.post('/create', createQuestion);
 router.get('/freetrial', getFreeTrial);
-router.get('/getquestions', getQuestions);
+router.get('/getquestions',verifyToken ,getQuestions);
 router.put('/editquestion', editQuestion);
 router.delete('/deletequestion/:questionId', deleteQuestion);
 
