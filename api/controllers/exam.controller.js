@@ -30,3 +30,21 @@ export const addExam = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUserExams = async (req, res, next) => {
+
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    return next(errorHandler(400, "Invalid user ID"));
+  }
+
+  try {
+    const exams = await Exam.find({ 
+      ...(req.query.userID && {userID: req.query.userID}), // get all exams of a user
+      ...(req.query.examID && {_id: req.query.examID}) //get a single exam
+    }).sort({ examNo: 1 });
+
+    res.status(200).json(exams);
+  } catch (error) {
+    next(error);
+  }
+}
