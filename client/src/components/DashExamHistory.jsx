@@ -1,44 +1,70 @@
-import React, { useState } from "react";
-import { Button } from "flowbite-react";
+import React, { useEffect, useState } from "react";
+import { Button, Spinner } from "flowbite-react";
 import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
 
 export default function DashExamHistory() {
   const [openedExams, setOpenedExams] = useState([]);
-  const examinations = [
-    {
-      _id: "1",
-      name: "Examination 1",
-      Score: "80",
-      NoOfCorrect: "8/10",
-      date: "2024/05/03",
-      timetaken: "30 mins 03 sec",
-    },
-    {
-      _id: "2",
-      name: "Examination 2",
-      Score: "90",
-      NoOfCorrect: "9/10",
-      date: "2024/05/03",
-      timetaken: "30 mins 03 sec",
-    },
-    {
-      _id: "3",
-      name: "Examination 3",
-      Score: "100",
-      NoOfCorrect: "10/10",
-      date: "2024/05/03",
-      timetaken: "30 mins 03 sec",
-    },
-    {
-      _id: "4",
-      name: "Examination 4",
-      Score: "70",
-      NoOfCorrect: "7/10",
-      date: "2024/05/03",
-      timetaken: "30 mins 03 sec",
-    },
-  ];
+  const [loading, setLoading] = useState(false);
+  const [examinations, setExaminations] = useState([])
 
+  useEffect(() => {
+    const getExams = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/exam/getExams');
+
+            if (!res.ok) {
+                setLoading(false);
+                console.error('Error fetching exams:', res.status, res.statusText);
+            } else {
+                const exams = await res.json();
+                setExaminations(exams);
+                setLoading(false);
+            }
+        } catch (error) {
+            setLoading(false); // Ensure loading is stopped in case of error
+            console.error('An error occurred while fetching exams:', error);
+        }
+    };
+
+    getExams();
+}, []); 
+
+  // const examinations = [//sample exams
+  //   {
+  //     _id: "1",
+  //     name: "Examination 1",
+  //     Score: "80",
+  //     NoOfCorrect: "8/10",
+  //     date: "2024/05/03",
+  //     timetaken: "30 mins 03 sec",
+  //   },
+  //   {
+  //     _id: "2",
+  //     name: "Examination 2",
+  //     Score: "90",
+  //     NoOfCorrect: "9/10",
+  //     date: "2024/05/03",
+  //     timetaken: "30 mins 03 sec",
+  //   },
+  //   {
+  //     _id: "3",
+  //     name: "Examination 3",
+  //     Score: "100",
+  //     NoOfCorrect: "10/10",
+  //     date: "2024/05/03",
+  //     timetaken: "30 mins 03 sec",
+  //   },
+  //   {
+  //     _id: "4",
+  //     name: "Examination 4",
+  //     Score: "70",
+  //     NoOfCorrect: "7/10",
+  //     date: "2024/05/03",
+  //     timetaken: "30 mins 03 sec",
+  //   },
+  // ];
+  
   const updateOpenedExams = (id) => {
     setOpenedExams(
       openedExams.includes(id)
@@ -47,6 +73,21 @@ export default function DashExamHistory() {
     );
   };
 
+  if(loading){//while loading
+    return(
+      <div className="">
+        <Spinner />
+      </div>
+    )
+  }
+
+  if(examinations.length === 0){
+    return(
+      <div className="flex p-4 sm:justify-center sm:items-center w-full h-full">
+        <p>No exams done !</p>
+      </div>
+    )
+  }
   return (
     <div className='flex flex-col p-4 gap-4 w-full'>
       {examinations.map((exam) => (
