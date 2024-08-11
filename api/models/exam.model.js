@@ -1,16 +1,20 @@
 import mongoose from "mongoose";
-import Question from "./question.model";
+// import Question from "./question.model.js"; 
 
 const examSchema = new mongoose.Schema(
   {
-    attendeeName: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
     },
+    examNo: {
+      type: Number,
+      required: true
+    },
     questions: [
       {
-        questionId: {
+        questionID: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Question",
           required: true

@@ -1,6 +1,8 @@
+import Exam from '../models/exam.model.js';
 import Question from '../models/question.model.js'
 import { errorHandler } from '../utils/error.js'
 
+// TODO: add user authentication
 export const createQuestion = async (req, res, next) => {
    // if (!req.user.userLevel == 1 && !req.user.userLevel == 2) {
    //    return next(errorHandler(403, 'You are not allowed to create a question'));
@@ -77,19 +79,22 @@ export const getQuestions = async (req, res, next) => {// get questions for exam
       var questions = []
 
       const questionSets = await Promise.all([// returns an array of questions when fullfilled
-         getFromBank(1, 40),
-         getFromBank(2, 30),
-         getFromBank(3, 20),
-         getFromBank(4, 20),
-         getFromBank(5, 20),
-         getFromBank(6, 20),
+         getFromBank(1, 1),
+         getFromBank(2, 1),
+         getFromBank(3, 1),
+         getFromBank(4, 1),
+         getFromBank(5, 1),
+         getFromBank(6, 1),
       ]);
 
       questionSets.forEach(set => {
          questions = questions.concat(set);
       });
 
-      res.status(200).json(questions);
+      const pastExams = await Exam.find({userID: req.user._id}).sort({createdAt: -1}).limit(1);      
+      const ExamNumber = !pastExams ? 0 : pastExams[0].examNo + 1;
+
+      res.status(200).json({ questions, ExamNumber });
 
    } catch (error) {
       next(error)
