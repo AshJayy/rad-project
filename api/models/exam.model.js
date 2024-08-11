@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-// import Question from "./question.model.js"; 
+import Question from "./question.model";
 
 const examSchema = new mongoose.Schema(
   {
@@ -19,7 +19,7 @@ const examSchema = new mongoose.Schema(
           ref: "Question",
           required: true
         },
-        answer: {
+        choice: {
           type: Number,
           required: true
         }
