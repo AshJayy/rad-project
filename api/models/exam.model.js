@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Question from "./question.model";
 
 const examSchema = new mongoose.Schema(
   {
