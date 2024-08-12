@@ -1,6 +1,8 @@
+import Exam from '../models/exam.model.js';
 import Question from '../models/question.model.js'
 import { errorHandler } from '../utils/error.js'
 
+// TODO: add user authentication
 export const createQuestion = async (req, res, next) => {
    // if (!req.user.userLevel == 1 && !req.user.userLevel == 2) {
    //    return next(errorHandler(403, 'You are not allowed to create a question'));
@@ -62,39 +64,59 @@ export const getFreeTrial = async (req, res, next) => {
    }
 }
 
-export const getQuestions = async (req, res, next) => {// get questions for exam
+export const getQuestions = async (req, res, next) => {
    try {
+      //get the recent exam details
+      const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+
+      //get the already answered Question ids
+      const usedQuestionIds = pastExams.reduce((acc, exam) => {
+         return acc.concat(exam.questions.map(q => q.toString()));
+      }, []);
+
       const getFromBank = async (bank, limit) => {
-         const questionSet = await Question.find({
-            bank: bank,
-            isActive: true
-         })
-         .sort({createdAt: 1})
-         .limit(limit)
-         return questionSet
+         const questionSet = await Question.aggregate([
+            { $match: { bank: bank, isActive: true, _id: { $nin: usedQuestionIds } } }, // Exclude used questions
+            { $sample: { size: limit } } // Randomly select the specified number of questions
+         ]);
+         return questionSet;
       }
 
-      var questions = []
-
-      const questionSets = await Promise.all([// returns an array of questions when fullfilled
-         getFromBank(1, 40),
-         getFromBank(2, 30),
-         getFromBank(3, 20),
-         getFromBank(4, 20),
-         getFromBank(5, 20),
-         getFromBank(6, 20),
+      // Fetch questions from multiple banks
+      const questionSets = await Promise.all([
+         getFromBank(1, 8),
+         getFromBank(2, 6),
+         getFromBank(3, 4),
+         getFromBank(4, 4),
+         getFromBank(5, 4),
+         getFromBank(6, 4),
       ]);
+      //limits of the questions picked are in the rtio of 1:5 from the supplied requ to original requirments given
 
-      questionSets.forEach(set => {
-         questions = questions.concat(set);
-      });
+      //bank    | given | original |
+      //  1     |   8   |    40    |
+      //  2     |   6   |    30    |
+      //  3     |   4   |    20    |
+      //  4     |   4   |    20    |
+      //  5     |   4   |    20    |
+      //  6     |   4   |    20    |
+      // Total  |  30   |   150    |
 
-      res.status(200).json(questions);
+      // Combine all question sets into a single array
+      const questions = questionSets.flat();
+      
+      // Calculate the new ExamNumber
+      const ExamNumber = pastExams.length === 0 ? 1 : pastExams[0].examNo + 1;
+
+      // Send the response with the questions and the exam number
+      res.status(200).json({ questions, ExamNumber });
 
    } catch (error) {
-      next(error)
+      console.error('Error fetching questions:', error);
+      next(error);
    }
 }
+
 
 export const editQuestion = async (req, res, next) => {
    // if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to edit questions

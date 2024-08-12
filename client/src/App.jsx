@@ -9,6 +9,8 @@ import Header from './components/Header'
 import Pricing from './pages/Pricing'
 import About from './pages/About'
 import Footer from './components/Footer'
+import PrivateRoute from './components/PrivateRoute'
+import Dashboard from './pages/Dashboard'
 
 function App() {
 
@@ -24,6 +26,9 @@ function App() {
         <Route path="subscribe" element={<Subscribe />} />
         <Route path="about" element={<About />} />
         <Route path="pricing" element={<Pricing />} />
+        <Route element={<PrivateRoute />}>
+          <Route path='/dashboard' element={<Dashboard />} />
+        </Route>
       </Routes>
       <Footer />
     </BrowserRouter>

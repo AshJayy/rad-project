@@ -5,6 +5,7 @@ import questionRoutes from './routes/question.route.js'
 import userRoutes from './routes/user.route.js'
 import authRoutes from './routes/auth.route.js';
 import examRoutes from './routes/exam.route.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -17,7 +18,9 @@ mongoose.connect(process.env.MONGO)
 
 const app = express();
 
+
 app.use(express.json());
+app.use(cookieParser());
 
 app.listen(3000, () => {
    console.log('Server is running on port 3000!!');
@@ -27,8 +30,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/question', questionRoutes);
 app.use('/api/exam', examRoutes);
-
-
 
 //middleware 
 app.use((err, req, res, next) => {

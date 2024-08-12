@@ -1,41 +1,45 @@
 import React, { useState } from 'react';
-import { Button,Label, TextInput } from 'flowbite-react';
+import { Alert, Button,Label, Spinner, TextInput } from 'flowbite-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
 
-const SignIn = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function SignIn () {
+  const [formData, setFormData] = useState({});
+  const {loading, error: errorMessage} = useSelector(state => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      dispatch(signInStart());
-      
-      if(res.ok){
+    const handleChange = (e) => {
+      setFormData({ ...formData, [e.target.id]: e.target.value.trim() }); 
+    }
+    
+    const handleSubmit =  async (e) => {    
+      e.preventDefault();  
+      if( !formData.email || !formData.password){
+        return dispatch(signInFailure('Please fill all the fields'));
+      }
+      try {
+        dispatch(signInStart());
+        const res = await fetch('/api/auth/signin', {
+          method : 'POST',
+          headers : {'Content-Type': 'application/json'},
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (data.success === false) {
+          
+          return dispatch(signInFailure(data.message));
+        }
+        
+        if(res.ok){
           dispatch(signInSuccess(data));
           navigate('/');
-        } else {
-        console.log('Sign-in failed');
-        dispatch(signInFailure());
+        }
+      } catch (error) {
+        dispatch(signInFailure(error.message));
       }
-    } catch (error) {
-      console.error('Error:', error);
-      dispatch(signInFailure());
-    }
-  };
+    };
 
   return (
     <div className="min-h-screen flex">
@@ -48,10 +52,9 @@ const SignIn = () => {
               id="email"
               type="email"
               placeholder="Enter your email address"
-              value={email}
               required
               className="w-full"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleChange}
             />
           </div>
           <div className="mb-4">
@@ -60,22 +63,36 @@ const SignIn = () => {
               id="password"
               type="password"
               placeholder="**********"
-              value={password}
               required
               className="w-full"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleChange}
             />
           </div>
-          <Button type="submit" className="w-full bg-mid-blue"  >
-            sign In
+          <Button type="submit" className="w-full bg-mid-blue"  disabled={loading}>
+          {
+                loading ? (
+                  <>
+                  <Spinner className='sm'/>
+                  <span className='pl-3'>Loading...</span>
+                  </>
+
+                ) : ('Sign In')
+              }
           </Button>
           <OAuth/>
         </form>
         <div className="flex gap-2 text-sm mt-5">
           <span>Don't have an account?</span>
           <Link to="/signup" className="text-blue-500">Sign Up</Link>
+          
         </div>
+        {errorMessage && (
+          <Alert className='mt-5 max-w-md w-full' color='failure'>
+            {errorMessage}
+          </Alert>
+        )}
       </div>
+      
       <div className="flex-1 hidden md:flex justify-center items-center bg-mid-blue rounded-lg pd-100 relative">
         <div className="w-full h-full bg-cover bg-center rounded-lg relative">
           <img
@@ -89,4 +106,3 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
