@@ -137,7 +137,7 @@ export default function DashExamHistory() {
               </h1>
             </div>
             <div className='flex justify-end'>
-              <button className='rounded-3xl h-[35px] w-[100px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue'>
+              <button className='rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue'>
                 Download
               </button>
             </div>

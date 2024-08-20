@@ -121,10 +121,12 @@ export default function FreeTrial() {
       </div>
       <main className="flex flex-col gap-10 p-10 max-w-6xl mx-auto">
         <div className="flex justify-between w-full font-semibold">
-          <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
-            <AiFillClockCircle />
-            <p className="text-nowrap">28 min 43 sec</p>
-          </span>
+          {!loading &&
+            <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
+              <AiFillClockCircle />
+              <p className="text-nowrap">28 min 43 sec</p>
+            </span>
+          }
           {!loading &&
             <div className="w-full flex justify-end">
               {questions.length > 0 && questions.map((question, index) => (
@@ -147,11 +149,11 @@ export default function FreeTrial() {
             handleAnswers={handleAnswers}
           />
         ) : (
-          <div>
-            <Spinner />
+          <div className="flex mt-1/2 justify-center">
+            <Spinner className="w-20 h-20"/>
           </div>
         )}
-        {questionIdx <= questions.length - 2 ? (
+        {!loading && (questionIdx <= questions.length - 2 ? (
           <Button
             className="self-end pl-4 bg-mid-blue"
             pill
@@ -172,7 +174,7 @@ export default function FreeTrial() {
               Submit Answers
             </span>
           </Button>
-        )}
+        ))}
       </main>
     </div>
   )
