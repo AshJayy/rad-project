@@ -123,7 +123,10 @@ export default function Header() {
         )}
 
           <Button className="bg-mid-blue" pill>
+          {currentUser ? (
             <Link to={'/freetrial'}>Start free trial</Link>
+              ) : (
+            <Link to={'/signin'} state={{ from: '/freetrial' }}>Start free trial</Link>)}
           </Button>
 
         </div>

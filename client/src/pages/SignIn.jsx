@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Button,Label, Spinner, TextInput } from 'flowbite-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation  } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
@@ -8,6 +8,7 @@ import OAuth from '../components/OAuth';
 export default function SignIn () {
   const [formData, setFormData] = useState({});
   const {loading, error: errorMessage} = useSelector(state => state.user);
+  const location = useLocation(); 
   const dispatch = useDispatch();
   const navigate = useNavigate();
     const handleChange = (e) => {
@@ -34,7 +35,8 @@ export default function SignIn () {
         
         if(res.ok){
           dispatch(signInSuccess(data));
-          navigate('/');
+          const redirectTo = location.state?.from || '/';
+          navigate(redirectTo);
         }
       } catch (error) {
         dispatch(signInFailure(error.message));

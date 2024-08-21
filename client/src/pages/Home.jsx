@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "flowbite-react";
 import { HiChevronRight } from "react-icons/hi";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function Home() {
+  const { currentUser } = useSelector((state) => state.user);
   const descriptionBoxes = [
     {
       title: "Extensive Question Banks",
@@ -129,7 +131,10 @@ export default function Home() {
           </p>
 
           <Button className="bg-mid-blue mx-auto" pill>
+          {currentUser ? (
             <Link to={'/freetrial'}>Start free trial</Link>
+              ) : (
+            <Link to={'/signin'} state={{ from: '/freetrial' }}>Start free trial</Link>)}
           </Button>
         </div>
       </section>
