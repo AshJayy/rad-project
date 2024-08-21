@@ -13,6 +13,9 @@ export default function FreeTrial() {
   const [completed, setCompleted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [marks, setMarks] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30 * 60); 
+  const [timeTaken, setTimeTaken] = useState(120);
+  const [startTimer,setStartTimer] = useState(true)
 
   useEffect(() => {
     try {
@@ -39,6 +42,28 @@ export default function FreeTrial() {
       console.log("Error fetching free trial");
     }
   }, [])
+
+  useEffect(() => {
+
+    if(!startTimer) return;
+    const timer = setInterval(() => {
+      setTimeLeft(prevTime => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer); 
+  }, []);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes} min ${secs < 10 ? '0' : ''}${secs} sec`;
+  };
 
   const handleAnswers = (qNo, selectedIndex) => {
     const updatedQuestions = questions.map((question, index) => {
@@ -94,7 +119,11 @@ export default function FreeTrial() {
 
 
   const handleSubmit = async () => {
+
     setCompleted(true);
+    setStartTimer(false);
+    const takenTime = 30*60 - timeLeft;
+    setTimeTaken(formatTime(takenTime));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0))
 
@@ -108,7 +137,7 @@ export default function FreeTrial() {
   if(completed){
     return (
       <div>
-        <Answers questions={questions} marks={marks} />
+        <Answers questions={questions} marks={marks} timeTaken={timeTaken}/>
       </div>
     )
   }
@@ -124,7 +153,7 @@ export default function FreeTrial() {
           {!loading &&
             <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
               <AiFillClockCircle />
-              <p className="text-nowrap">28 min 43 sec</p>
+              <p className="text-nowrap">{formatTime(timeLeft)}</p>
             </span>
           }
           {!loading &&
