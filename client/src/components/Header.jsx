@@ -24,6 +24,7 @@ export default function Header() {
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
   const location = useLocation();
+  const currentPath = location.pathname;
   const navigate = useNavigate();
 
   const handleSignout = async () => {
@@ -130,7 +131,9 @@ export default function Header() {
           </span>
         )}
 
-        {currentUser ? (
+        {currentPath !== "/freetrial" && (
+          <>
+            {currentUser ? (
           currentUser.userLevel === 0 && (
             <Button className="bg-mid-blue" pill>
               <Link to={"/freetrial"}>Start free trial</Link>
@@ -143,6 +146,11 @@ export default function Header() {
             </Link>
           </Button>
         )}
+          </>
+        )
+
+        }
+        
       </div>
     </Navbar>
   );
