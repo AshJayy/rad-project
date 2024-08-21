@@ -54,7 +54,7 @@ export default function DashSidebar() {
     <Sidebar className="w-full md:w-72" theme={customSidebarTheme}>
       <Sidebar.Items className="">
         <Sidebar.ItemGroup className="flex flex-col gap-1 ">
-          {currentUser.userLevel > 0 && (
+          {currentUser.userLevel >= 0 && (
             <Link to="/dashboard?tab=dash">
               <Sidebar.Item
                 active={tab === "dash" || !tab}
@@ -94,7 +94,7 @@ export default function DashSidebar() {
             </Link>
             
           )}
-          {currentUser.userLevel == 0 && (
+          {/* {currentUser.userLevel == 0 && (
             <Link to="/dashboard?tab=history">
               <Sidebar.Item
                 active={tab === "history"}
@@ -106,7 +106,7 @@ export default function DashSidebar() {
               </Sidebar.Item>
             </Link>
             
-          )}
+          )} */}
           {currentUser.userLevel > 0 && (
             <Link to="/dashboard?tab=userMan">
               <Sidebar.Item

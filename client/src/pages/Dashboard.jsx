@@ -32,7 +32,7 @@ export default function Dashboard() {
       {currentUser.userLevel === 0 && (
         <>
           {/* Exam history */
-          tab === "history" && <DashExamHistory />}
+          tab === "dash" && <DashExamHistory />}
         </>
       )}
 
