@@ -5,22 +5,21 @@ import { useSelector, useDispatch } from "react-redux";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-
 export default function Header() {
   const dropDownItems = [
     {
       name: "Product 1",
-      path: "#"
+      path: "#",
     },
     {
       name: "Product 2",
-      path: "#"
+      path: "#",
     },
     {
       name: "Product 3",
-      path: "#"
+      path: "#",
     },
-  ]
+  ];
 
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
@@ -45,91 +44,106 @@ export default function Header() {
 
   return (
     <Navbar className="px-10 py-6 sticky top-0 z-10 backdrop-blur-lg bg-opacity-70">
-        <div className="flex gap-16 items-center">
-          <Logo />
+      <div className="flex gap-16 items-center">
+        <Logo />
 
-          <div className="flex gap-8 ">
-
-            <Dropdown
-              label=""
-              dismissOnClick={false}
-              renderTrigger={() =>
+        <div className="flex gap-8 ">
+          <Dropdown
+            label=""
+            dismissOnClick={false}
+            renderTrigger={() => (
               <span className="flex items-center gap-2 text-sm font-medium cursor-pointer text-dark-blue hover:text-mid-blue">
                 Products
                 <HiChevronDown />
               </span>
-            }
-            >
-              {dropDownItems.map((item, index) => (
-                <Link key={index} to={item.path}>
-                  <Dropdown.Item>{item.name}</Dropdown.Item>
-                </Link>
-              ))}
-            </Dropdown>
+            )}
+          >
+            {dropDownItems.map((item, index) => (
+              <Link key={index} to={item.path}>
+                <Dropdown.Item>{item.name}</Dropdown.Item>
+              </Link>
+            ))}
+          </Dropdown>
 
-            <Navbar.Toggle />
+          <Navbar.Toggle />
 
-            <Navbar.Collapse>
-              <Navbar.Link as={'div'}>
-                <Link to={'/pricing'} className="text-sm font-medium text-dark-blue hover:text-mid-blue">
-                  Pricing
-                </Link>
-              </Navbar.Link>
-              <Navbar.Link as={'div'}>
-                <Link to={'/about'} className="text-sm font-medium text-dark-blue hover:text-mid-blue">
-                  About
-                </Link>
-              </Navbar.Link>
-            </Navbar.Collapse>
-          </div>
-
+          <Navbar.Collapse>
+            <Navbar.Link as={"div"}>
+              <Link
+                to={"/pricing"}
+                className="text-sm font-medium text-dark-blue hover:text-mid-blue"
+              >
+                Pricing
+              </Link>
+            </Navbar.Link>
+            <Navbar.Link as={"div"}>
+              <Link
+                to={"/about"}
+                className="text-sm font-medium text-dark-blue hover:text-mid-blue"
+              >
+                About
+              </Link>
+            </Navbar.Link>
+          </Navbar.Collapse>
         </div>
+      </div>
 
-        <div className="flex gap-4 items-center text-sm">
+      <div className="flex gap-4 items-center text-sm">
         {currentUser ? (
           <>
-          <span className="block text-sm">Hi, {currentUser.username}</span>
-          <Dropdown
-            arrowIcon={false}
-            inline
-            label={
-              <Avatar alt="user" img={currentUser.profilePicture} rounded className="border-blue-500"/>
-            }
-          >
-            <Dropdown.Header>
-              
-              <span className="block text-sm font-medium truncate">
-                {currentUser.email}
-              </span>
-            </Dropdown.Header>
-            {currentUser.userLevel > 0 && (
-              <>
-              
-              <Link to={"/dashboard?tab=dash"}>
-                <Dropdown.Item>Dashboard</Dropdown.Item>
+            <span className="block text-sm">Hi, {currentUser.username}</span>
+            <Dropdown
+              arrowIcon={false}
+              inline
+              label={
+                <Avatar
+                  alt="user"
+                  img={currentUser.profilePicture}
+                  rounded
+                  className="border-blue-500"
+                />
+              }
+            >
+              <Dropdown.Header>
+                <span className="block text-sm font-medium truncate">
+                  {currentUser.email}
+                </span>
+              </Dropdown.Header>
+              {currentUser.userLevel > 0 && (
+                <>
+                  <Link to={"/dashboard?tab=dash"}>
+                    <Dropdown.Item>Dashboard</Dropdown.Item>
+                  </Link>
+                  <Dropdown.Divider />
+                </>
+              )}
+              <Link to={"/dashboard?tab=profile"}>
+                <Dropdown.Item>Profile</Dropdown.Item>
               </Link>
               <Dropdown.Divider />
-              </>
-            )}
-            <Link to={"/dashboard?tab=profile"}>
-              <Dropdown.Item>Profile</Dropdown.Item>
-            </Link>
-            <Dropdown.Divider />
-            <Dropdown.Item onClick={handleSignout}>Sign Out</Dropdown.Item>
-          </Dropdown>
+              <Dropdown.Item onClick={handleSignout}>Sign Out</Dropdown.Item>
+            </Dropdown>
           </>
         ) : (
-          <span><Link to={'/signin'}>Log In</Link></span>
+          <span>
+            <Link to={"/signin"}>Log In</Link>
+          </span>
         )}
 
+        {currentUser ? (
+          currentUser.userLevel === 0 && (
+            <Button className="bg-mid-blue" pill>
+              <Link to={"/freetrial"}>Start free trial</Link>
+            </Button>
+          )
+        ) : (
           <Button className="bg-mid-blue" pill>
-          {currentUser ? (
-            <Link to={'/freetrial'}>Start free trial</Link>
-              ) : (
-            <Link to={'/signin'} state={{ from: '/freetrial' }}>Start free trial</Link>)}
+            <Link to={"/signin"} state={{ from: "/freetrial" }}>
+              Start free trial
+            </Link>
           </Button>
-
-        </div>
+        )}
+      </div>
     </Navbar>
-  )
+  );
 }

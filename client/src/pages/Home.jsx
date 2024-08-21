@@ -176,7 +176,10 @@ export default function Home() {
           <h1 className="text-5xl text-white font-bold text-center">Join ExamEase to ace your exams.</h1>
           <p className=" text-white font-semibold">Sign up now and explore our comprehensive exam preparation platform.</p>
           <Button className="bg-white mx-auto text-dark-blue font-semibold my-3" pill>
+          {currentUser ? (
             <Link to={'/freetrial'}>Start free trial</Link>
+              ) : (
+            <Link to={'/signin'} state={{ from: '/freetrial' }}>Start free trial</Link>)}
           </Button>
       </section>
 

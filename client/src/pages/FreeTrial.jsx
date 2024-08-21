@@ -5,9 +5,12 @@ import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
 import { FcQuestions } from "react-icons/fc";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function FreeTrial() {
-
+  const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [questionIdx, setquestionIdx] = useState(0)
   const [completed, setCompleted] = useState(false)
@@ -143,8 +146,16 @@ export default function FreeTrial() {
     )
   }
 
+  useEffect(() => {
+    if (!currentUser || currentUser.userLevel !== 0) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
+
   return (
-    <div className="min-h-screen">
+    <>
+    {currentUser && currentUser.userLevel === 0 ? (
+      <div className="min-h-screen">
       <div className="bg-mid-blue p-8 text-sm font-semibold">
         <h3 className="text-white">This free trial contains 10 questions.   Each question has 5 choices as answers.</h3>
         <p className="text-white opacity-50">Time duration - 30minutes</p>
@@ -207,5 +218,9 @@ export default function FreeTrial() {
         ))}
       </main>
     </div>
+    ) : null
+      }
+    </>
+    
   )
 }
