@@ -24,6 +24,7 @@ export default function Dashboard() {
       </div>
       {/* Exam History */}
       {tab === "history" && <DashExamHistory />}
+      {tab == "profile" && <DashProfile />}
     </div>
   );
 }
