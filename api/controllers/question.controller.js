@@ -4,9 +4,9 @@ import { errorHandler } from '../utils/error.js'
 
 // TODO: add user authentication
 export const createQuestion = async (req, res, next) => {
-   // if (!req.user.userLevel == 1 && !req.user.userLevel == 2) {
-   //    return next(errorHandler(403, 'You are not allowed to create a question'));
-   // }
+   if (req.user.userLevel !== 1 && req.user.userLevel !== 2) {
+      return next(errorHandler(403, 'You are not allowed to create a question'));
+   }
    const { bank, content, options, correctAnswer, justification } = req.body;
 
    if (!bank || !content || !options || correctAnswer == null) {
@@ -119,9 +119,9 @@ export const getQuestions = async (req, res, next) => {
 
 
 export const editQuestion = async (req, res, next) => {
-   // if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to edit questions
-   //    return next(errorHandler(403, 'You are not allowed to edit a question'));
-   // }
+   if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to edit questions
+      return next(errorHandler(403, 'You are not allowed to edit a question'));
+   }
 
    const { bank, content, options, correctAnswer, justification } = req.body;
    const questionId = req.body._id;
@@ -153,9 +153,9 @@ export const editQuestion = async (req, res, next) => {
 }
 
 export const deleteQuestion = async (req, res, next) => {
-   // if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to delete questions
-   //    return next(errorHandler(403, 'You are not allowed to delete a question'));
-   // }
+   if (req.user.userLevel !== 1 && req.user.userLevel !== 2) { // Allow only admins and super admins to delete questions
+      return next(errorHandler(403, 'You are not allowed to delete a question'));
+   }
 
    const questionId = req.params.questionId;
 
