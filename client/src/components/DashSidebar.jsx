@@ -94,20 +94,8 @@ export default function DashSidebar() {
             </Link>
             
           )}
-          {/* {currentUser.userLevel == 0 && (
-            <Link to="/dashboard?tab=history">
-              <Sidebar.Item
-                active={tab === "history"}
-                icon={FaRegFileAlt}
-                as="div"
-                className="border shadow-md"
-              >
-                Exam History
-              </Sidebar.Item>
-            </Link>
-            
-          )} */}
-          {currentUser.userLevel > 0 && (
+          
+          {currentUser.userLevel === 2 && (
             <Link to="/dashboard?tab=userMan">
               <Sidebar.Item
                 active={tab === "userMan" || !tab}

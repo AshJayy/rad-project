@@ -36,10 +36,16 @@ export default function Dashboard() {
         </>
       )}
 
-      {currentUser.userLevel > 0 && (
+      {currentUser.userLevel === 2 && (
         <>
           {/* User Management */}
           {tab === "userMan" && <DashUserManagement />}
+          
+        </>
+      )}
+      {currentUser.userLevel > 0 && (
+        <>
+          
           {/* QA Management */}
           {tab === "qaMan" && <DashQAManagement />}
         </>
