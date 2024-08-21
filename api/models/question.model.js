@@ -27,6 +27,10 @@ const questionSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
+    timeTaken: {
+      type: Number,
+      default: 120
+    }
    },
   { timestamps: true }
 );
