@@ -14,7 +14,7 @@ export default function FreeTrial() {
   const [loading, setLoading] = useState(false)
   const [marks, setMarks] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30 * 60); 
-  const [timeTaken, setTimeTaken] = useState(120);
+  const [takenTime, setTakenTime] = useState(120);
   const [startTimer,setStartTimer] = useState(true)
 
   useEffect(() => {
@@ -37,6 +37,7 @@ export default function FreeTrial() {
         }
       }
       fetchQuestions();
+
     } catch (error) {
       setLoading(false)
       console.log("Error fetching free trial");
@@ -88,14 +89,14 @@ export default function FreeTrial() {
     return (totalMarks / questions.length) * 100;
   };
 
-  const addExamination = async (marks) => {
+  const addExamination = async (marks,timeTaken ) => {
     try {
         const res = await fetch('/api/exam/create/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ questions, marks }),
+            body: JSON.stringify({ questions, marks, timeTaken }),
         });
 
         if (!res.ok) {
@@ -122,13 +123,13 @@ export default function FreeTrial() {
 
     setCompleted(true);
     setStartTimer(false);
-    const takenTime = 30*60 - timeLeft;
-    setTimeTaken(formatTime(takenTime));
+    const timeTaken = 30*60 - timeLeft;
+    setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0))
 
     try {
-      await addExamination(marks);
+      await addExamination(marks,timeTaken);
     } finally {
       setCompleted(true);
     }
@@ -137,7 +138,7 @@ export default function FreeTrial() {
   if(completed){
     return (
       <div>
-        <Answers questions={questions} marks={marks} timeTaken={timeTaken}/>
+        <Answers questions={questions} marks={marks} timeTaken={takenTime}/>
       </div>
     )
   }

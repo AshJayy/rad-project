@@ -1,7 +1,7 @@
 import Answer from "../components/Answer"
 
 export default function Answers({questions, marks, timeTaken}) {
-  console.table(questions)
+  //console.table(questions)
   return (
     <div>
       <div className="bg-mid-blue p-8 text-sm font-semibold">
