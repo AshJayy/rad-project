@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Sidebar } from "flowbite-react";
 import { FaRegUser, FaChartPie, FaArrowLeft, FaDownload,FaRegFileAlt } from "react-icons/fa";
+import { HiOutlineNewspaper, HiOutlineUsers } from "react-icons/hi"
 import { Link, useLocation } from "react-router-dom";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -105,6 +106,30 @@ export default function DashSidebar() {
               </Sidebar.Item>
             </Link>
             
+          )}
+          {currentUser.userLevel > 0 && (
+            <Link to="/dashboard?tab=userMan">
+              <Sidebar.Item
+                active={tab === "userMan" || !tab}
+                icon={HiOutlineUsers}
+                as="div"
+                className="border shadow-md"
+              >
+                User Management
+              </Sidebar.Item>
+            </Link>
+          )}
+          {currentUser.userLevel > 0 && (
+            <Link to="/dashboard?tab=qaMan">
+              <Sidebar.Item
+                active={tab === "qaMan" || !tab}
+                icon={HiOutlineNewspaper}
+                as="div"
+                className="border shadow-md"
+              >
+                Q & A Management
+              </Sidebar.Item>
+            </Link>
           )}
 
         </Sidebar.ItemGroup>
