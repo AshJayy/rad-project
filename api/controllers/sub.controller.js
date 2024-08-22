@@ -1,126 +1,77 @@
 import { errorHandler } from "../utils/error.js"
 import Sub from "../models/sub.model.js";
 
-export const makepayment = async (req, res, next) => {
-    // console.log(new Date().toISOString())
-    if(!req.body.userId || !req.body.type) 
-        return next(errorHandler(204, 'user id and subscription type required'));
-    if(req.body.type !== '1' && req.body.type !== '2' && req.body.type !== '3') //subtype
-        return next(errorHandler(400, 'Invalid request'));
-    
+export const makePayment = async (req, res, next) => {
+    if (!req.body.userId || !req.body.type) {
+        return next(errorHandler(204, 'User ID and subscription type required'));
+    }
+
+    if (!['1', '2', '3'].includes(req.body.type)) { // Ensure valid subscription type
+        return next(errorHandler(400, 'Invalid subscription type'));
+    }
+
     try {
-        const { userId,type } = req.body;
-        const sub = await Sub.findOne({userId: userId});
-        
-        if(sub) {
-            const upTime = new Date(sub.validUntil);
-            let valid = new Date( //default 1 month
-                upTime.getFullYear(),
-                upTime.getMonth() + 1,
-                upTime.getDate(),
-            );
-            switch (req.body.type) {
-                case '1':
-                    const oneWeekAfter = new Date(
-                        upTime.getFullYear(),
-                        upTime.getMonth(),
-                        upTime.getDate() +7,
-                    );
-                    valid = oneWeekAfter;
-                    break;
-                case '2':
-                    const oneMonthAfter = new Date(
-                        upTime.getFullYear(),
-                        upTime.getMonth() + 1,
-                        upTime.getDate(),
-                    );
-                    valid = oneMonthAfter;
-                    break;
-                case '3':
-                    const oneYearAfter = new Date(
-                        upTime.getFullYear() +1,
-                        upTime.getMonth() ,
-                        upTime.getDate(),
-                    );
-                    valid = oneYearAfter;
-                    break;
+        const { userId, type } = req.body;
+        const sub = await Sub.findOne({ userId });
+
+        const getUpdatedValidityDate = (currentDate, subscriptionType) => {
+            switch (subscriptionType) {
+                case '1': // Weekly
+                    return new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7);
+                case '2': // Monthly
+                    return new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+                case '3': // Yearly
+                    return new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), currentDate.getDate());
                 default:
-                    break;
+                    return currentDate;
             }
-            const updateSub = await Sub.findByIdAndUpdate(
-                sub._id,
-                { $set: {
-                    validUntil: valid,
-                    status: 1,
-                    history: [...sub.history, {
-                        paymentDate:upTime, 
-                        type: type,
-                        validUntil: valid, 
-                    }],
-                    }
-                 },
-                { new: true }
-            );  
-            updateSub.save();
-            return res.status(200).json({message: "User subscription extended"})
-        }else{
-            const now = new Date();           
-            //type: 1 = weekly, 2 = monthly,  3 = yearly
-            // console.log(now)
-            let valid = new Date(
-                now.getFullYear(),
-                now.getMonth() + 1,
-                now.getDate(),
-            );//default one month
-            switch (req.body.type) {
-                case '1':
-                    const oneWeekAfter = new Date(
-                        now.getFullYear(),
-                        now.getMonth(),
-                        now.getDate() +7,
-                    );
-                    valid = oneWeekAfter;
-                    break;
-                case '2':
-                    const oneMonthAfter = new Date(
-                        now.getFullYear(),
-                        now.getMonth() + 1,
-                        now.getDate(),
-                    );
-                    valid = oneMonthAfter;
-                    break;
-                case '3':
-                    const oneYearAfter = new Date(
-                        now.getFullYear() +1,
-                        now.getMonth() ,
-                        now.getDate(),
-                    );
-                    valid = oneYearAfter;
-                    break;
-                default:
-                    break;
-            }
+        };
+
+        if (sub) {
+            const updatedValidityDate = getUpdatedValidityDate(new Date(sub.validUntil), type);
             
-                const newSub = new Sub({
-                userId: userId,
-                validUntil: valid,
+            const updatedSub = await Sub.findByIdAndUpdate(
+                sub._id,
+                { 
+                    $set: { 
+                        validUntil: updatedValidityDate, 
+                        status: 1 
+                    },
+                    $push: { 
+                        history: { 
+                            paymentDate: new Date(), 
+                            type, 
+                        } 
+                    }
+                },
+                { new: true }
+            );
+
+            await updatedSub.save();
+            return res.status(200).json({ message: "User subscription extended" });
+        } else {
+            const now = new Date();
+            const validityDate = getUpdatedValidityDate(now, type);
+
+            const newSub = new Sub({
+                userId,
+                validUntil: validityDate,
                 status: 1,
                 history: [{
-                    paymentDate:now, 
-                    type: type,
-                    validUntil: valid, 
+                    paymentDate: now,
+                    type,
                 }]
-            })
+            });
+
             await newSub.save();
-            return res.status(200).json({message: "Subscription created"})
+            return res.status(200).json({ message: "Subscription created" });
         }
-        
+
     } catch (error) {
         console.log(error.message);
         next(error);
     }
-};
-
+}
 export const payhere = async (req, res, next) => {
     return res.status(200).json({message: "payhere works"})
     try {
@@ -132,17 +83,17 @@ export const payhere = async (req, res, next) => {
 };
 
 
-export const getsubs = async (req, res, next) => {
+export const getSubs = async (req, res, next) => {
     console.log("works")
     
 };
 
-export const deletesub = async (req, res, next) => {
+export const deleteSub = async (req, res, next) => {
     console.log("works")
     
 };
 
-export const updatesub = async (req, res, next) => {
+export const updateSub = async (req, res, next) => {
     console.log("works")
     
 };

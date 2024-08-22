@@ -1,20 +1,20 @@
 import express from 'express';
 import { verifyToken } from '../utils/verifyUser.js';
 import { 
-    makepayment, 
-    getsubs, 
-    deletesub, 
-    updatesub, 
+    makePayment, 
+    getSubs, 
+    deleteSub, 
+    updateSub, 
     payhere
 } from '../controllers/sub.controller.js';
 
 const router = express.Router();
 
-router.post('/makepayment', makepayment);
+router.post('/makepayment', makePayment);
 router.post('/payhere', payhere);
-router.get('/getsubs', getsubs);
-router.delete('/deletesub/:subId', verifyToken, deletesub);
-router.put('/updatesub/:subId', verifyToken, updatesub);
+router.get('/getsubs', getSubs);
+router.delete('/deletesub/:subId', verifyToken, deleteSub);
+router.put('/updatesub/:subId', verifyToken, updateSub);
 
 
 export default router;

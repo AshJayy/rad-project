@@ -1,31 +1,45 @@
 import mongoose from "mongoose";
 
-const subSchema = new mongoose.Schema({   
+const subSchema = new mongoose.Schema(
+  {
     userId: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
     },
     validUntil: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     },
     status: {
-        type: Int16Array,
-        required: true,
-        default: 0,
-        // 0: inactive
-        // 1: active
-        // 2: pending
+      type: Number,
+      required: true,
+      default: 0,
+      enum: [0, 1, 2], // Ensures that status can only be 0, 1, or 2
+      // 0: inactive
+      // 1: active
+      // 2: pending
     },
     history: {
-        type: Array,
-        default: [],//has all the previous payment days and types
-    }
-},
-{timestamps: true}//saving time of creation and update
+      type: [
+        {
+          paymentDate: {
+            type: Date,
+            required: true,
+          },
+          type: {
+            type: String,
+            required: true,
+            enum: [0, 1, 2],
+          },
+        },
+      ],
+      default: [], 
+    },
+  },
+  { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );
 
-const Sub = mongoose.model('Sub', subSchema);
+const Sub = mongoose.model("Sub", subSchema);
 
 export default Sub;
