@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-router.post('/makepayment', makePayment);
+router.post('/makepayment', verifyToken, makePayment);
 router.post('/payhere', payhere);
 router.get('/getsubs', getSubs);
 router.delete('/deletesub/:subId', verifyToken, deleteSub);

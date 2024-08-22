@@ -3,11 +3,15 @@ import Sub from "../models/sub.model.js";
 
 export const makePayment = async (req, res, next) => {
     if (!req.body.userId || !req.body.type) {
-        return next(errorHandler(204, 'User ID and subscription type required'));
+        return next(errorHandler(400, 'User ID and subscription type required'));
     }
 
     if (!['1', '2', '3'].includes(req.body.type)) { // Ensure valid subscription type
         return next(errorHandler(400, 'Invalid subscription type'));
+    }
+
+    if(!req.body.status === '1') {
+        req.body.status = 2;
     }
 
     try {
@@ -27,6 +31,7 @@ export const makePayment = async (req, res, next) => {
             }
         };
 
+
         if (sub) {
             const updatedValidityDate = getUpdatedValidityDate(new Date(sub.validUntil), type);
             
@@ -35,7 +40,7 @@ export const makePayment = async (req, res, next) => {
                 { 
                     $set: { 
                         validUntil: updatedValidityDate, 
-                        status: 1 
+                        status: req.body.status //default is pending
                     },
                     $push: { 
                         history: { 
