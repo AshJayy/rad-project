@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spinner } from "flowbite-react";
-import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
+// import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
+import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
 export default function DashExamHistory() {
   const [openedExams, setOpenedExams] = useState([]);
@@ -103,11 +104,11 @@ export default function DashExamHistory() {
             <div>Examination {exam.examNo}</div>
             <div className='scale-[200%] mt-1'>
               {openedExams.includes(exam._id) ? (
-                // <RiArrowDropUpLine /> 
-                <IoMdArrowDropdown />
+                <RiArrowDropUpLine /> 
+                //<IoMdArrowDropdown />
               ) : (
-                // <RiArrowDropDownLine />
-                <IoMdArrowDropup />
+                <RiArrowDropDownLine />
+                //<IoMdArrowDropup />
               )}
             </div>
           </span>

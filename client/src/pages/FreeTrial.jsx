@@ -5,14 +5,20 @@ import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
 import { FcQuestions } from "react-icons/fc";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function FreeTrial() {
-
+  const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [questionIdx, setquestionIdx] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [marks, setMarks] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30 * 60); 
+  const [takenTime, setTakenTime] = useState(120);
+  const [startTimer,setStartTimer] = useState(true)
 
   useEffect(() => {
     try {
@@ -34,11 +40,34 @@ export default function FreeTrial() {
         }
       }
       fetchQuestions();
+
     } catch (error) {
       setLoading(false)
       console.log("Error fetching free trial");
     }
   }, [])
+
+  useEffect(() => {
+
+    if(!startTimer) return;
+    const timer = setInterval(() => {
+      setTimeLeft(prevTime => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer); 
+  }, []);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes} min ${secs < 10 ? '0' : ''}${secs} sec`;
+  };
 
   const handleAnswers = (qNo, selectedIndex) => {
     const updatedQuestions = questions.map((question, index) => {
@@ -63,14 +92,14 @@ export default function FreeTrial() {
     return (totalMarks / questions.length) * 100;
   };
 
-  const addExamination = async (marks) => {
+  const addExamination = async (marks,timeTaken ) => {
     try {
         const res = await fetch('/api/exam/create/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ questions, marks }),
+            body: JSON.stringify({ questions, marks, timeTaken }),
         });
 
         if (!res.ok) {
@@ -94,12 +123,16 @@ export default function FreeTrial() {
 
 
   const handleSubmit = async () => {
+
     setCompleted(true);
+    setStartTimer(false);
+    const timeTaken = 30*60 - timeLeft;
+    setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0))
 
     try {
-      await addExamination(marks);
+      await addExamination(marks,timeTaken);
     } finally {
       setCompleted(true);
     }
@@ -108,13 +141,21 @@ export default function FreeTrial() {
   if(completed){
     return (
       <div>
-        <Answers questions={questions} marks={marks} />
+        <Answers questions={questions} marks={marks} timeTaken={takenTime}/>
       </div>
     )
   }
 
+  useEffect(() => {
+    if (!currentUser || currentUser.userLevel !== 0) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
+
   return (
-    <div className="min-h-screen">
+    <>
+    {currentUser && currentUser.userLevel === 0 ? (
+      <div className="min-h-screen">
       <div className="bg-mid-blue p-8 text-sm font-semibold">
         <h3 className="text-white">This free trial contains 10 questions.   Each question has 5 choices as answers.</h3>
         <p className="text-white opacity-50">Time duration - 30minutes</p>
@@ -124,7 +165,7 @@ export default function FreeTrial() {
           {!loading &&
             <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
               <AiFillClockCircle />
-              <p className="text-nowrap">28 min 43 sec</p>
+              <p className="text-nowrap">{formatTime(timeLeft)}</p>
             </span>
           }
           {!loading &&
@@ -177,5 +218,9 @@ export default function FreeTrial() {
         ))}
       </main>
     </div>
+    ) : null
+      }
+    </>
+    
   )
 }
