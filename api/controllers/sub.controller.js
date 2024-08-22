@@ -4,8 +4,8 @@ import Sub from "../models/sub.model.js";
 export const makepayment = async (req, res, next) => {
     // console.log(new Date().toISOString())
     if(!req.body.userId || !req.body.type) 
-        return next(errorHandler(204, 'user id and type required'));
-    if(req.body.type !== '1' && req.body.type !== '2' && req.body.type !== '3') 
+        return next(errorHandler(204, 'user id and subscription type required'));
+    if(req.body.type !== '1' && req.body.type !== '2' && req.body.type !== '3') //subtype
         return next(errorHandler(400, 'Invalid request'));
     
     try {

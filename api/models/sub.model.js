@@ -11,20 +11,16 @@ const subSchema = new mongoose.Schema({
         required: true,
     },
     status: {
-        type: String,
+        type: Int16Array,
         required: true,
         default: 0,
         // 0: inactive
         // 1: active
         // 2: pending
     },
-    pendingPayment: {
-        type: Date,
-        default: null,
-    },
     history: {
         type: Array,
-        default: [],//has all the previous payment days
+        default: [],//has all the previous payment days and types
     }
 },
 {timestamps: true}//saving time of creation and update
