@@ -6,6 +6,7 @@ import DashExamHistory from "../components/DashExamHistory";
 import DashUserManagement from "../components/DashUserManagement";
 import DashQAManagement from "../components/DashQAManagement";
 import { useSelector } from "react-redux";
+import DashAdmin from "../components/DashAdmin";
 
 export default function Dashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -38,6 +39,7 @@ export default function Dashboard() {
 
       {currentUser.userLevel === 2 && (
         <>
+
           {/* User Management */}
           {tab === "userMan" && <DashUserManagement />}
           
@@ -45,7 +47,8 @@ export default function Dashboard() {
       )}
       {currentUser.userLevel > 0 && (
         <>
-          
+          {/* Dashboard */}
+          {tab === "dash" && <DashAdmin />}
           {/* QA Management */}
           {tab === "qaMan" && <DashQAManagement />}
         </>
