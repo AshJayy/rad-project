@@ -4,9 +4,10 @@ import Question from "../models/question.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const addExam = async (req, res, next) => {
-  const { userID, examNo, questions, totalMarks } = req.body;
+  const { userID, examNo, questions, totalMarks, timeTaken } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(userID)) {
+    console.log(userID)
     return next(errorHandler(400, "Invalid user ID"));
   }
 
@@ -21,6 +22,7 @@ export const addExam = async (req, res, next) => {
     examNo,
     questions,
     totalMarks,
+    timeTaken,
   });
 
   try {
@@ -30,3 +32,22 @@ export const addExam = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUserExams = async (req, res, next) => {
+  const { userID, examID } = req.query;
+  if (userID && !mongoose.Types.ObjectId.isValid(userID)) {// check if only userID available
+    return next(errorHandler(400, "Invalid user ID"));
+  }
+
+  try {
+    // Construct the query object conditionally
+    const exams = await Exam.find({ 
+      ...(userID && {userID: userID}), // get all exams of a user
+      ...(examID && {_id: examID}) //get a single exam
+    }).sort({ examNo: 1 });
+
+    res.status(200).json(exams);
+  } catch (error) {
+    next(error);
+  }
+}

@@ -28,6 +28,10 @@ const examSchema = new mongoose.Schema(
       type: Number,
       required: true,
       default: 0
+    },
+    takenTime: {
+      type: Number,
+      default: 120
     }
   },
   { timestamps: true }
