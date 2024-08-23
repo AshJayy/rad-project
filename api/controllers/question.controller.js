@@ -64,7 +64,7 @@ export const getFreeTrial = async (req, res, next) => {
    }
 }
 
-export const getQuestions = async (req, res, next) => {
+export const getUserQuestions = async (req, res, next) => {
    try {
       //get the recent exam details
       const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
@@ -169,5 +169,39 @@ export const deleteQuestion = async (req, res, next) => {
       res.status(200).json('Question deleted successfully');
    } catch (error) {
       next(error);
+   }
+}
+
+export const getQuestions = async (req, res, next) => {
+   try {
+       const startIndex = parseInt(req.query.startIndex) || 0;
+       const limit = parseInt(req.query.limit) || 9;
+       const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
+       const posts = await Question.find({
+           ...(req.query.userId && { userId: req.query.userId }),
+           ...(req.query.bank && { category: req.query.bank }),
+           ...(req.query.content && { _id: req.query.content }),
+           ...(req.query.searchTerm && {
+               $or: [
+                   { options: { $regex: req.query.options, $options: 'i' } },
+                   { content: { $regex: req.query.searchTerm, $options: 'i' } },
+                   { justification: { $regex: req.query.justification, $options: 'i' } },
+               ],
+           }),
+       })
+           .sort({ updatedAt: sortDirrection })
+           .skip(startIndex)
+           .limit(limit);
+       
+       const totalQuestions = await Question.countDocuments();
+       res
+           .status(200)
+           .json({ 
+               posts, 
+               totalQuestions, 
+           });
+       
+   } catch (error) {
+       next(error);
    }
 }

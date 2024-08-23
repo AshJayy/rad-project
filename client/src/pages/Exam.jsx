@@ -20,7 +20,7 @@ export default function Exam() {
     try {
       const fetchQuestions = async () => {
         setLoading(true);
-        const res = await fetch('/api/question/getquestions/');
+        const res = await fetch('/api/question/getuserquestions/');
         if(!res.ok){
           setLoading(false)
         }else{
