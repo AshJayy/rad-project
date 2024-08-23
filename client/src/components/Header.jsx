@@ -110,7 +110,7 @@ export default function Header() {
                   {currentUser.email}
                 </span>
               </Dropdown.Header>
-              {currentUser.userLevel > 0 && (
+              {currentUser.userLevel >= 0 && (
                 <>
                   <Link to={"/dashboard?tab=dash"}>
                     <Dropdown.Item>Dashboard</Dropdown.Item>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Spinner } from "flowbite-react";
 // import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import { useSelector } from "react-redux";
 
 export default function DashExamHistory() {
   const [openedExams, setOpenedExams] = useState([]);
