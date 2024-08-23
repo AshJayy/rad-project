@@ -104,11 +104,12 @@ export default function DashExamHistory() {
             <div>Examination {exam.examNo}</div>
             <div className='scale-[200%] mt-1'>
               {openedExams.includes(exam._id) ? (
-                <RiArrowDropUpLine /> 
-                //<IoMdArrowDropdown />
+                // <RiArrowDropUpLine />
+                <IoMdArrowDropup />
               ) : (
-                <RiArrowDropDownLine />
-                //<IoMdArrowDropup />
+                // <RiArrowDropDownLine />
+                <IoMdArrowDropdown />
+
               )}
             </div>
           </span>

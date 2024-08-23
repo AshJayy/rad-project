@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Sidebar } from "flowbite-react";
 import { FaRegUser, FaChartPie, FaArrowLeft, FaDownload,FaRegFileAlt } from "react-icons/fa";
+import { HiOutlineNewspaper, HiOutlineUsers } from "react-icons/hi"
 import { Link, useLocation } from "react-router-dom";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,7 +54,7 @@ export default function DashSidebar() {
     <Sidebar className="w-full md:w-72" theme={customSidebarTheme}>
       <Sidebar.Items className="">
         <Sidebar.ItemGroup className="flex flex-col gap-1 ">
-          {currentUser.userLevel > 0 && (
+          {currentUser.userLevel >= 0 && (
             <Link to="/dashboard?tab=dash">
               <Sidebar.Item
                 active={tab === "dash" || !tab}
@@ -93,18 +94,30 @@ export default function DashSidebar() {
             </Link>
             
           )}
-          {currentUser.userLevel == 0 && (
-            <Link to="/dashboard?tab=history">
+          
+          {currentUser.userLevel === 2 && (
+            <Link to="/dashboard?tab=userMan">
               <Sidebar.Item
-                active={tab === "history"}
-                icon={FaRegFileAlt}
+                active={tab === "userMan" || !tab}
+                icon={HiOutlineUsers}
                 as="div"
                 className="border shadow-md"
               >
-                Exam History
+                User Management
               </Sidebar.Item>
             </Link>
-            
+          )}
+          {currentUser.userLevel > 0 && (
+            <Link to="/dashboard?tab=qaMan">
+              <Sidebar.Item
+                active={tab === "qaMan" || !tab}
+                icon={HiOutlineNewspaper}
+                as="div"
+                className="border shadow-md"
+              >
+                Q & A Management
+              </Sidebar.Item>
+            </Link>
           )}
 
         </Sidebar.ItemGroup>
