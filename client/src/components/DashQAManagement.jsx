@@ -13,12 +13,12 @@ export default function DashQAManagement() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const fetchQuestions = async (searchTerm = "", startIndex = 0) => {
+  const fetchQuestions = async (searchTerm = "", startIndex = 0, reset = false) => {
     try {
       setLoading(true);
-      const res = searchTerm
-        ? await fetch(`/api/question/getquestions?searchTerm=${searchTerm}&startIndex=${startIndex}`)
-        : await fetch(`/api/question/getquestions?startIndex=${startIndex}`);
+      const res = await fetch(
+        `/api/question/getquestions?searchTerm=${encodeURIComponent(searchTerm)}&startIndex=${startIndex}`
+      );
       if (!res.ok) {
         console.log("Error fetching questions:", res.statusText);
         return;
@@ -27,7 +27,7 @@ export default function DashQAManagement() {
       if (data.questions.length < 6) {
         setHasMore(false); // No more questions to load if less than limit returned
       }
-      setQuestions(prevQuestions => [...prevQuestions, ...data.questions]); // Append new questions
+      setQuestions(prevQuestions => reset ? data.questions : [...prevQuestions, ...data.questions]); // Append or reset questions
     } catch (error) {
       console.log("Error fetching questions:", error.message);
     } finally {
@@ -37,23 +37,18 @@ export default function DashQAManagement() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setStartIndex(0); // Reset startIndex on a new search
+    setHasMore(true); // Reset hasMore on a new search
     const urlParams = new URLSearchParams(location.search);
     urlParams.set("searchTerm", searchTerm);
-    const searchQuery = urlParams.toString();
-    navigate(`/dashboard?${searchQuery}`);
-    setStartIndex(0); // Reset startIndex on a new search
-    setQuestions([]); // Clear previous questions
-    fetchQuestions(searchTerm, 0); // Fetch with new search term
+    navigate(`/dashboard?${urlParams.toString()}`);
   };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const searchTermFromURL = searchParams.get("searchTerm") || "";
     setSearchTerm(searchTermFromURL); // Sync the state with the URL
-    setStartIndex(0); // Reset startIndex when location changes
-    setQuestions([]); // Clear previous questions
-    setHasMore(true); // Reset hasMore on new search
-    fetchQuestions(searchTermFromURL, 0); // Fetch with new startIndex
+    fetchQuestions(searchTermFromURL, 0, true); // Fetch with reset on initial load or search
   }, [location.search]);
 
   const loadMoreQuestions = () => {
@@ -97,8 +92,8 @@ export default function DashQAManagement() {
                   <Table.HeadCell>Delete</Table.HeadCell>
                 </Table.Head>
                 <Table.Body className="divide-y">
-                  {questions.map((question) => (
-                    <Table.Row key={question._id} className="bg-white">
+                  {questions.map((question, index) => (
+                    <Table.Row key={index} className="bg-white">
                       <Table.Cell>{question._id}</Table.Cell>
                       <Table.Cell className="truncate max-w-xs">{question.content}</Table.Cell>
                       <Table.Cell className="truncate max-w-xs">
