@@ -175,17 +175,18 @@ export const deleteQuestion = async (req, res, next) => {
 export const getQuestions = async (req, res, next) => {
    try {
        const startIndex = parseInt(req.query.startIndex) || 0;
-       const limit = parseInt(req.query.limit) || 9;
+       const limit = parseInt(req.query.limit) || 6;
        const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
        const posts = await Question.find({
-           ...(req.query.userId && { userId: req.query.userId }),
+           ...(req.query.Id && { _id: req.query.Id }),
            ...(req.query.bank && { category: req.query.bank }),
-           ...(req.query.content && { _id: req.query.content }),
+           ...(req.query.content && { content: req.query.content }),
            ...(req.query.searchTerm && {
                $or: [
-                   { options: { $regex: req.query.options, $options: 'i' } },
-                   { content: { $regex: req.query.searchTerm, $options: 'i' } },
-                   { justification: { $regex: req.query.justification, $options: 'i' } },
+                  //  { _id: { $regex: req.query.Id, $options: 'i' } },
+                   { options: { $elemMatch: { $regex: new RegExp(req.query.searchTerm, 'i') } } },
+                   { content: { $regex: new RegExp(req.query.searchTerm, 'i') } },
+                   { justification: { $regex: new RegExp(req.query.searchTerm, 'i') } },
                ],
            }),
        })

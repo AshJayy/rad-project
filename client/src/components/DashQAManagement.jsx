@@ -8,53 +8,76 @@ export default function DashQAManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [startIndex, setStartIndex] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const fetchQuestions = async (searchTerm = "", startIndex = 0) => {
+    try {
+      setLoading(true);
+      const res = searchTerm
+        ? await fetch(`/api/question/getquestions?searchTerm=${searchTerm}&startIndex=${startIndex}`)
+        : await fetch(`/api/question/getquestions?startIndex=${startIndex}`);
+      if (!res.ok) {
+        console.log("Error fetching questions:", res.statusText);
+        return;
+      }
+      const data = await res.json();
+      if (data.posts.length < 6) {
+        setHasMore(false); // No more questions to load if less than limit returned
+      }
+      setQuestions(prevQuestions => [...prevQuestions, ...data.posts]); // Append new questions
+    } catch (error) {
+      console.log("Error fetching questions:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(location.search);
-    urlParams.set('searchTerm', searchTerm);
+    urlParams.set("searchTerm", searchTerm);
     const searchQuery = urlParams.toString();
     navigate(`/dashboard?${searchQuery}`);
-  }
+    setStartIndex(0); // Reset startIndex on a new search
+    setQuestions([]); // Clear previous questions
+    fetchQuestions(searchTerm, 0); // Fetch with new search term
+  };
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/question/getquestions/');
-        if (!res.ok) {
-           console.log("Error fetching questions:", res.statusText);
-        }
-        const data = await res.json();
-        setQuestions(data.posts || []);
-      } catch (error) {
-        console.log("Error fetching questions:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const searchParams = new URLSearchParams(location.search);
+    const searchTermFromURL = searchParams.get("searchTerm") || "";
+    setSearchTerm(searchTermFromURL); // Sync the state with the URL
+    setStartIndex(0); // Reset startIndex when location changes
+    setQuestions([]); // Clear previous questions
+    setHasMore(true); // Reset hasMore on new search
+    fetchQuestions(searchTermFromURL, 0); // Fetch with new startIndex
+  }, [location.search]);
 
-    fetchQuestions();
-  }, []);
+  const loadMoreQuestions = () => {
+    const newIndex = startIndex + 6;
+    setStartIndex(newIndex);
+    fetchQuestions(searchTerm, newIndex);
+  };
 
   return (
-    <div className='flex sm:flex-col w-full p-4'>
-      <div className='flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between'>
-        <form onSubmit={handleSearch} className='md:flex-1 md:mr-4'>
+    <div className="flex sm:flex-col w-full p-4">
+      <div className="flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between">
+        <form onSubmit={handleSearch} className="md:flex-1 md:mr-4">
           <TextInput
-            type='text'
-            placeholder='Search ...'
+            type="text"
+            placeholder="Search ..."
             rightIcon={AiOutlineSearch}
             value={searchTerm}
-            className='w-full'
+            className="w-full"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </form>
-        <button className='flex flex-row justify-center items-center min-w-20 p-4 h-11 gap-4 bg-mid-blue rounded-xl'>
-          <FaPlus className='text-white w-6 h-6' />
-          <div className='text-white text-md'>Add New Question</div>
+        <button className="flex flex-row justify-center items-center min-w-20 p-4 h-11 gap-4 bg-mid-blue rounded-xl">
+          <FaPlus className="text-white w-6 h-6" />
+          <div className="text-white text-md">Add New Question</div>
         </button>
       </div>
       {loading ? (
@@ -64,7 +87,7 @@ export default function DashQAManagement() {
           {questions.length === 0 ? (
             <div className="text-gray-500 text-center">No questions</div>
           ) : (
-            <div>
+            <div className="flex flex-col">
               <Table>
                 <Table.Head className="text-center">
                   <Table.HeadCell>Question ID</Table.HeadCell>
@@ -76,10 +99,10 @@ export default function DashQAManagement() {
                 <Table.Body className="divide-y">
                   {questions.map((question) => (
                     <Table.Row key={question._id} className="bg-white">
-                      <Table.Cell className="">{question._id}</Table.Cell>
-                      <Table.Cell className="">{question.content}</Table.Cell>
-                      <Table.Cell className="truncate max-w-48">
-                        {question.options && question.options.join(', ')}
+                      <Table.Cell>{question._id}</Table.Cell>
+                      <Table.Cell className="truncate max-w-xs">{question.content}</Table.Cell>
+                      <Table.Cell className="truncate max-w-xs">
+                        {question.options && question.options.join(", ")}
                       </Table.Cell>
                       <Table.Cell>
                         <Button className="bg-green-600 rounded-xl">Edit</Button>
@@ -91,6 +114,15 @@ export default function DashQAManagement() {
                   ))}
                 </Table.Body>
               </Table>
+              {hasMore && (
+                <button 
+                  className="text-center text-s text-mid-blue mt-4" 
+                  onClick={loadMoreQuestions}
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "More"}
+                </button>
+              )}
             </div>
           )}
         </div>
