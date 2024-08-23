@@ -44,7 +44,6 @@ export default function CreateQuestion() {
 
       if (res.ok) {
         setPublishError(null);
-        navigate(`/post/${data.slug}`);
       }
     } catch (error) {
       setPublishError("Something went wrong");
@@ -69,25 +68,50 @@ export default function CreateQuestion() {
             }
           /> */}
           <div className=" flex-1 mb-5">
-            <div className="mb-2 block">
-              <Label
-                htmlFor="question"
-                value="Add The Content Of the Question"
-              />
+            <div className="flex flex-col gap-4">
+              <Select
+                onChange={(e) =>
+                  setFormData({ ...formData, Bank: e.target.value })
+                }
+              >
+                <option value="1">Bank 1 - Operating systems</option>
+                <option value="2">Bank 2 - Data Structures and Algorithms</option>
+                <option value="3">Bank 3 - Functional Programming</option>
+                <option value="4">Bank 4 - Computer Networks</option>
+                <option value="5">Bank 5 - Game development</option>
+                <option value="6">Bank 6 - CTF</option>
+              </Select>
+              <div className="flex flex-col gap-3 mt-2">
+               <Label
+                  htmlFor="question"
+                  value="Add The Content Of the Question"
+               />
+               <Textarea
+                  id="question"
+                  placeholder="Type Here"
+                  required
+                  rows="6"
+                  className=""
+               />
+
+              </div>
             </div>
-            <Textarea id="question" placeholder="Type Here" required rows="6" className="" />
           </div>
-            
+
           <div className="flex-1">
             <div className="mb-2 flex justify-between">
               <Label htmlFor="ans1" value="Add Answer 1" />
-              <Label htmlFor="ans" value="Correct Answer" className=""/>
+              <Label htmlFor="ans" value="Correct Answer" className="" />
             </div>
             <div className="flex flex-row ">
-
-            <Textarea id="ans1" placeholder="Type Here" required rows="1" />
-            <Radio id="correct-ans1" name="correct-ans" value="1" defaultChecked className="m-3 mx-12 text-green-500 focus:ring-green-400"/>
-            
+              <Textarea id="ans1" placeholder="Type Here" required rows="1" />
+              <Radio
+                id="correct-ans1"
+                name="correct-ans"
+                value="1"
+                defaultChecked
+                className="m-3 mx-12 text-green-500 focus:ring-green-400"
+              />
             </div>
           </div>
           <div className="flex-1">
@@ -95,22 +119,27 @@ export default function CreateQuestion() {
               <Label htmlFor="ans2" value="Add Answer 2" />
             </div>
             <div className="flex flex-row ">
-
-            <Textarea id="ans2" placeholder="Type Here" required rows="1" />
-            <Radio id="correct-ans2" name="correct-ans" value="2" className="m-3 mx-12 text-green-500 focus:ring-green-400"/>
-            
+              <Textarea id="ans2" placeholder="Type Here" required rows="1" />
+              <Radio
+                id="correct-ans2"
+                name="correct-ans"
+                value="2"
+                className="m-3 mx-12 text-green-500 focus:ring-green-400"
+              />
             </div>
-            
           </div>
           <div className="flex-1">
             <div className="mb-2 block">
               <Label htmlFor="ans3" value="Add Answer 3" />
             </div>
             <div className="flex flex-row ">
-
-            <Textarea id="ans3" placeholder="Type Here" required rows="1" />
-            <Radio id="correct-ans3" name="correct-ans" value="3" className="m-3 mx-12 text-green-500 focus:ring-green-400"/>
-            
+              <Textarea id="ans3" placeholder="Type Here" required rows="1" />
+              <Radio
+                id="correct-ans3"
+                name="correct-ans"
+                value="3"
+                className="m-3 mx-12 text-green-500 focus:ring-green-400"
+              />
             </div>
           </div>
           <div className="flex-1">
@@ -118,10 +147,13 @@ export default function CreateQuestion() {
               <Label htmlFor="ans4" value="Add Answer 4" />
             </div>
             <div className="flex flex-row ">
-
-            <Textarea id="ans4" placeholder="Type Here" required rows="1" />
-            <Radio id="correct-ans4" name="correct-ans" value="4" className="m-3 mx-12 text-green-500 focus:ring-green-400"/>
-            
+              <Textarea id="ans4" placeholder="Type Here" required rows="1" />
+              <Radio
+                id="correct-ans4"
+                name="correct-ans"
+                value="4"
+                className="m-3 mx-12 text-green-500 focus:ring-green-400"
+              />
             </div>
           </div>
           <div className="flex-1">
@@ -129,11 +161,24 @@ export default function CreateQuestion() {
               <Label htmlFor="ans5" value="Add Answer 5" />
             </div>
             <div className="flex flex-row ">
-
-            <Textarea id="ans5" placeholder="Type Here" required rows="1" />
-            <Radio id="correct-ans5" name="correct-ans" value="5" className="m-3 mx-12 text-green-500 focus:ring-green-400"/>
-            
+              <Textarea id="ans5" placeholder="Type Here" required rows="1" />
+              <Radio
+                id="correct-ans5"
+                name="correct-ans"
+                value="5"
+                className="m-3 mx-12 text-green-500 focus:ring-green-400"
+              />
             </div>
+          </div>
+          <div className="mt-5">
+            <Label htmlFor="question" value="Add The justification" />
+            <Textarea
+              className="mt-3"
+              id="justification"
+              placeholder="Type Here"
+              required
+              rows="6"
+            />
           </div>
         </div>
 
