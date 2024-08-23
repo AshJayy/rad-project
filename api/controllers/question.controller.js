@@ -177,7 +177,7 @@ export const getQuestions = async (req, res, next) => {
        const startIndex = parseInt(req.query.startIndex) || 0;
        const limit = parseInt(req.query.limit) || 6;
        const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
-       const posts = await Question.find({
+       const questions = await Question.find({
            ...(req.query.Id && { _id: req.query.Id }),
            ...(req.query.bank && { category: req.query.bank }),
            ...(req.query.content && { content: req.query.content }),
@@ -198,7 +198,7 @@ export const getQuestions = async (req, res, next) => {
        res
            .status(200)
            .json({ 
-               posts, 
+               questions, 
                totalQuestions, 
            });
        

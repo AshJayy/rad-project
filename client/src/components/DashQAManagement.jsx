@@ -24,10 +24,10 @@ export default function DashQAManagement() {
         return;
       }
       const data = await res.json();
-      if (data.posts.length < 6) {
+      if (data.questions.length < 6) {
         setHasMore(false); // No more questions to load if less than limit returned
       }
-      setQuestions(prevQuestions => [...prevQuestions, ...data.posts]); // Append new questions
+      setQuestions(prevQuestions => [...prevQuestions, ...data.questions]); // Append new questions
     } catch (error) {
       console.log("Error fetching questions:", error.message);
     } finally {
