@@ -17,7 +17,7 @@ export default function DashQAManagement() {
     try {
       setLoading(true);
       const res = await fetch(
-        `/api/question/getquestions?searchTerm=${encodeURIComponent(searchTerm)}&startIndex=${startIndex}`
+        `/api/question/getquestions?searchTerm=${searchTerm}&startIndex=${startIndex}`
       );
       if (!res.ok) {
         console.log("Error fetching questions:", res.statusText);
