@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, Table, TextInput } from "flowbite-react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 export default function DashQAManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
+  // const [questionID,setQuestionID] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,6 +40,28 @@ export default function DashQAManagement() {
     fetchQuestions();
   }, []);
 
+  const handleDeleteQuestion = async (questionID) => {
+    //setShowModal(false);
+    try {
+      const res = await fetch(
+        `/api/question/deletequestion/${questionID}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        setQuestions((prev) =>
+          prev.filter((question) => question._id !== questionID)
+        );
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <div className='flex sm:flex-col w-full p-4'>
       <div className='flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between'>
@@ -52,7 +75,8 @@ export default function DashQAManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </form>
-        <button className='flex flex-row justify-center items-center min-w-20 p-4 h-11 gap-4 bg-mid-blue rounded-xl'>
+        <button className='flex flex-row justify-center items-center min-w-20 p-4 h-11 gap-4 bg-mid-blue rounded-xl ' 
+        onClick={() => navigate('/createQuestion')}>
           <FaPlus className='text-white w-6 h-6' />
           <div className='text-white text-md'>Add New Question</div>
         </button>
@@ -85,7 +109,8 @@ export default function DashQAManagement() {
                         <Button className="bg-green-600 rounded-xl">Edit</Button>
                       </Table.Cell>
                       <Table.Cell>
-                        <Button className="bg-red-800 rounded-xl">Delete</Button>
+                        <Button className="bg-red-800 rounded-xl"
+                        onClick={() => handleDeleteQuestion(question._id)}>Delete</Button>
                       </Table.Cell>
                     </Table.Row>
                   ))}
