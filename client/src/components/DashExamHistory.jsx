@@ -102,7 +102,7 @@ export default function DashExamHistory() {
             className='flex flex-row justify-between w-full font-semibold text-xl cursor-pointer'
             onClick={() => updateOpenedExams(exam._id)}
           >
-            <div>Examination {exam.examNo}</div>
+            <div>Examination {exam.examNo + 1}</div>
             <div className='scale-[200%] mt-1'>
               {openedExams.includes(exam._id) ? (
                 // <RiArrowDropUpLine />
