@@ -73,4 +73,43 @@ export const signout = (req, res, next) => {
   }
 };
 
+export const deleteUser = async (req, res, next) => {
+  console.log("delete user");
+  
+  if (!req.user.userLevel > 0 && req.user.id !== req.params.userId) {
+    return next(errorHandler(403, 'You are not allowed to delete this user'));
+  }
+  try {
+    await User.findByIdAndDelete(req.params.userId);
+    res.status(200).json('User has been deleted');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const makeUserAdmin = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!req.user || req.user.userLevel <= 0) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    user.userLevel = 1;
+
+    await user.save();
+
+    res.status(200).json({ message: 'User successfully made an admin', user });
+  } catch (error) {
+    console.error('Error making user admin:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
  
