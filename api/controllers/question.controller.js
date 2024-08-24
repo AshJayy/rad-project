@@ -171,3 +171,20 @@ export const deleteQuestion = async (req, res, next) => {
       next(error);
    }
 }
+
+export const getQuestionById = async (req, res, next) => {
+   const questionId = req.params.questionId;
+
+   try {
+      const question = await Question.findById(questionId)
+
+      if (!question) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      res.status(200).json(question);
+
+   } catch (error) {
+      next(error)
+   }
+}
