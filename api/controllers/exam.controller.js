@@ -51,3 +51,66 @@ export const getUserExams = async (req, res, next) => {
     next(error);
   }
 }
+
+export const getExams = async (req, res, next) => {
+  try {
+    const { limit, skip } = req.query;
+
+    // Helper function to get the start and end date of a month
+    const getMonthRange = (year, month) => {
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0);
+      endOfMonth.setHours(23, 59, 59, 999); // Set to the end of the last day of the month
+      return { startOfMonth, endOfMonth };
+    };
+
+    // Get the current date
+    const currentDate = new Date();
+
+    // Array to store data for the last seven months
+    const lastSevenMonthsData = [];
+
+    // Loop through the last seven months
+    for (let i = 0; i < 7; i++) {
+      const month = currentDate.getMonth() - i;
+      const year = currentDate.getFullYear();
+
+      // Adjust year and month for cases where the month is negative (i.e., before January)
+      const adjustedYear = month < 0 ? year - 1 : year;
+      const adjustedMonth = (month + 12) % 12;
+
+      const { startOfMonth, endOfMonth } = getMonthRange(adjustedYear, adjustedMonth);
+
+      // Get the count of exams created in this month
+      const examsInMonth = await Exam.find({
+        createdAt: { $gte: startOfMonth, $lt: endOfMonth }
+      }).exec();
+
+      const totalExamsInMonth = examsInMonth.length;
+
+      lastSevenMonthsData.push({
+        month: startOfMonth.toLocaleString('default', { month: 'long' }),
+        examsCount: totalExamsInMonth,
+      });
+    }
+
+    // Fetch exams with pagination if limit and skip are provided
+    const exams = await Exam.find({})
+      .limit(limit ? parseInt(limit) : 0)
+      .skip(skip ? parseInt(skip) : 0)
+      .exec();
+
+    // Get the total number of exams in the database
+    const totalExams = await Exam.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      exams,
+      totalExams,
+      lastSevenMonthsData, // Add the exams count for the last seven months
+    });
+  } catch (error) {
+    // Handle any errors and pass them to the next middleware (error handler)
+    next(error);
+  }
+};
