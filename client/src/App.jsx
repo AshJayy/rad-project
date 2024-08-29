@@ -12,6 +12,8 @@ import Footer from './components/Footer'
 import PrivateRoute from './components/PrivateRoute'
 import Dashboard from './pages/Dashboard'
 import CreateQuestion from './pages/CreateQuestion'
+import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
+import UpdateQuestion from './pages/UpdateQuestion'
 
 function App() {
 
@@ -29,7 +31,11 @@ function App() {
         <Route path="pricing" element={<Pricing />} />
         <Route element={<PrivateRoute />}>
           <Route path='/dashboard' element={<Dashboard />} />
+          
+        </Route>
+        <Route element={<PrivateRouteOnlyAdmin />}>
           <Route path='/createQuestion' element={<CreateQuestion />} />
+          <Route path='/editQuestion/:questionID' element={<UpdateQuestion />} />
         </Route>
       </Routes>
       <Footer />

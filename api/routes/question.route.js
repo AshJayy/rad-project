@@ -13,9 +13,9 @@ const router = express.Router();
 
 router.post("/create", verifyToken, createQuestion);
 router.get("/freetrial", verifyToken, getFreeTrial);
-router.get("/getuserquestions/", verifyToken, getUserQuestions);
+router.get("/getuserquestions", verifyToken, getUserQuestions);
 router.get("/getquestions", verifyToken, getQuestions);
-router.put("/editquestion", verifyToken, editQuestion);
+router.put("/editQuestion/:questionId", verifyToken, editQuestion);
 router.delete("/deletequestion/:questionId", verifyToken, deleteQuestion);
 
 export default router;

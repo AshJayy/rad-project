@@ -24,7 +24,7 @@ export default function DashQAManagement() {
     const fetchQuestions = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/question/getquestions/');
+        const res = await fetch('/api/question/getQuestions/');
         if (!res.ok) {
            console.log("Error fetching questions:", res.statusText);
         }
@@ -61,6 +61,10 @@ export default function DashQAManagement() {
       console.log(error.message);
     }
   };
+
+  const handleEditQuestion = (questionID) => {
+    navigate(`/editQuestion/${questionID}`);
+  }
 
   return (
     <div className='flex sm:flex-col w-full p-4'>
@@ -106,7 +110,8 @@ export default function DashQAManagement() {
                         {question.options && question.options.join(', ')}
                       </Table.Cell>
                       <Table.Cell>
-                        <Button className="bg-green-600 rounded-xl">Edit</Button>
+                        <Button className="bg-green-600 rounded-xl"
+                        onClick={() => handleEditQuestion(question._id)}>Edit</Button>
                       </Table.Cell>
                       <Table.Cell>
                         <Button className="bg-red-800 rounded-xl"
