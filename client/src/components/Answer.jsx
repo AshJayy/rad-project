@@ -75,10 +75,10 @@ export default function Answer({ question, index }) {
               {/* <button className=""> show reason </button>    */}
             </div>
             {question.justification.length > 0 && (
-              <p className='flex ml-4 flex-row max-w-6xl w-[70vw]'>
+              <div className='flex ml-4 flex-row max-w-6xl w-[70vw]'>
                 <HiOutlinePencilAlt className='mt-[2px] mr-2' />
-                <div className=''>Justification : {question.justification}</div>
-              </p>
+                <p className=''>Justification : {question.justification}</p>
+              </div>
             )}
           </Alert>
         </div>
