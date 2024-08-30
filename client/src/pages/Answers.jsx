@@ -1,4 +1,4 @@
-import Answer from "../components/Answer"
+import Answer from "../components/AnswerComponent"
 
 export default function Answers({questions, marks, timeTaken}) {
   //console.table(questions)

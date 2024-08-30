@@ -2,7 +2,7 @@ import { Alert, Label, Radio } from "flowbite-react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { HiOutlinePencil, HiOutlinePencilAlt } from "react-icons/hi";
 
-export default function Answer({ question, index }) {
+export default function AnswerComponent({ question, index }) {
   return (
     <>
       <div className='max-w-6xl w-full py-8 px-12 text-sm rounded-3xl drop-shadow-md bg-light-blue'>
