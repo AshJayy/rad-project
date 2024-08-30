@@ -4,28 +4,33 @@ import Question from "../models/question.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const addExam = async (req, res, next) => {
-  const { userID, examNo, questions, totalMarks, timeTaken } = req.body;
+  const { userID, questions, totalMarks, timeTaken, done } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(userID)) {
-    console.log(userID)
     return next(errorHandler(400, "Invalid user ID"));
   }
 
-  const questionIDs = questions.map((question) => question.questionID);
-  const validQuestions = await Question.find({ _id: { $in: questionIDs } });
-  if (validQuestions.length !== questionIDs.length) {
-    return next(errorHandler(400, "Invalid question IDs"));
-  }
-
-  const exam = new Exam({
-    userID,
-    examNo,
-    questions,
-    totalMarks,
-    timeTaken,
-  });
-
   try {
+    // Fetch the latest exam for the user and get the highest exam number
+    const lastExam = await Exam.findOne({ userID }).sort({ examNo: -1 }).exec();
+    const nextExamNo = lastExam ? lastExam.examNo + 1 : 1;
+
+    const questionIDs = questions.map((question) => question.questionID);
+    const validQuestions = await Question.find({ _id: { $in: questionIDs } });
+
+    if (validQuestions.length !== questionIDs.length) {
+      return next(errorHandler(400, "Invalid question IDs"));
+    }
+
+    const exam = new Exam({
+      userID,
+      examNo: nextExamNo, // Use the next sequential exam number
+      questions,
+      totalMarks,
+      takenTime: timeTaken, // Using takenTime instead of timeTaken based on your schema
+      done
+    });
+
     await exam.save();
     res.status(201).json("Exam added successfully");
   } catch (error) {

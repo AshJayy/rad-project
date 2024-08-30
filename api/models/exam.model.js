@@ -31,8 +31,12 @@ const examSchema = new mongoose.Schema(
     },
     takenTime: {
       type: Number,
-      default: 120
-    }
+      default: 0
+    },
+    done: {
+      type: Boolean,
+      default: false
+    },
   },
   { timestamps: true }
 );
