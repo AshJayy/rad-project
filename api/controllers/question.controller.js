@@ -68,12 +68,14 @@ export const getUserQuestions = async (req, res, next) => {
    try {
       // Get the recent exam details
       const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+      
 
       // Get the already answered Question IDs
       const usedQuestionIds = pastExams.reduce((acc, exam) => {
          return acc.concat(exam.questions.map(q => q.toString()));
       }, []);
-
+      console.log("pastExams");
+      console.log(pastExams);
       // Function to get questions from a specific bank, excluding used questions
       const getFromBank = async (bank, limit) => {
          const questionSet = await Question.aggregate([
@@ -92,15 +94,15 @@ export const getUserQuestions = async (req, res, next) => {
          getFromBank(5, 4),
          getFromBank(6, 4),
       ]);
-
+      
       // Combine all question sets into a single array
       const questions = questionSets.flat();
       
       // Calculate the new ExamNumber
-      const ExamNumber = pastExams.length === 0 ? 1 : pastExams[0].examNo + 1;
-
+      // const ExamNumber = pastExams.length === 0 ? 1 : pastExams[0].examNo + 1;
+   
       // Send the response with the questions and the exam number
-      res.status(200).json({ questions, ExamNumber });
+      res.status(200).json(questions);
 
    } catch (error) {
       console.error('Error fetching questions:', error);

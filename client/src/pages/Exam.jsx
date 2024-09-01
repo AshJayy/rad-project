@@ -34,11 +34,12 @@ export default function Exam() {
     //get questions from the server
     const fetchQuestions = async () => {
       setLoading(true);
-      const res = await fetch("/api/question/getuserquestions");
+      const res = await fetch(`/api/question/getuserquestions?userID=${currentUser._id}`);
       if (!res.ok) {
         setLoading(false);
       } else {
         const question = await res.json();
+        
         // Marked choice attribute
         const modifiedData = Array.isArray(question)
           ? question.map((question) => ({
@@ -46,7 +47,7 @@ export default function Exam() {
               choice: -1,
             }))
           : [];
-        setQuestions(modifiedData);
+        setQuestions(modifiedData);        
         setLoading(false);
       }
     };
