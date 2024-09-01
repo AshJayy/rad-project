@@ -180,10 +180,11 @@ export const editQuestion = async (req, res, next) => {
    }
 
    const { bank, content, options, correctAnswer, justification } = req.body;
-   const questionId = req.body._id;
+   const questionId = req.params.questionId;
+
 
    // Making sure all fields are filled
-   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null || !questionId) {
+   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null) {
       return next(errorHandler(400, 'Please provide all required fields'));
    }
 
@@ -233,7 +234,7 @@ export const getQuestions = async (req, res, next) => {
        const startIndex = parseInt(req.query.startIndex) || 0;
        const limit = parseInt(req.query.limit) || 9;
        const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
-       const posts = await Question.find({
+       const questions = await Question.find({
            ...(req.query.userId && { userId: req.query.userId }),
            ...(req.query.bank && { category: req.query.bank }),
            ...(req.query.content && { _id: req.query.content }),
@@ -253,7 +254,7 @@ export const getQuestions = async (req, res, next) => {
        res
            .status(200)
            .json({ 
-               posts, 
+               questions, 
                totalQuestions, 
            });
        

@@ -24,12 +24,13 @@ export default function DashQAManagement() {
     const fetchQuestions = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/question/getQuestions/');
+        const res = await fetch('/api/question/getquestions');
         if (!res.ok) {
            console.log("Error fetching questions:", res.statusText);
         }
         const data = await res.json();
-        setQuestions(data.posts || []);
+        console.log(data);
+        setQuestions(data.questions || []);
       } catch (error) {
         console.log("Error fetching questions:", error.message);
       } finally {
