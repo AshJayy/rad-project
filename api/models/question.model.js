@@ -5,7 +5,7 @@ const questionSchema = new mongoose.Schema(
    bank: {
       type: Number,
       required: true,
-      enum: [1, 2, 3, 4, 5, 6]
+      enum: [1, 2, 3, 4, 5, 6, 7]
     },
     content: {
       type: String,
@@ -27,10 +27,7 @@ const questionSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
-    timeTaken: {
-      type: Number,
-      default: 120
-    }
+    
    },
   { timestamps: true }
 );

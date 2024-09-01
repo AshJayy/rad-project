@@ -1,97 +1,101 @@
-import { Alert, Button, Label, List, Radio, Spinner } from "flowbite-react";
+import { Button, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { AiFillClockCircle } from "react-icons/ai";
-import { HiChevronRight, HiOutlinePencilAlt, HiOutlinePencil } from "react-icons/hi";
+import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
+import { FcQuestions } from "react-icons/fc";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+// import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
+import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 
 export default function Exam() {
   const { currentUser } = useSelector((state) => state.user);
-  
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
-  const [questionIdx, setQuestionIdx] = useState(0)
-  const [completed, setCompleted] = useState(false)
-  const [examStatus, setExamStatus] = useState("unsaved")
-  const [loading, setLoading] = useState(false)
+  const [questionIdx, setquestionIdx] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [marks, setMarks] = useState(0);
+  const examTime = 30 * 60; // 30 min
+  const [timeLeft, setTimeLeft] = useState(examTime); 
+  const [takenTime, setTakenTime] = useState(120);
+  const [startTimer, setStartTimer] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
-  useEffect(() => { //get questions from the server
-    try {
-      const fetchQuestions = async () => {
-        setLoading(true);
-        const res = await fetch('/api/question/getquestions/');
-        if(!res.ok){
-          setLoading(false)
-        }else{
-          const data = await res.json();
-          // Marked choice attribute
-          const modifiedData = data.questions.map(question => ({
-            ...question,
-            choice: -1,
-          }))
-          setQuestions(modifiedData);
-          setLoading(false);
-        }
-      }
-      fetchQuestions();
-    } catch (error) {
-      setLoading(false)
-      console.log("Error fetching free trial");
-    }
-  }, [])
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const examNo = params.get("no");
+  const examID = params.get("id");
+  const [currentPage, setCurrentPage] = useState(0);
+  const buttonsPerPage = 10;
+   // const [examStatus, setExamStatus] = useState("unsaved")
 
-  useEffect(() => { // calculate marks got from the quizz
-    const getMarks = () => {
-      const marks = questions.reduce((acc, question) => {
-        if(question.choice === question.correctAnswer){
-          return acc + 1
-        }
-        return acc
-      }, 0)
-      return marks
-    }
-    const addExam = async () => {
+  //console.log(examNo,examID)
+  const startIdx = currentPage * buttonsPerPage;
+  const endIdx = Math.min(startIdx + buttonsPerPage, questions.length);
+  const currentQuestions = questions.slice(startIdx, endIdx);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
       setLoading(true);
-      const questionsData = questions.map(({ choice, _id }) => {
-        return { questionID: _id, choice: choice };
-      });
       try {
-        const res = await fetch("/api/exam/addexam", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userID: currentUser._id,
-            examNo: 0,
-            questions: questionsData,
-            totalMarks: marks,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          console.log("Error saving exam results", data);
-          setLoading(false);
+        const res = await fetch(`/api/question/getuserquestions?userID=${currentUser._id}`);
+        if (res.ok) {
+          const question = await res.json();
+          const modifiedData = Array.isArray(question)
+            ? question.map((question) => ({
+                ...question,
+                choice: -1,
+              }))
+            : [];
+          setQuestions(modifiedData);
         } else {
-          setLoading(false);
-          setExamStatus("saved");
+          console.log("Failed to fetch questions");
         }
       } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
         setLoading(false);
-        console.log("Error saving exam results", error);
       }
     };
-    const marks = ((getMarks() / questions.length) * 100).toFixed(0);
-    setMarks(marks);
-    addExam();
-  }, [completed])
 
-  const handleAnswers = (qNo, selectedIndex) => { //update state with selected answers
+    if (currentUser) {
+      fetchQuestions(); // Call fetchQuestions only if currentUser is defined
+    }
+  }, [currentUser]);
+
+
+  useEffect(() => {
+    if (!startTimer || !ready) return;
+  
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  
+    return () => clearInterval(timer);
+  }, [startTimer, ready]); 
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes} min ${secs < 10 ? "0" : ""}${secs} sec`;
+  };
+
+  const handleAnswers = (qNo, selectedIndex) => {
     const updatedQuestions = questions.map((question, index) => {
       if (index === qNo) {
-        if(selectedIndex == question.choice){
-          return { ...question, choice: -1 }
+        if (selectedIndex == question.choice) {
+          return { ...question, choice: -1 };
         }
         return { ...question, choice: selectedIndex };
       }
@@ -100,80 +104,193 @@ export default function Exam() {
     setQuestions(updatedQuestions);
   };
 
-  const handleSubmit = () => {
+  const calculateMarks = () => {
+    const totalMarks = questions.reduce((acc, question) => {
+      if (question.choice === question.correctAnswer) {
+        return acc + 1;
+      }
+      return acc;
+    }, 0);
+    return (totalMarks / questions.length) * 100 ;
+  };
+
+  const updateExam = async (marks,takenTime) => {
+    const data = {
+      questions,
+      timeTaken: takenTime,
+      totalMarks: marks,
+      done: true,
+    };
+    const res = await fetch(`/api/exam/update/${examID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      console.error("Error updating exam:", res.status, res.statusText);
+    }
+  }
+
+  
+
+  const handleSubmit = async () => {
     setCompleted(true);
-  }
+    setStartTimer(false);
+    const timeTaken = examTime - timeLeft;
+    setTakenTime(formatTime(timeTaken));
+    const marks = calculateMarks();
+    setMarks(marks.toFixed(0));
+    await updateExam(marks,timeTaken);
+  };
 
-  if(examStatus == "saved"){ // page after submitting answers
-    return (
-      <Answers questions={questions} marks={marks} />
-    )
-  }
+  useEffect(() => {
+    if(timeLeft === 0){
+      handleSubmit();
+    }
+  }, [timeLeft]);
 
-  return ( // page before submitting answers
-    <div className="min-h-screen">
-      <div className="bg-mid-blue p-8 text-sm font-semibold">
-        <h3 className="text-white">This free trial contains 10 questions.   Each question has 5 choices as answers.</h3>
-        <p className="text-white opacity-50">Time duration - 30minutes</p>
-      </div>
-      <main className="flex flex-col gap-10 p-10 max-w-6xl mx-auto">
-        <div className="flex justify-between w-full font-semibold">
-          <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
-            <AiFillClockCircle />
-            <p className="text-nowrap">28 min 43 sec</p>
-          </span>
-          {!loading &&
-            <div className="w-full flex justify-end">
-              {questions.length > 0 && questions.map((question, index) => (
-                <div className="flex items-center" key={index}>
-                  <button
-                    onClick={() => setQuestionIdx(index)}
-                    className={`w-10 h-10 rounded-full ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}>
-                      {index + 1}
-                  </button>
-                  <div className={`h-2 w-12 mx-[-4px] ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}></div>
-                </div>
-              ))}
-            </div>
-          }
+  useEffect(() => {
+    if (!currentUser || currentUser.userLevel !== 0) {
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
+
+  return (
+    <>
+      {completed ? (
+        <div>
+          <Answers questions={questions} marks={marks} timeTaken={takenTime} />
         </div>
-        {!loading && questions.length > 0 ? (
-            <Question
-              key={questionIdx}
-              question={questions[questionIdx]}
-              questionIdx={questionIdx}
-              handleAnswers={handleAnswers}
-          />
-        ) : (
-          <div className="w-12 h-12">
-            <Spinner className="text-blue-500"/>
-          </div>
-        )}
-        {questionIdx <= questions.length - 2 ? (
-          <Button
-            className="self-end pl-4 bg-mid-blue"
-            pill
-            onClick={() => setQuestionIdx(questionIdx + 1)}
-          >
-            <span className="flex flex-row items-center gap-3">
-              Next Question
-              <HiChevronRight className="w-6 h-6" />
-            </span>
-          </Button>
-        ) : (
-          (questionIdx == questions.length - 1 ) && (
-          <Button
-            className="self-end px-4 bg-mid-blue"
-            pill
-            onClick={() => handleSubmit()}
-          >
-            <span className="flex flex-row items-center gap-3">
-              Submit Answers
-            </span>
-          </Button>
-          )
-        )}
-      </main>
-    </div>
-  )
+      ) : (
+        <>
+          {ready ? (
+            <>
+              {currentUser && currentUser.userLevel === 0 ? (
+                <div className="min-h-screen">
+                  <main className="flex flex-col gap-10 p-10 max-w-6xl mx-auto">
+                    <div className="flex justify-between w-full font-semibold ">
+                      {!loading && (
+                        <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
+                          <AiFillClockCircle />
+                          <p className="text-nowrap">{formatTime(timeLeft)}</p>
+                        </span>
+                      )}
+                      {!loading && (
+                        <div className="w-full flex py-2 items-center justify-between">
+                          <div className="px-3">
+
+                            <button
+                              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                              disabled={currentPage === 0}
+                              className={`px-2 py-2 rounded-full  ${
+                                currentPage === 0 ? "bg-gray-300" : "bg-mid-blue text-white"
+                              }`}
+                            >
+                              {/* <MdOutlineNavigateBefore /> */}
+                              <GrFormPrevious />
+                            </button>
+                          
+                          </div>
+                        <div className="flex">
+                          {currentQuestions.map((question, index) => (
+                            <div className="flex items-center" key={index + startIdx}>
+                              <button
+                                onClick={() => setquestionIdx(index + startIdx)}
+                                className={`w-10 h-10 rounded-full ${
+                                  question.choice > -1 ? "bg-mid-blue text-white" : "bg-light-blue"
+                                } transition-all`}
+                              >
+                                {index + startIdx + 1}
+                              </button>
+                              <div
+                                className={`h-2 w-12 ${
+                                  question.choice > -1 ? "bg-mid-blue text-white" : "bg-light-blue"
+                                } transition-all`}
+                              ></div>
+                            </div>
+                          ))}
+                        </div>
+                      
+                        <button
+                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(questions.length / buttonsPerPage) - 1))}
+                          disabled={endIdx >= questions.length}
+                          className={`px-2 py-2 rounded-full  ${
+                            endIdx >= questions.length ? "bg-gray-300" : "bg-mid-blue text-white"
+                          }`}
+                        >
+                          {/* <MdOutlineNavigateNext /> */}
+                          <GrFormNext />
+                        </button>
+                      </div>
+                      )}
+                    </div>
+                    {!loading && questions.length > 0 ? (
+                      <Question
+                        question={questions[questionIdx]}
+                        questionIdx={questionIdx}
+                        handleAnswers={handleAnswers}
+                      />
+                    ) : (
+                      <div className="flex mt-1/2 justify-center">
+                        <Spinner className="w-20 h-20" />
+                      </div>
+                    )}
+                    {!loading &&
+                      (questionIdx <= questions.length - 2 ? (
+                        <Button
+                          className="self-end pl-4 bg-mid-blue"
+                          pill
+                          onClick={() => setquestionIdx(questionIdx + 1)}
+                        >
+                          <span className="flex flex-row items-center gap-3">
+                            Next Question
+                            <HiChevronRight className="w-6 h-6" />
+                          </span>
+                        </Button>
+                      ) : (
+                        <Button
+                          className="self-end px-4 bg-mid-blue"
+                          pill
+                          onClick={() => handleSubmit()}
+                        >
+                          <span className="flex flex-row items-center gap-3">
+                            Submit Answers
+                          </span>
+                        </Button>
+                      ))}
+                  </main>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col items-center h-screen mt-32">
+                <FcQuestions className="w-20 h-20 text-mid-blue" />
+                <div className=" p-8 font-semibold text-center ">
+                  <h3 className="text-mid-blue text-lg mb-2">
+                    This Exam contains 30 questions. Each question has 5 choices
+                    as answers.
+                  </h3>
+                  <p className="text-mid-blue opacity-50">
+                    Time duration - 30minutes
+                  </p>
+                </div>
+                <Button
+                  className=" font-semibold bg-mid-blue rounded-full"
+                  onClick={() => setReady(true)}
+                >
+                  Start Exam
+                </Button>
+                <p className="text-sm text-mid-blue opacity-50 mt-5 text-center">
+                  Click The Button To Get Started With The Exam
+                </p>
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
 }

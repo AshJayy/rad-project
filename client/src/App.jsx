@@ -11,28 +11,36 @@ import About from './pages/About'
 import Footer from './components/Footer'
 import PrivateRoute from './components/PrivateRoute'
 import Dashboard from './pages/Dashboard'
+import CreateQuestion from './pages/CreateQuestion'
+import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
+import UpdateQuestion from './pages/UpdateQuestion'
 
 function App() {
 
-    return (
-        <BrowserRouter>
-            <Header/>
-            <Routes>
-                <Route path="/" element={<Home/>}/>
-                <Route path="freetrial" element={<FreeTrial/>}/>
-                <Route path="exam" element={<Exam/>}/>
-                <Route path="signin" element={<SignIn/>}/>
-                <Route path="signup" element={<SignUp/>}/>
-                <Route path="subscribe" element={<Subscribe/>}/>
-                <Route path="about" element={<About/>}/>
-                <Route path="pricing" element={<Pricing/>}/>
-                <Route element={<PrivateRoute/>}>
-                    <Route path='/dashboard' element={<Dashboard/>}/>
-                </Route>
-            </Routes>
-            <Footer/>
-        </BrowserRouter>
-    )
+  return (
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="freetrial" element={<FreeTrial />} />
+        <Route path="exam" element={<Exam />} />
+        <Route path="signin" element={<SignIn />} />
+        <Route path="signup" element={<SignUp />} />
+        <Route path="subscribe" element={<Subscribe />} />
+        <Route path="about" element={<About />} />
+        <Route path="pricing" element={<Pricing />} />
+        <Route element={<PrivateRoute />}>
+          <Route path='/dashboard' element={<Dashboard />} />
+          
+        </Route>
+        <Route element={<PrivateRouteOnlyAdmin />}>
+          <Route path='/createQuestion' element={<CreateQuestion />} />
+          <Route path='/editQuestion/:questionID' element={<UpdateQuestion />} />
+        </Route>
+      </Routes>
+      <Footer />
+    </BrowserRouter>
+  )
 }
 
 export default App
