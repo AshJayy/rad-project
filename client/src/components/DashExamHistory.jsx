@@ -3,8 +3,13 @@ import { Spinner } from "flowbite-react";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PdfFile from "./PdfFile";
+import { AiOutlineDownload } from "react-icons/ai";
 
 export default function DashExamHistory() {
+  const { currentUser } = useSelector((state) => state.user);
+
   const [openedExams, setOpenedExams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [examinations, setExaminations] = useState([]); // Correct initialization
@@ -13,6 +18,8 @@ export default function DashExamHistory() {
   const [creatingExam, setCreatingExam] = useState(false); // New state to manage ongoing exam creation
   const user = useSelector((state) => state.user.currentUser);
   const navigate = useNavigate();
+
+  const [selectedExam, setSelectedExam] = useState(null);
 
   const createExam = async (examNum) => {
     try {
@@ -80,17 +87,27 @@ export default function DashExamHistory() {
       try {
         const res = await fetch(`/api/question/getnextExam?userID=${user._id}`);
         if (!res.ok) {
-          console.error("Error checking next exam availability:", res.status, res.statusText);
+          console.error(
+            "Error checking next exam availability:",
+            res.status,
+            res.statusText
+          );
         } else {
           const { message } = await res.json();
-          if (message === "Enough questions are available to create the next exam.") {
+          if (
+            message ===
+            "Enough questions are available to create the next exam."
+          ) {
             setNextExam(1); // Set nextExam to 1 if enough questions are available
           } else {
             setNextExam(0); // Otherwise, set it to 0 or handle it as needed
           }
         }
       } catch (error) {
-        console.error("An error occurred while checking next exam availability:", error);
+        console.error(
+          "An error occurred while checking next exam availability:",
+          error
+        );
       }
     };
 
@@ -100,7 +117,8 @@ export default function DashExamHistory() {
   }, [user?._id]);
 
   useEffect(() => {
-    if (nextExam === 1 && !creatingExam) { // Check if nextExam is 1 and an exam is not already being created
+    if (nextExam === 1 && !creatingExam) {
+      // Check if nextExam is 1 and an exam is not already being created
       const unfinishedExam = examinations.some((exam) => !exam.done); // Check if there is any unfinished exam
       if (!unfinishedExam) {
         createExam(examNumber); // Create a new exam if there are no unfinished exams
@@ -123,6 +141,10 @@ export default function DashExamHistory() {
     return `${hours} hr ${minutes % 60} min ${secs < 10 ? "0" : ""}${secs} sec`;
   };
 
+  const handleDownloadClick = (exam) => {
+    setSelectedExam(exam);
+  };
+
   if (loading) {
     // Show a spinner while loading
     return (
@@ -134,85 +156,125 @@ export default function DashExamHistory() {
 
   return (
     <div className="flex flex-col p-4 gap-4 w-full">
-      {Array.isArray(examinations) && examinations.map((exam) => (
-        <div
-          className={`w-full rounded-lg px-7 py-5 cursor-pointer shadow-md ${
-            exam.done ? "bg-light-blue" : "bg-white"
-          }`}
-          key={exam._id}
-        >
-          <span
-            className="flex flex-row justify-between w-full font-semibold text-xl cursor-pointer"
-            onClick={() => updateOpenedExams(exam._id)}
-          >
-            <div>Examination {exam.examNo}</div>
-            <div className="scale-[200%] mt-1">
-              {openedExams.includes(exam._id) ? (
-                <IoMdArrowDropup />
-              ) : (
-                <IoMdArrowDropdown />
-              )}
-            </div>
-          </span>
+      {Array.isArray(examinations) &&
+        examinations.map((exam) => (
           <div
-            className={`flex flex-col transition-all duration-700 ease-in-out overflow-hidden ${
-              openedExams.includes(exam._id) ? "max-h-screen" : "max-h-0"
+            className={`w-full rounded-lg px-7 py-5 cursor-pointer shadow-md ${
+              exam.done ? "bg-light-blue" : "bg-white"
             }`}
+            key={exam._id}
           >
-            <div className="mt-3 mb-5 flex flex-col gap-1">
-              <h1>
-                Score: <span className="text-gray-500 ml-5">{Math.round(exam.totalMarks)}%</span>
-              </h1>
-              <h1>
-                No of correct answers:{" "}
-                <span className="text-gray-500 ml-5">
-                  {(exam.questions.length * exam.totalMarks) / 100} / {exam.questions.length}
-                </span>
-              </h1>
-              <h1>
-                Date and time:{" "}
-                <span className="text-gray-500 ml-5">
-                  {`${new Date(exam.createdAt).getDate().toString().padStart(2, "0")}/${(
-                    new Date(exam.createdAt).getMonth() + 1
-                  )
-                    .toString()
-                    .padStart(2, "0")}/${new Date(exam.createdAt).getFullYear()} at 
-                    ${new Date(exam.createdAt).getHours().toString().padStart(2, "0")}:${new Date(
-                    exam.createdAt
-                  )
-                    .getMinutes()
-                    .toString()
-                    .padStart(2, "0")}`}
-                </span>
-              </h1>
-              <h1>
-                Time Taken: 
-                <span className="text-gray-500 ml-5">
-                {formatTime(exam.takenTime)}
-                  
-                </span>
-              </h1>
-            </div>
-  
-            <div className="flex justify-end gap-4">
-              <button 
-                className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
+            <span
+              className="flex flex-row justify-between w-full font-semibold text-xl cursor-pointer"
+              onClick={() => updateOpenedExams(exam._id)}
+            >
+              <div>Examination {exam.examNo}</div>
+              <div className="scale-[200%] mt-1">
+                {openedExams.includes(exam._id) ? (
+                  <IoMdArrowDropup />
+                ) : (
+                  <IoMdArrowDropdown />
+                )}
+              </div>
+            </span>
+            <div
+              className={`flex flex-col transition-all duration-700 ease-in-out overflow-hidden ${
+                openedExams.includes(exam._id) ? "max-h-screen" : "max-h-0"
+              }`}
+            >
+              <div className="mt-3 mb-5 flex flex-col gap-1">
+                <h1>
+                  Score:{" "}
+                  <span className="text-gray-500 ml-5">
+                    {Math.round(exam.totalMarks)}%
+                  </span>
+                </h1>
+                <h1>
+                  No of correct answers:{" "}
+                  <span className="text-gray-500 ml-5">
+                    {(exam.questions.length * exam.totalMarks) / 100} /{" "}
+                    {exam.questions.length}
+                  </span>
+                </h1>
+                <h1>
+                  Date and time:{" "}
+                  <span className="text-gray-500 ml-5">
+                    {`${new Date(exam.createdAt)
+                      .getDate()
+                      .toString()
+                      .padStart(2, "0")}/${(
+                      new Date(exam.createdAt).getMonth() + 1
+                    )
+                      .toString()
+                      .padStart(2, "0")}/${new Date(
+                      exam.createdAt
+                    ).getFullYear()} at 
+                    ${new Date(exam.createdAt)
+                      .getHours()
+                      .toString()
+                      .padStart(2, "0")}:${new Date(exam.createdAt)
+                      .getMinutes()
+                      .toString()
+                      .padStart(2, "0")}`}
+                  </span>
+                </h1>
+                <h1>
+                  Time Taken:
+                  <span className="text-gray-500 ml-5">
+                    {formatTime(exam.takenTime)}
+                  </span>
+                </h1>
+              </div>
+
+              <div className="flex justify-end gap-4">
+                {!exam.done && (
+                  <button
+                    className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
                 disabled:bg-gray-300 disabled:text-gray-600  disabled:border-gray-400"
-                onClick={() => navigate(`/exam?no=${exam.examNo}&id=${exam._id}`)}
-                disabled={exam.done}
-              >
-                Take Exam
-              </button>
-              <button className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
-                disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-400"
-                disabled={!exam.done}
-              >
-                Download
-              </button>
+                    onClick={() =>
+                      navigate(`/exam?no=${exam.examNo}&id=${exam._id}`)
+                    }
+                    disabled={exam.done}
+                  >
+                    Take Exam
+                  </button>
+                )}
+
+                <button
+                  className={`rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
+                disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-400 ${
+                  selectedExam && selectedExam._id === exam._id
+                    ? "bg-mid-blue text-white"
+                    : ""
+                }`}
+                  disabled={!exam.done}
+                  onClick={() => handleDownloadClick(exam)}
+                >
+                  {selectedExam && selectedExam._id === exam._id ? (
+                    <div className="">
+                      <PDFDownloadLink
+                        document={
+                          <PdfFile exam={selectedExam} user={currentUser} />
+                        }
+                        fileName={`exam${exam.examNo}_report`}
+                      >
+                        {({ loading }) =>
+                          loading ? (
+                            <Spinner size="sm" color="info" />
+                          ) : (
+                            "Download"
+                          )
+                        }
+                      </PDFDownloadLink>
+                    </div>
+                  ) : (
+                    "Get Report"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
-}  
+}
