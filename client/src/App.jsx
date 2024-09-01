@@ -31,6 +31,11 @@ function App() {
         <Route path="pricing" element={<Pricing />} />
         <Route element={<PrivateRoute />}>
           <Route path='/dashboard' element={<Dashboard />} />
+          
+        </Route>
+        <Route element={<PrivateRouteOnlyAdmin />}>
+          <Route path='/createQuestion' element={<CreateQuestion />} />
+          <Route path='/editQuestion/:questionID' element={<UpdateQuestion />} />
         </Route>
       </Routes>
       <Footer />
