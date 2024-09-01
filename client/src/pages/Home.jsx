@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "flowbite-react";
 import { HiChevronRight } from "react-icons/hi";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function Home() {
+  const { currentUser } = useSelector((state) => state.user);
   const descriptionBoxes = [
     {
       title: "Extensive Question Banks",
@@ -129,7 +131,10 @@ export default function Home() {
           </p>
 
           <Button className="bg-mid-blue mx-auto" pill>
+          {currentUser ? (
             <Link to={'/freetrial'}>Start free trial</Link>
+              ) : (
+            <Link to={'/signin'} state={{ from: '/freetrial' }}>Start free trial</Link>)}
           </Button>
         </div>
       </section>
@@ -151,7 +156,7 @@ export default function Home() {
 
       <section id="reviews" className="p-24 flex flex-wrap gap-16 justify-center lg:justify-between">
         {reviews.map((review, index) => (
-          <div key={index} className={`w-80 lg:w-[25vw] h-80 flex flex-col gap-4 items-center justify-center p-8 text-sm rounded-xl drop-shadow-lg text-white text-center`} style={{"background-color": review.bg}}>
+          <div key={index} className={`w-80 lg:w-[25vw] h-80 flex flex-col gap-4 items-center justify-center p-8 text-sm rounded-xl drop-shadow-lg text-white text-center`} style={{"backgroundColor": review.bg}}>
             <p className="shadow-none">"{review.review}"</p>
             <p className="text-light-blue shadow-none">{review.name}, {review.company}</p>
           </div>
@@ -162,7 +167,7 @@ export default function Home() {
         <h1 className="font-semibold">frequently asked questions (FAQs)</h1>
         <div className="flex flex-col gap-4">
           {faq.map((question, index) => (
-            <FAQ question={question} index={index} />
+            <FAQ question={question} index={index} key={index}/>
           ))}
         </div>
       </section>
@@ -171,7 +176,10 @@ export default function Home() {
           <h1 className="text-5xl text-white font-bold text-center">Join ExamEase to ace your exams.</h1>
           <p className=" text-white font-semibold">Sign up now and explore our comprehensive exam preparation platform.</p>
           <Button className="bg-white mx-auto text-dark-blue font-semibold my-3" pill>
+          {currentUser ? (
             <Link to={'/freetrial'}>Start free trial</Link>
+              ) : (
+            <Link to={'/signin'} state={{ from: '/freetrial' }}>Start free trial</Link>)}
           </Button>
       </section>
 
