@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import DashSidebar from "../components/DashSidebar";
 import DashProfile from "../components/DashProfile";
 import DashExamHistory from "../components/DashExamHistory"
+import DashReports from "../components/DashReports.jsx";
+import PdfFile from "../components/PdfFile.jsx";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -24,6 +26,10 @@ export default function Dashboard() {
       </div>
       {/* Exam History */}
       {tab === "history" && <DashExamHistory />}
+      {/* Profile */}
+      {tab === "profile" && <DashProfile />}
+      {tab === "reports" && <DashReports />}
+      {tab === "test" && <PdfFile />}
     </div>
   );
 }

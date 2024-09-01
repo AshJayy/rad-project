@@ -35,8 +35,11 @@ export const addExam = async (req, res, next) => {
 
 export const getUserExams = async (req, res, next) => {
   const { userID, examID } = req.query;
-  if (userID && !mongoose.Types.ObjectId.isValid(userID)) {// check if only userID available
-    return next(errorHandler(400, "Invalid user ID"));
+
+  if(userID){
+    if (!mongoose.Types.ObjectId.isValid(userID)) {// check if only userID available
+      return next(errorHandler(400, "Invalid user ID"));
+    }
   }
 
   try {

@@ -14,25 +14,25 @@ import Dashboard from './pages/Dashboard'
 
 function App() {
 
-  return (
-    <BrowserRouter>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="freetrial" element={<FreeTrial />} />
-        <Route path="exam" element={<Exam />} />
-        <Route path="signin" element={<SignIn />} />
-        <Route path="signup" element={<SignUp />} />
-        <Route path="subscribe" element={<Subscribe />} />
-        <Route path="about" element={<About />} />
-        <Route path="pricing" element={<Pricing />} />
-        <Route element={<PrivateRoute />}>
-          <Route path='/dashboard' element={<Dashboard />} />
-        </Route>
-      </Routes>
-      <Footer />
-    </BrowserRouter>
-  )
+    return (
+        <BrowserRouter>
+            <Header/>
+            <Routes>
+                <Route path="/" element={<Home/>}/>
+                <Route path="freetrial" element={<FreeTrial/>}/>
+                <Route path="exam" element={<Exam/>}/>
+                <Route path="signin" element={<SignIn/>}/>
+                <Route path="signup" element={<SignUp/>}/>
+                <Route path="subscribe" element={<Subscribe/>}/>
+                <Route path="about" element={<About/>}/>
+                <Route path="pricing" element={<Pricing/>}/>
+                <Route element={<PrivateRoute/>}>
+                    <Route path='/dashboard' element={<Dashboard/>}/>
+                </Route>
+            </Routes>
+            <Footer/>
+        </BrowserRouter>
+    )
 }
 
 export default App

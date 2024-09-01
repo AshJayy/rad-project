@@ -26,7 +26,7 @@ export default function Exam() {
         }else{
           const data = await res.json();
           // Marked choice attribute
-          const modifiedData = data.map(question => ({
+          const modifiedData = data.questions.map(question => ({
             ...question,
             choice: -1,
           }))
@@ -54,7 +54,7 @@ export default function Exam() {
     const addExam = async () => {
       setLoading(true);
       const questionsData = questions.map(({ choice, _id }) => {
-        return { questionID: _id, answer: choice };
+        return { questionID: _id, choice: choice };
       });
       try {
         const res = await fetch("/api/exam/addexam", {
@@ -71,7 +71,7 @@ export default function Exam() {
         });
         const data = await res.json();
         if (!res.ok) {
-          console.log("Error saving exam results");
+          console.log("Error saving exam results", data);
           setLoading(false);
         } else {
           setLoading(false);
