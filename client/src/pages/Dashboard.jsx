@@ -58,7 +58,6 @@ export default function Dashboard() {
       {/* Exam History */}
       {tab === "history" && <DashExamHistory />}
       {/* Profile */}
-      {tab === "profile" && <DashProfile />}
       {tab === "reports" && <DashReports />}
       {tab === "test" && <PdfFile />}
     </div>
