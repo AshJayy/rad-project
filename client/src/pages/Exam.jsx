@@ -101,8 +101,27 @@ export default function Exam() {
       }
       return acc;
     }, 0);
-    return (totalMarks / questions.length) * 100;
+    return (totalMarks / questions.length) * 100 ;
   };
+
+  const updateExam = async (marks,takenTime) => {
+    const data = {
+      questions,
+      timeTaken: takenTime,
+      totalMarks: marks,
+      done: true,
+    };
+    const res = await fetch(`/api/exam/update/${examID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      console.error("Error updating exam:", res.status, res.statusText);
+    }
+  }
 
   
 
@@ -113,6 +132,7 @@ export default function Exam() {
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0));
+    await updateExam(marks,timeTaken);
   };
 
   useEffect(() => {
