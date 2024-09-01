@@ -7,6 +7,7 @@ import {
   getQuestions,
   editQuestion,
   deleteQuestion,
+  getNextExam
 } from "../controllers/question.controller.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 router.post("/create", verifyToken, createQuestion);
 router.get("/freetrial", verifyToken, getFreeTrial);
 router.get("/getuserquestions", verifyToken, getUserQuestions);
+router.get("/getnextexam", verifyToken, getNextExam);
 router.get("/getquestions", verifyToken, getQuestions);
 router.put("/editQuestion/:questionId", verifyToken, editQuestion);
 router.delete("/deletequestion/:questionId", verifyToken, deleteQuestion);
