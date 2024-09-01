@@ -17,7 +17,8 @@ export default function Exam() {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [marks, setMarks] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30 * 60);
+  const examTime = 30 * 60; // 30 min
+  const [timeLeft, setTimeLeft] = useState(examTime); 
   const [takenTime, setTakenTime] = useState(120);
   const [startTimer, setStartTimer] = useState(true);
   const [ready, setReady] = useState(false);
@@ -129,12 +130,18 @@ export default function Exam() {
   const handleSubmit = async () => {
     setCompleted(true);
     setStartTimer(false);
-    const timeTaken = 30 * 60 - timeLeft;
+    const timeTaken = examTime - timeLeft;
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0));
     await updateExam(marks,timeTaken);
   };
+
+  useEffect(() => {
+    if(timeLeft === 0){
+      handleSubmit();
+    }
+  }, [timeLeft]);
 
   useEffect(() => {
     if (!currentUser || currentUser.userLevel !== 0) {
