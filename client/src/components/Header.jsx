@@ -4,6 +4,8 @@ import { HiChevronDown } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaSpinner } from "react-icons/fa";
+
 
 export default function Header() {
   const dropDownItems = [
