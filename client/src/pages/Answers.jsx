@@ -1,7 +1,7 @@
 import Answer from "../components/AnswerComponent"
 
 export default function Answers({questions, marks, timeTaken}) {
-  const correctAnswers = Math.round((questions.length * marks) / 100)
+  const correctAnswers = Math.round((questions.length * marks) / 100);
   //console.table(questions)
   return (
     <div>

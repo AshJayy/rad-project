@@ -116,6 +116,13 @@ export default function DashExamHistory() {
     );
   };
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const secs = seconds % 60;
+    return `${hours} hr ${minutes % 60} min ${secs < 10 ? "0" : ""}${secs} sec`;
+  };
+
   if (loading) {
     // Show a spinner while loading
     return (
@@ -154,12 +161,12 @@ export default function DashExamHistory() {
           >
             <div className="mt-3 mb-5 flex flex-col gap-1">
               <h1>
-                Score: <span className="text-gray-500 ml-5">{exam.totalMarks}%</span>
+                Score: <span className="text-gray-500 ml-5">{Math.round(exam.totalMarks)}%</span>
               </h1>
               <h1>
                 No of correct answers:{" "}
                 <span className="text-gray-500 ml-5">
-                  {Array.isArray(exam.questions) && (exam.questions.length * exam.totalMarks) / 100} / {exam.questions?.length}
+                  {(exam.questions.length * exam.totalMarks) / 100} / {exam.questions.length}
                 </span>
               </h1>
               <h1>
@@ -179,12 +186,10 @@ export default function DashExamHistory() {
                 </span>
               </h1>
               <h1>
-                Time Taken:{" "}
+                Time Taken: 
                 <span className="text-gray-500 ml-5">
-                  {exam.timeTaken ? Math.floor(exam.timeTaken / 60) : "0"} hours{" "}
-                  {exam.timeTaken && exam.timeTaken % 60 !== 0
-                    ? `${exam.timeTaken % 60} minutes`
-                    : ""}
+                {formatTime(exam.takenTime)}
+                  
                 </span>
               </h1>
             </div>
@@ -194,11 +199,13 @@ export default function DashExamHistory() {
                 className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
                 disabled:bg-gray-300 disabled:text-gray-600  disabled:border-gray-400"
                 onClick={() => navigate(`/exam?no=${exam.examNo}&id=${exam._id}`)}
+                disabled={exam.done}
               >
                 Take Exam
               </button>
               <button className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
                 disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-400"
+                disabled={!exam.done}
               >
                 Download
               </button>
