@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import DashSidebar from "../components/DashSidebar";
 import DashProfile from "../components/DashProfile";
-import DashExamHistory from "../components/DashExamHistory";
 import DashUserManagement from "../components/DashUserManagement";
 import DashQAManagement from "../components/DashQAManagement";
 import { useSelector } from "react-redux";
 import DashAdmin from "../components/DashAdmin";
+import DashExamHistory from "../components/DashExamHistory"
+import DashReports from "../components/DashReports.jsx";
 
 export default function Dashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -34,6 +35,7 @@ export default function Dashboard() {
         <>
           {/* Exam history */
           tab === "dash" && <DashExamHistory />}
+          {tab === "reports" && <DashReports />}
         </>
       )}
 
@@ -53,6 +55,7 @@ export default function Dashboard() {
           {tab === "qaMan" && <DashQAManagement />}
         </>
       )}
+
     </div>
   );
 }
