@@ -63,7 +63,12 @@ export default function DashExamHistory() {
           console.error("Error fetching exams:", res.status, res.statusText);
         } else {
           const exams = await res.json();
-          setExaminations(exams);
+          setExaminations(exams.map(exam => ({
+            ...exam,
+            questions: exam.questions || [], // Ensure questions is always an array
+            totalMarks: exam.totalMarks || 0,
+            takenTime: exam.takenTime || 0,
+          })));
 
           // If there are no exams, create one
           if (exams.length === 0) {
