@@ -62,7 +62,8 @@ export default function Exam() {
 
 
   useEffect(() => {
-    if (!startTimer) return;
+    if (!startTimer || !ready) return;
+  
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
@@ -72,9 +73,9 @@ export default function Exam() {
         return prevTime - 1;
       });
     }, 1000);
-
+  
     return () => clearInterval(timer);
-  }, []);
+  }, [startTimer, ready]); 
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
