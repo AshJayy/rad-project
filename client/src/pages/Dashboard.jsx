@@ -7,6 +7,8 @@ import DashUserManagement from "../components/DashUserManagement";
 import DashQAManagement from "../components/DashQAManagement";
 import { useSelector } from "react-redux";
 import DashAdmin from "../components/DashAdmin";
+import DashReports from "../components/DashReports.jsx";
+import PdfFile from "../components/PdfFile.jsx";
 
 export default function Dashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -53,6 +55,12 @@ export default function Dashboard() {
           {tab === "qaMan" && <DashQAManagement />}
         </>
       )}
+      {/* Exam History */}
+      {tab === "history" && <DashExamHistory />}
+      {/* Profile */}
+      {tab === "profile" && <DashProfile />}
+      {tab === "reports" && <DashReports />}
+      {tab === "test" && <PdfFile />}
     </div>
   );
 }

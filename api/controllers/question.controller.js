@@ -86,14 +86,24 @@ export const getUserQuestions = async (req, res, next) => {
       }
 
 
-      // Fetch questions from multiple banks
+      //  // Fetch questions from multiple banks
+      //  const questionSets = await Promise.all([
+      //    getFromBank(1, 8),
+      //    getFromBank(2, 6),
+      //    getFromBank(3, 4),
+      //    getFromBank(4, 4),
+      //    getFromBank(5, 4),
+      //    getFromBank(6, 4),
+      // ]);
+
+      // TEST
       const questionSets = await Promise.all([
-         getFromBank(1, 8),
-         getFromBank(2, 6),
-         getFromBank(3, 4),
-         getFromBank(4, 4),
-         getFromBank(5, 4),
-         getFromBank(6, 4),
+         getFromBank(1, 1),
+         getFromBank(2, 1),
+         getFromBank(3, 1),
+         getFromBank(4, 1),
+         getFromBank(5, 1),
+         getFromBank(6, 1),
       ]);
       
       // Combine all question sets into a single array
@@ -249,5 +259,23 @@ export const getQuestions = async (req, res, next) => {
        
    } catch (error) {
        next(error);
+   }
+}
+
+
+export const getQuestionById = async (req, res, next) => {
+   const questionId = req.params.questionId;
+
+   try {
+      const question = await Question.findById(questionId)
+
+      if (!question) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      res.status(200).json(question);
+
+   } catch (error) {
+      next(error)
    }
 }
