@@ -31,34 +31,33 @@ export default function Exam() {
   //console.log(examNo,examID)
 
   useEffect(() => {
-    //get questions from the server
     const fetchQuestions = async () => {
       setLoading(true);
-      const res = await fetch(`/api/question/getuserquestions?userID=${currentUser._id}`);
-      if (!res.ok) {
-        setLoading(false);
-      } else {
-        const question = await res.json();
-        
-        // Marked choice attribute
-        const modifiedData = Array.isArray(question)
-          ? question.map((question) => ({
-              ...question,
-              choice: -1,
-            }))
-          : [];
-        setQuestions(modifiedData);        
+      try {
+        const res = await fetch(`/api/question/getuserquestions?userID=${currentUser._id}`);
+        if (res.ok) {
+          const question = await res.json();
+          const modifiedData = Array.isArray(question)
+            ? question.map((question) => ({
+                ...question,
+                choice: -1,
+              }))
+            : [];
+          setQuestions(modifiedData);
+        } else {
+          console.log("Failed to fetch questions");
+        }
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
         setLoading(false);
       }
     };
-    try {
-      fetchQuestions();
-    } catch (error) {
-      setLoading(false);
-      console.log("Error fetching questions", error);
-    }
-  }, []);
 
+    if (currentUser) {
+      fetchQuestions(); // Call fetchQuestions only if currentUser is defined
+    }
+  }, [currentUser]);
 
 
   useEffect(() => {
