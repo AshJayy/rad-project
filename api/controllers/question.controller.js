@@ -64,16 +64,17 @@ export const getFreeTrial = async (req, res, next) => {
    }
 }
 
-export const getQuestions = async (req, res, next) => {
+export const getUserQuestions = async (req, res, next) => {
    try {
-      //get the recent exam details
+      // Get the recent exam details
       const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
 
-      //get the already answered Question ids
+      // Get the already answered Question IDs
       const usedQuestionIds = pastExams.reduce((acc, exam) => {
          return acc.concat(exam.questions.map(q => q.toString()));
       }, []);
 
+      // Function to get questions from a specific bank, excluding used questions
       const getFromBank = async (bank, limit) => {
          const questionSet = await Question.aggregate([
             { $match: { bank: bank, isActive: true, _id: { $nin: usedQuestionIds } } }, // Exclude used questions
@@ -91,16 +92,6 @@ export const getQuestions = async (req, res, next) => {
          getFromBank(5, 4),
          getFromBank(6, 4),
       ]);
-      //limits of the questions picked are in the rtio of 1:5 from the supplied requ to original requirments given
-
-      //bank    | given | original |
-      //  1     |   8   |    40    |
-      //  2     |   6   |    30    |
-      //  3     |   4   |    20    |
-      //  4     |   4   |    20    |
-      //  5     |   4   |    20    |
-      //  6     |   4   |    20    |
-      // Total  |  30   |   150    |
 
       // Combine all question sets into a single array
       const questions = questionSets.flat();
@@ -113,9 +104,61 @@ export const getQuestions = async (req, res, next) => {
 
    } catch (error) {
       console.error('Error fetching questions:', error);
-      next(error);
+      next(error); // Pass the error to the next middleware
    }
 }
+
+export const getNextExam = async (req, res, next) => {
+   try {
+     // Get the recent exam details for the user
+     const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+ 
+     // Extract IDs of already answered questions
+     const usedQuestionIds = pastExams.reduce((acc, exam) => {
+       return acc.concat(exam.questions.map((q) => q.toString()));
+     }, []);
+ 
+     // Define the criteria for the exam (e.g., total number of questions required from each bank)
+     const requiredQuestions = {
+       1: 8,  // Bank 1 requires 8 questions
+       2: 6,  // Bank 2 requires 6 questions
+       3: 4,  // Bank 3 requires 4 questions
+       4: 4,  // Bank 4 requires 4 questions
+       5: 4,  // Bank 5 requires 4 questions
+       6: 4   // Bank 6 requires 4 questions
+     };
+ 
+     // Function to check if enough questions are available in a given bank, excluding used questions
+     const checkBankAvailability = async (bank, limit) => {
+       const availableQuestions = await Question.countDocuments({
+         bank: bank,
+         isActive: true,
+         _id: { $nin: usedQuestionIds }  // Exclude already used questions
+       });
+       return availableQuestions >= limit;
+     };
+ 
+     // Check availability for each bank in parallel
+     const bankAvailability = await Promise.all(
+       Object.entries(requiredQuestions).map(([bank, limit]) =>
+         checkBankAvailability(parseInt(bank), limit)
+       )
+     );
+ 
+     // Determine if all banks have enough questions
+     const enoughQuestionsAvailable = bankAvailability.every((available) => available);
+ 
+     if (enoughQuestionsAvailable) {
+       res.status(200).json({ message: "Enough questions are available to create the next exam." });
+     } else {
+       res.status(400).json({ message: "Not enough questions available to create the next exam." });
+     }
+   } catch (error) {
+     console.error('Error checking question availability:', error);
+     next(error);
+   }
+ };
+ 
 
 
 export const editQuestion = async (req, res, next) => {
@@ -169,5 +212,39 @@ export const deleteQuestion = async (req, res, next) => {
       res.status(200).json('Question deleted successfully');
    } catch (error) {
       next(error);
+   }
+}
+
+export const getQuestions = async (req, res, next) => {
+   try {
+       const startIndex = parseInt(req.query.startIndex) || 0;
+       const limit = parseInt(req.query.limit) || 9;
+       const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
+       const posts = await Question.find({
+           ...(req.query.userId && { userId: req.query.userId }),
+           ...(req.query.bank && { category: req.query.bank }),
+           ...(req.query.content && { _id: req.query.content }),
+           ...(req.query.searchTerm && {
+               $or: [
+                   { options: { $regex: req.query.options, $options: 'i' } },
+                   { content: { $regex: req.query.searchTerm, $options: 'i' } },
+                   { justification: { $regex: req.query.justification, $options: 'i' } },
+               ],
+           }),
+       })
+           .sort({ updatedAt: sortDirrection })
+           .skip(startIndex)
+           .limit(limit);
+       
+       const totalQuestions = await Question.countDocuments();
+       res
+           .status(200)
+           .json({ 
+               posts, 
+               totalQuestions, 
+           });
+       
+   } catch (error) {
+       next(error);
    }
 }
