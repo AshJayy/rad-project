@@ -8,6 +8,7 @@ import { FcQuestions } from "react-icons/fc";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
 
 export default function Exam() {
   const { currentUser } = useSelector((state) => state.user);
@@ -22,14 +23,20 @@ export default function Exam() {
   const [takenTime, setTakenTime] = useState(120);
   const [startTimer, setStartTimer] = useState(true);
   const [ready, setReady] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const examNo = params.get("no");
   const examID = params.get("id");
-  // const [examStatus, setExamStatus] = useState("unsaved")
+  const [currentPage, setCurrentPage] = useState(0);
+  const buttonsPerPage = 10;
+   // const [examStatus, setExamStatus] = useState("unsaved")
 
   //console.log(examNo,examID)
+  const startIdx = currentPage * buttonsPerPage;
+  const endIdx = Math.min(startIdx + buttonsPerPage, questions.length);
+  const currentQuestions = questions.slice(startIdx, endIdx);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -170,30 +177,50 @@ export default function Exam() {
                         </span>
                       )}
                       {!loading && (
-                        <div className="w-full flex ">
-                          {questions.length > 0 &&
-                            questions.map((question, index) => (
-                              <div className="flex items-center" key={index}>
-                                <button
-                                  onClick={() => setquestionIdx(index)}
-                                  className={`w-10 h-10 rounded-full ${
-                                    question.choice > -1
-                                      ? "bg-mid-blue text-white"
-                                      : "bg-light-blue"
-                                  } transition-all`}
-                                >
-                                  {index + 1}
-                                </button>
-                                <div
-                                  className={`h-2 w-12 mx-[-4px] ${
-                                    question.choice > -1
-                                      ? "bg-mid-blue text-white"
-                                      : "bg-light-blue"
-                                  } transition-all`}
-                                ></div>
-                              </div>
-                            ))}
+                        <div className="w-full flex py-2 items-center justify-between">
+                          <div className="px-3">
+
+                            <button
+                              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                              disabled={currentPage === 0}
+                              className={`px-2 py-2 rounded-full  ${
+                                currentPage === 0 ? "bg-gray-300" : "bg-mid-blue text-white"
+                              }`}
+                            >
+                              <MdOutlineNavigateBefore />
+                            </button>
+                          
+                          </div>
+                        <div className="flex">
+                          {currentQuestions.map((question, index) => (
+                            <div className="flex items-center" key={index + startIdx}>
+                              <button
+                                onClick={() => setquestionIdx(index + startIdx)}
+                                className={`w-10 h-10 rounded-full ${
+                                  question.choice > -1 ? "bg-mid-blue text-white" : "bg-light-blue"
+                                } transition-all`}
+                              >
+                                {index + startIdx + 1}
+                              </button>
+                              <div
+                                className={`h-2 w-12 ${
+                                  question.choice > -1 ? "bg-mid-blue text-white" : "bg-light-blue"
+                                } transition-all`}
+                              ></div>
+                            </div>
+                          ))}
                         </div>
+                      
+                        <button
+                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(questions.length / buttonsPerPage) - 1))}
+                          disabled={endIdx >= questions.length}
+                          className={`px-2 py-2 rounded-full  ${
+                            endIdx >= questions.length ? "bg-gray-300" : "bg-mid-blue text-white"
+                          }`}
+                        >
+                          <MdOutlineNavigateNext />
+                        </button>
+                      </div>
                       )}
                     </div>
                     {!loading && questions.length > 0 ? (
@@ -240,7 +267,7 @@ export default function Exam() {
                 <FcQuestions className="w-20 h-20 text-mid-blue" />
                 <div className=" p-8 font-semibold text-center ">
                   <h3 className="text-mid-blue text-lg mb-2">
-                    This Exam contains 10 questions. Each question has 5 choices
+                    This Exam contains 30 questions. Each question has 5 choices
                     as answers.
                   </h3>
                   <p className="text-mid-blue opacity-50">
