@@ -8,7 +8,8 @@ import { FcQuestions } from "react-icons/fc";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
+// import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
+import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 
 export default function Exam() {
   const { currentUser } = useSelector((state) => state.user);
@@ -187,7 +188,8 @@ export default function Exam() {
                                 currentPage === 0 ? "bg-gray-300" : "bg-mid-blue text-white"
                               }`}
                             >
-                              <MdOutlineNavigateBefore />
+                              {/* <MdOutlineNavigateBefore /> */}
+                              <GrFormPrevious />
                             </button>
                           
                           </div>
@@ -218,7 +220,8 @@ export default function Exam() {
                             endIdx >= questions.length ? "bg-gray-300" : "bg-mid-blue text-white"
                           }`}
                         >
-                          <MdOutlineNavigateNext />
+                          {/* <MdOutlineNavigateNext /> */}
+                          <GrFormNext />
                         </button>
                       </div>
                       )}
