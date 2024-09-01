@@ -101,17 +101,20 @@ export default function Header() {
       <div className="flex gap-4 items-center text-sm">
         {currentUser ? (
           <>
-            <span className="block text-sm">Hi, {currentUser.username}</span>
+            
             <Dropdown
               arrowIcon={false}
               inline
               label={
+                <>
+                <span className="block text-sm mr-2">Hi, {currentUser.username}</span>
                 <Avatar
                   alt="user"
                   img={currentUser.profilePicture}
                   rounded
                   className="border-blue-500"
                 />
+                </>
               }
             >
               <Dropdown.Header>
@@ -119,7 +122,7 @@ export default function Header() {
                   {currentUser.email}
                 </span>
               </Dropdown.Header>
-              {currentUser.userLevel > 0 && (
+              {currentUser.userLevel >= 0 && (
                 <>
                   <Link to={"/dashboard?tab=dash"}>
                     <Dropdown.Item>Dashboard</Dropdown.Item>
