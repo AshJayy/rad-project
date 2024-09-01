@@ -7,11 +7,9 @@ import {
   getQuestions,
   editQuestion,
   deleteQuestion,
-  getNextExam
+  getNextExam,
+  getQuestionById
 } from "../controllers/question.controller.js";
-import express from 'express'
-import { verifyToken } from '../utils/verifyUser.js';
-import { createQuestion, getFreeTrial, getQuestions, editQuestion, deleteQuestion, getQuestionById, } from '../controllers/question.controller.js';
 
 const router = express.Router();
 
