@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Spinner } from "flowbite-react";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function DashExamHistory() {
   const [openedExams, setOpenedExams] = useState([]);
@@ -9,6 +10,7 @@ export default function DashExamHistory() {
   const [examinations, setExaminations] = useState([]);
   const [examNumber, setExamNumber] = useState(0); // Use useState for examNumber
   const user = useSelector((state) => state.user.currentUser);
+  const navigate = useNavigate();
 
   const createExam = async (examNum) => {
     try {
@@ -75,6 +77,7 @@ export default function DashExamHistory() {
         : [...prevOpenedExams, id]
     );
   };
+
 
   if (loading) {
     // While loading
@@ -153,13 +156,14 @@ export default function DashExamHistory() {
             <button 
             className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
             disabled:bg-gray-300 disabled:text-gray-600  disabled:border-gray-400"
-            disabled={exam.done}
+            //disabled={exam.done}
+            onClick={() => navigate(`/exam?no=${exam.examNo}&id=${exam._id}`)}
             >
                 Take Exam
               </button>
               <button className="rounded-3xl h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue
                disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-400"
-               disabled={!exam.done}
+               //disabled={!exam.done}
               >
                 Download
               </button>

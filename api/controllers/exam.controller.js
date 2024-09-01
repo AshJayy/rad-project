@@ -38,6 +38,30 @@ export const addExam = async (req, res, next) => {
   }
 };
 
+export const updateExam = async (req, res, next) => {
+  const { examID } = req.params;
+  const { questions, timeTaken, totalMarks, done } = req.body;
+
+  try {
+    const exam = await Exam.findById(examID);
+
+    if (!exam) {
+      return next(errorHandler(404, "Exam not found"));
+    }
+
+    exam.questions = questions;
+    exam.takenTime = timeTaken;
+    exam.totalMarks = totalMarks;
+    exam.done = done;
+
+    await exam.save();
+
+    res.status(200).json("Exam updated successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUserExams = async (req, res, next) => {
   const { userID, examID } = req.query;
   if (userID && !mongoose.Types.ObjectId.isValid(userID)) {// check if only userID available
