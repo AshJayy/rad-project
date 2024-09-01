@@ -122,7 +122,7 @@ export default function DashProfile() {
     }
     try {
       dispatch(updateStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+      const res = await fetch(`/api/users/update/${currentUser._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -177,7 +177,10 @@ export default function DashProfile() {
   return (
     <div className="p-3 w-full lg:ml-10 lg:mr-20">
       <h1 className="my-7 font-semibold text-2xl mb-10">Profile</h1>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      {imageFileUploadError && (
+            <Alert color="failure">{imageFileUploadError}</Alert>
+          )}
+      <form className="flex flex-col gap-4 mt-5 " onSubmit={handleSubmit}>
         <div className="bg-white p-5 rounded-xl shadow-md flex">
           <input
             type="file"
@@ -230,9 +233,7 @@ export default function DashProfile() {
               {currentUser.userLevel > 0 ? "Admin" : "Student"}
             </h1>
           </div>
-          {imageFileUploadError && (
-            <Alert color="failure">{imageFileUploadError}</Alert>
-          )}
+          
           <div className="text-red-500 ml-auto mr-2">
             <span onClick={handleSignout} className="cursor-pointer">
           Sign Out
