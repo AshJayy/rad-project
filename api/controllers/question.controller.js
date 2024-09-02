@@ -86,25 +86,25 @@ export const getUserQuestions = async (req, res, next) => {
       }
 
 
-      //  // Fetch questions from multiple banks
-      //  const questionSets = await Promise.all([
-      //    getFromBank(1, 8),
-      //    getFromBank(2, 6),
-      //    getFromBank(3, 4),
-      //    getFromBank(4, 4),
-      //    getFromBank(5, 4),
-      //    getFromBank(6, 4),
-      // ]);
+       // Fetch questions from multiple banks
+       const questionSets = await Promise.all([
+         getFromBank(1, 8),
+         getFromBank(2, 6),
+         getFromBank(3, 4),
+         getFromBank(4, 4),
+         getFromBank(5, 4),
+         getFromBank(6, 4),
+      ]);
 
       // TEST
-      const questionSets = await Promise.all([
-         getFromBank(1, 1),
-         getFromBank(2, 1),
-         getFromBank(3, 1),
-         getFromBank(4, 1),
-         getFromBank(5, 1),
-         getFromBank(6, 1),
-      ]);
+      // const questionSets = await Promise.all([
+      //    getFromBank(1, 1),
+      //    getFromBank(2, 1),
+      //    getFromBank(3, 1),
+      //    getFromBank(4, 1),
+      //    getFromBank(5, 1),
+      //    getFromBank(6, 1),
+      // ]);
       
       // Combine all question sets into a single array
       const questions = questionSets.flat();
