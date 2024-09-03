@@ -35,8 +35,7 @@ export default function SignIn () {
         
         if(res.ok){
           dispatch(signInSuccess(data));
-          const redirectTo = location.state?.from || '/';
-          navigate(redirectTo);
+          navigate('/dashboard?tab=dash');
         }
       } catch (error) {
         dispatch(signInFailure(error.message));
