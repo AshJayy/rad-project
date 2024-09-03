@@ -17,6 +17,7 @@ export default function CreateQuestion() {
     content: '',
     correctAnswer: '',
     justification: '',
+    isActive: '',
   });
   const [publishError, setPublishError] = useState(null);
   const navigate = useNavigate();
@@ -28,7 +29,6 @@ export default function CreateQuestion() {
         const res = await fetch(`/api/question/getquestions?questionID=${questionID}`);
         const questionSelected = await res.json();
         const data = questionSelected.questions[0];
-        console.log(data);
 
         if (res.ok) {
           setFormData({
@@ -51,6 +51,10 @@ export default function CreateQuestion() {
     }
   }, [questionID]);
 
+  useEffect(() => {
+    console.log(formData);
+  }, [formData]);
+
   const handleAnswerChange = (index, value) => {
     const updatedAnswers = [...formData.options];
     updatedAnswers[index] = value;
@@ -59,6 +63,7 @@ export default function CreateQuestion() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
     try {
       const res = await fetch(`/api/question/editquestion/${questionID}`, {
         method: "PUT",
@@ -95,20 +100,32 @@ export default function CreateQuestion() {
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 mb-5 justify-between">
           <div className="flex-1 mb-5">
-            <div className="flex flex-col gap-4">
-              <Select
-                value={formData.bank}
-                onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
-                required
-              >
-                <option value="">Select Bank</option>
-                <option value="1">Bank 1 - Operating systems</option>
-                <option value="2">Bank 2 - Data Structures and Algorithms</option>
-                <option value="3">Bank 3 - Functional Programming</option>
-                <option value="4">Bank 4 - Computer Networks</option>
-                <option value="5">Bank 5 - Game development</option>
-                <option value="6">Bank 6 - CTF</option>
-              </Select>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-row justify-between gap-4">
+                <Select
+                  value={formData.bank}
+                  onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
+                  required
+                  className="w-full text-gray-600"
+                >
+                  <option value="">Select Bank</option>
+                  <option value="1">Bank 1 - Operating systems</option>
+                  <option value="2">Bank 2 - Data Structures and Algorithms</option>
+                  <option value="3">Bank 3 - Functional Programming</option>
+                  <option value="4">Bank 4 - Computer Networks</option>
+                  <option value="5">Bank 5 - Game development</option>
+                  <option value="6">Bank 6 - CTF</option>
+                </Select>
+                <Select 
+                  color={formData.isActive === 'true' ? 'success' : 'failure'}
+                  className='w-36'
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.value })}
+                  value={formData.isActive}
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Disabled</option>
+                </Select>
+              </div>
               <div className="flex flex-col gap-3 mt-2">
                 <Label htmlFor="question" value="Add The Content Of the Question" />
                 <Textarea
@@ -117,7 +134,7 @@ export default function CreateQuestion() {
                   required
                   rows="6"
                   value={formData.content}
-                  className="w-full overflow-hidden"
+                  className="w-full overflow-hidden text-gray-600"
                   onInput={autoExpand}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   style={{ resize: 'none' }}
@@ -128,8 +145,8 @@ export default function CreateQuestion() {
 
           {[1, 2, 3, 4, 5].map((num) => (
             <div className="flex-1" key={num}>
-              <div className="mb-2 flex justify-between">
-                <Label htmlFor={`ans${num}`} value={`Add Answer ${num}`} />
+              <div className="mb-2 flex mx-3 justify-between">
+                <Label htmlFor={`ans${num}`} value={`Answer ${num}`} />
                 {num === 1 && <Label htmlFor="ans" value="Correct Answer" />}
               </div>
               <div className="flex flex-row w-full justify-between">
@@ -137,7 +154,7 @@ export default function CreateQuestion() {
                   id={`ans${num}`}
                   placeholder="Type Here"
                   required
-                  className="w-full overflow-hidden"
+                  className="w-full overflow-hidden text-gray-600"
                   rows="1"
                   value={formData.options[num - 1] || ''}
                   onInput={autoExpand}
@@ -148,8 +165,8 @@ export default function CreateQuestion() {
                   id={`correct-ans${num}`}
                   name="correct-ans"
                   value={num}
-                  checked={formData.correctAnswer === num}
-                  className="m-3 mx-12 text-green-500 focus:ring-green-400"
+                  checked={formData.correctAnswer == num}
+                  className="m-3 mx-12 text-green-500 focus:ring-green-100"
                   onChange={(e) => setFormData({ ...formData, correctAnswer: e.target.value })}
                 />
               </div>
@@ -163,7 +180,7 @@ export default function CreateQuestion() {
               placeholder="Type Here"
               required
               rows="6"
-              className="mt-3 w-full overflow-hidden"
+              className="mt-3 w-full overflow-hidden text-gray-600"
               value={formData.justification}
               onInput={autoExpand}
               onChange={(e) => setFormData({ ...formData, justification: e.target.value })}
