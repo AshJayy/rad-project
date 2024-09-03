@@ -58,6 +58,32 @@ export default function DashQAManagement() {
     fetchQuestions(searchTerm, newIndex);
   };
 
+  const handleDeleteQuestion = async (questionID) => {
+    //setShowModal(false);
+    try {
+      const res = await fetch(
+        `/api/question/deletequestion/${questionID}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        setQuestions((prev) =>
+          prev.filter((question) => question._id !== questionID)
+        );
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleEditQuestion = (questionID) => {
+    navigate(`/editQuestion/${questionID}`);
+  }
+  
   return (
     <div className="flex sm:flex-col w-full p-4">
       <div className="flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between">
