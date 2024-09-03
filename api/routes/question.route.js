@@ -20,5 +20,6 @@ router.get("/getnextexam", verifyToken, getNextExam);
 router.get("/getquestions", verifyToken, getQuestions);
 router.put("/editquestion/:questionId", verifyToken, editQuestion);
 router.delete("/deletequestion/:questionId", verifyToken, deleteQuestion);
+router.get("/getquestion/:questionId", verifyToken, getQuestionById);
 
 export default router;
