@@ -22,6 +22,7 @@ import {
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { Link } from "react-router-dom";
+import { FiEdit } from "react-icons/fi";
 
 const customFloatingLabelTheme = {
   input: {
@@ -241,8 +242,11 @@ export default function DashProfile() {
       </div>
         </div>
         <div className="bg-white p-10 rounded-xl shadow-md flex-row space-y-5 space-x-4">
-          <h1 className="font-semibold text-xl mb-10">Personal Information</h1>
-
+          <span className="font-semibold text-xl mb-10 flex felx-row">Personal Information 
+            <FiEdit className="ml-auto" />
+          </span>
+          
+          
           <FloatingLabel
             theme={customFloatingLabelTheme}
             type="text"
@@ -273,11 +277,11 @@ export default function DashProfile() {
           <FloatingLabel
             theme={customFloatingLabelTheme}
             type="phone"
-            id="number"
+            id="phone"
             variant="standard"
             label="Phone Number"
             defaultValue={
-              currentUser.number ? currentUser.number : "+94 xxx xxx xxx"
+              currentUser.phone ? currentUser.phone : "+94 xxx xxx xxx"
             }
             onChange={handleChange}
           />
