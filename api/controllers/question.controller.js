@@ -66,14 +66,17 @@ export const getFreeTrial = async (req, res, next) => {
 
 export const getUserQuestions = async (req, res, next) => {
    try {
-      //get the recent exam details
-      const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+      // Get the recent exam details
+      const pastExams = await Exam.find({ userID: req.user.id }).select('questions').lean();
+      
+ 
 
-      //get the already answered Question ids
+      // Get the already answered Question IDs
       const usedQuestionIds = pastExams.reduce((acc, exam) => {
-         return acc.concat(exam.questions.map(q => q.toString()));
+         return acc.concat(exam.questions.map(q => q._id.toString())); // Extract the _id field
       }, []);
-
+      
+      // Function to get questions from a specific bank, excluding used questions
       const getFromBank = async (bank, limit) => {
          const questionSet = await Question.aggregate([
             { $match: { bank: bank, isActive: true, _id: { $nin: usedQuestionIds } } }, // Exclude used questions
@@ -82,8 +85,9 @@ export const getUserQuestions = async (req, res, next) => {
          return questionSet;
       }
 
-      // Fetch questions from multiple banks
-      const questionSets = await Promise.all([
+
+       // Fetch questions from multiple banks
+       const questionSets = await Promise.all([
          getFromBank(1, 8),
          getFromBank(2, 6),
          getFromBank(3, 4),
@@ -91,31 +95,83 @@ export const getUserQuestions = async (req, res, next) => {
          getFromBank(5, 4),
          getFromBank(6, 4),
       ]);
-      //limits of the questions picked are in the rtio of 1:5 from the supplied requ to original requirments given
 
-      //bank    | given | original |
-      //  1     |   8   |    40    |
-      //  2     |   6   |    30    |
-      //  3     |   4   |    20    |
-      //  4     |   4   |    20    |
-      //  5     |   4   |    20    |
-      //  6     |   4   |    20    |
-      // Total  |  30   |   150    |
-
+      // TEST
+      // const questionSets = await Promise.all([
+      //    getFromBank(1, 1),
+      //    getFromBank(2, 1),
+      //    getFromBank(3, 1),
+      //    getFromBank(4, 1),
+      //    getFromBank(5, 1),
+      //    getFromBank(6, 1),
+      // ]);
+      
       // Combine all question sets into a single array
       const questions = questionSets.flat();
       
       // Calculate the new ExamNumber
-      const ExamNumber = pastExams.length === 0 ? 1 : pastExams[0].examNo + 1;
-
+      // const ExamNumber = pastExams.length === 0 ? 1 : pastExams[0].examNo + 1;
+   
       // Send the response with the questions and the exam number
-      res.status(200).json({ questions, ExamNumber });
+      res.status(200).json(questions);
 
    } catch (error) {
       console.error('Error fetching questions:', error);
-      next(error);
+      next(error); // Pass the error to the next middleware
    }
 }
+
+export const getNextExam = async (req, res, next) => {
+   try {
+     // Get the recent exam details for the user
+     const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+ 
+     // Extract IDs of already answered questions
+     const usedQuestionIds = pastExams.reduce((acc, exam) => {
+      return acc.concat(exam.questions.map(q => q._id.toString())); // Extract the _id field
+   }, []);
+ 
+     // Define the criteria for the exam (e.g., total number of questions required from each bank)
+     const requiredQuestions = {
+       1: 8,  // Bank 1 requires 8 questions
+       2: 6,  // Bank 2 requires 6 questions
+       3: 4,  // Bank 3 requires 4 questions
+       4: 4,  // Bank 4 requires 4 questions
+       5: 4,  // Bank 5 requires 4 questions
+       6: 4   // Bank 6 requires 4 questions
+     };
+ 
+     // Function to check if enough questions are available in a given bank, excluding used questions
+     const checkBankAvailability = async (bank, limit) => {
+       const availableQuestions = await Question.countDocuments({
+         bank: bank,
+         isActive: true,
+         _id: { $nin: usedQuestionIds }  // Exclude already used questions
+       });
+       return availableQuestions >= limit;
+     };
+ 
+     // Check availability for each bank in parallel
+     const bankAvailability = await Promise.all(
+       Object.entries(requiredQuestions).map(([bank, limit]) =>
+         checkBankAvailability(parseInt(bank), limit)
+       )
+     );
+ 
+     // Determine if all banks have enough questions
+     const enoughQuestionsAvailable = bankAvailability.every((available) => available);
+ 
+     if (enoughQuestionsAvailable) {
+       res.status(200).json({ message: "Enough questions are available to create the next exam." });
+     } else {
+       res.status(400).json({ message: "Not enough questions available to create the next exam." });
+     }
+   } catch (error) {
+     console.error('Error checking question availability:', error);
+     next(error);
+   }
+ };
+ 
 
 
 export const editQuestion = async (req, res, next) => {
@@ -124,10 +180,11 @@ export const editQuestion = async (req, res, next) => {
    }
 
    const { bank, content, options, correctAnswer, justification } = req.body;
-   const questionId = req.body._id;
+   const questionId = req.params.questionId;
+
 
    // Making sure all fields are filled
-   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null || !questionId) {
+   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null) {
       return next(errorHandler(400, 'Please provide all required fields'));
    }
 
@@ -204,5 +261,23 @@ export const getQuestions = async (req, res, next) => {
        
    } catch (error) {
        next(error);
+   }
+}
+
+
+export const getQuestionById = async (req, res, next) => {
+   const questionId = req.params.questionId;
+
+   try {
+      const question = await Question.findById(questionId)
+
+      if (!question) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      res.status(200).json(question);
+
+   } catch (error) {
+      next(error)
    }
 }

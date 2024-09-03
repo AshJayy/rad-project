@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, Table, TextInput } from "flowbite-react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 export default function DashQAManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
+  // const [questionID,setQuestionID] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const location = useLocation();
@@ -70,9 +71,10 @@ export default function DashQAManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </form>
-        <button className="flex flex-row justify-center items-center min-w-20 p-4 h-11 gap-4 bg-mid-blue rounded-xl">
-          <FaPlus className="text-white w-6 h-6" />
-          <div className="text-white text-md">Add New Question</div>
+        <button className='flex flex-row justify-center items-center min-w-20 p-4 h-11 gap-4 bg-mid-blue rounded-xl ' 
+        onClick={() => navigate('/createQuestion')}>
+          <FaPlus className='text-white w-6 h-6' />
+          <div className='text-white text-md'>Add New Question</div>
         </button>
       </div>
       {loading ? (
@@ -100,10 +102,12 @@ export default function DashQAManagement() {
                         {question.options && question.options.join(", ")}
                       </Table.Cell>
                       <Table.Cell>
-                        <Button className="bg-green-600 rounded-xl">Edit</Button>
+                        <Button className="bg-green-600 rounded-xl"
+                        onClick={() => handleEditQuestion(question._id)}>Edit</Button>
                       </Table.Cell>
                       <Table.Cell>
-                        <Button className="bg-red-800 rounded-xl">Delete</Button>
+                        <Button className="bg-red-800 rounded-xl"
+                        onClick={() => handleDeleteQuestion(question._id)}>Delete</Button>
                       </Table.Cell>
                     </Table.Row>
                   ))}

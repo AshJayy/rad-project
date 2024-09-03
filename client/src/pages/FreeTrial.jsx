@@ -12,46 +12,45 @@ export default function FreeTrial() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
-  const [questionIdx, setquestionIdx] = useState(0)
-  const [completed, setCompleted] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [questionIdx, setquestionIdx] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [marks, setMarks] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); 
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [takenTime, setTakenTime] = useState(120);
-  const [startTimer,setStartTimer] = useState(true)
+  const [startTimer, setStartTimer] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
       const fetchQuestions = async () => {
         setLoading(true);
-        const res = await fetch('/api/question/freetrial/');
-        if(!res.ok){
-          setLoading(false)
-        }else{
+        const res = await fetch("/api/question/freetrial/");
+        if (!res.ok) {
+          setLoading(false);
+        } else {
           const data = await res.json();
           // Marked choice attribute
-          const modifiedData = data.map(question => ({
+          const modifiedData = data.map((question) => ({
             ...question,
             choice: -1,
-          }))
+          }));
           // modifiedData[1].choice = 2
           setQuestions(modifiedData);
           setLoading(false);
         }
-      }
+      };
       fetchQuestions();
-
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.log("Error fetching free trial");
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-
-    if(!startTimer) return;
+    if (!startTimer) return;
     const timer = setInterval(() => {
-      setTimeLeft(prevTime => {
+      setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           clearInterval(timer);
           return 0;
@@ -60,20 +59,20 @@ export default function FreeTrial() {
       });
     }, 1000);
 
-    return () => clearInterval(timer); 
+    return () => clearInterval(timer);
   }, []);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes} min ${secs < 10 ? '0' : ''}${secs} sec`;
+    return `${minutes} min ${secs < 10 ? "0" : ""}${secs} sec`;
   };
 
   const handleAnswers = (qNo, selectedIndex) => {
     const updatedQuestions = questions.map((question, index) => {
       if (index === qNo) {
-        if(selectedIndex == question.choice){
-          return { ...question, choice: -1 }
+        if (selectedIndex == question.choice) {
+          return { ...question, choice: -1 };
         }
         return { ...question, choice: selectedIndex };
       }
@@ -92,135 +91,136 @@ export default function FreeTrial() {
     return (totalMarks / questions.length) * 100;
   };
 
-  const addExamination = async (marks,timeTaken ) => {
-    try {
-        const res = await fetch('/api/exam/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ questions, marks, timeTaken }),
-        });
-
-        if (!res.ok) {
-            console.error('Error in adding examination details:', res.status, res.statusText);
-            return;
-        }
-
-        // Check if the response body is empty before parsing
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : null;
-
-        if (data) {
-            console.log('Examination added successfully:', data);
-        } else {
-            console.log('No data returned from the server.');
-        }
-    } catch (error) {
-        console.error('An error occurred while adding examination details:', error);
-    }
-};
-
-
   const handleSubmit = async () => {
-
     setCompleted(true);
     setStartTimer(false);
-    const timeTaken = 30*60 - timeLeft;
+    const timeTaken = 30 * 60 - timeLeft;
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
-    setMarks(marks.toFixed(0))
+    setMarks(marks.toFixed(0));
+  };
 
-    try {
-      await addExamination(marks,timeTaken);
-    } finally {
-      setCompleted(true);
-    }
-  }
-
-  if(completed){
-    return (
-      <div>
-        <Answers questions={questions} marks={marks} timeTaken={takenTime}/>
-      </div>
-    )
-  }
+  
 
   useEffect(() => {
     if (!currentUser || currentUser.userLevel !== 0) {
-      navigate('/');
+      navigate("/");
     }
   }, [currentUser, navigate]);
 
   return (
     <>
-    {currentUser && currentUser.userLevel === 0 ? (
-      <div className="min-h-screen">
-      <div className="bg-mid-blue p-8 text-sm font-semibold">
-        <h3 className="text-white">This free trial contains 10 questions.   Each question has 5 choices as answers.</h3>
-        <p className="text-white opacity-50">Time duration - 30minutes</p>
+    {completed ? (
+
+      <div>
+        <Answers questions={questions} marks={marks} timeTaken={takenTime} />
       </div>
-      <main className="flex flex-col gap-10 p-10 max-w-6xl mx-auto">
-        <div className="flex justify-between w-full font-semibold">
-          {!loading &&
-            <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
-              <AiFillClockCircle />
-              <p className="text-nowrap">{formatTime(timeLeft)}</p>
-            </span>
-          }
-          {!loading &&
-            <div className="w-full flex justify-end">
-              {questions.length > 0 && questions.map((question, index) => (
-                <div className="flex items-center" key={index}>
-                  <button
-                    onClick={() => setquestionIdx(index)}
-                    className={`w-10 h-10 rounded-full ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}>
-                      {index + 1}
-                  </button>
-                  <div className={`h-2 w-12 mx-[-4px] ${question.choice > -1 ? 'bg-mid-blue text-white' : 'bg-light-blue' } transition-all`}></div>
+    ) : (
+
+    <>
+      {ready ? (
+        <>
+          {currentUser && currentUser.userLevel === 0 ? (
+            <div className="min-h-screen">
+              <main className="flex flex-col gap-10 p-10 max-w-6xl mx-auto">
+                <div className="flex justify-between w-full font-semibold">
+                  {!loading && (
+                    <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
+                      <AiFillClockCircle />
+                      <p className="text-nowrap">{formatTime(timeLeft)}</p>
+                    </span>
+                  )}
+                  {!loading && (
+                    <div className="w-full flex justify-end">
+                      {questions.length > 0 &&
+                        questions.map((question, index) => (
+                          <div className="flex items-center" key={index}>
+                            <button
+                              onClick={() => setquestionIdx(index)}
+                              className={`w-10 h-10 rounded-full ${
+                                question.choice > -1
+                                  ? "bg-mid-blue text-white"
+                                  : "bg-light-blue"
+                              } transition-all`}
+                            >
+                              {index + 1}
+                            </button>
+                            <div
+                              className={`h-2 w-12 mx-[-4px] ${
+                                question.choice > -1
+                                  ? "bg-mid-blue text-white"
+                                  : "bg-light-blue"
+                              } transition-all`}
+                            ></div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
-              ))}
+                {!loading && questions.length > 0 ? (
+                  <Question
+                    question={questions[questionIdx]}
+                    questionIdx={questionIdx}
+                    handleAnswers={handleAnswers}
+                  />
+                ) : (
+                  <div className="flex mt-1/2 justify-center">
+                    <Spinner className="w-20 h-20" />
+                  </div>
+                )}
+                {!loading &&
+                  (questionIdx <= questions.length - 2 ? (
+                    <Button
+                      className="self-end pl-4 bg-mid-blue"
+                      pill
+                      onClick={() => setquestionIdx(questionIdx + 1)}
+                    >
+                      <span className="flex flex-row items-center gap-3">
+                        Next Question
+                        <HiChevronRight className="w-6 h-6" />
+                      </span>
+                    </Button>
+                  ) : (
+                    <Button
+                      className="self-end px-4 bg-mid-blue"
+                      pill
+                      onClick={() => handleSubmit()}
+                    >
+                      <span className="flex flex-row items-center gap-3">
+                        Submit Answers
+                      </span>
+                    </Button>
+                  ))}
+              </main>
             </div>
-          }
-        </div>
-        {!loading && questions.length > 0 ? (
-          <Question
-            question={questions[questionIdx]}
-            questionIdx={questionIdx}
-            handleAnswers={handleAnswers}
-          />
-        ) : (
-          <div className="flex mt-1/2 justify-center">
-            <Spinner className="w-20 h-20"/>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <div className="flex flex-col items-center h-screen mt-32">
+            <FcQuestions className="w-20 h-20 text-mid-blue" />
+            <div className=" p-8 font-semibold text-center ">
+              <h3 className="text-mid-blue text-lg mb-2">
+                This free trial contains 10 questions. Each question has 5
+                choices as answers.
+              </h3>
+              <p className="text-mid-blue opacity-50">Time duration - 30minutes</p>
+            </div>
+            <Button
+              className=" font-semibold bg-mid-blue rounded-full"
+              onClick={() => setReady(true)}
+            >
+              Start Free Trial
+            </Button>
+            <p className="text-sm text-mid-blue opacity-50 mt-5 text-center">
+              Click The Button To Get Started With The Free Trail
+            </p>
+            
           </div>
-        )}
-        {!loading && (questionIdx <= questions.length - 2 ? (
-          <Button
-            className="self-end pl-4 bg-mid-blue"
-            pill
-            onClick={() => setquestionIdx(questionIdx + 1)}
-          >
-            <span className="flex flex-row items-center gap-3">
-              Next Question
-              <HiChevronRight className="w-6 h-6" />
-            </span>
-          </Button>
-        ) : (
-          <Button
-            className="self-end px-4 bg-mid-blue"
-            pill
-            onClick={() => handleSubmit()}
-          >
-            <span className="flex flex-row items-center gap-3">
-              Submit Answers
-            </span>
-          </Button>
-        ))}
-      </main>
-    </div>
-    ) : null
-      }
+        </>
+      )}
     </>
-    
-  )
+    )}
+    </>
+  );
 }

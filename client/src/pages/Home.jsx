@@ -156,7 +156,7 @@ export default function Home() {
 
       <section id="reviews" className="p-24 flex flex-wrap gap-16 justify-center lg:justify-between">
         {reviews.map((review, index) => (
-          <div key={index} className={`w-80 lg:w-[25vw] h-80 flex flex-col gap-4 items-center justify-center p-8 text-sm rounded-xl drop-shadow-lg text-white text-center`} style={{"background-color": review.bg}}>
+          <div key={index} className={`w-80 lg:w-[25vw] h-80 flex flex-col gap-4 items-center justify-center p-8 text-sm rounded-xl drop-shadow-lg text-white text-center`} style={{"backgroundColor": review.bg}}>
             <p className="shadow-none">"{review.review}"</p>
             <p className="text-light-blue shadow-none">{review.name}, {review.company}</p>
           </div>
@@ -167,7 +167,7 @@ export default function Home() {
         <h1 className="font-semibold">frequently asked questions (FAQs)</h1>
         <div className="flex flex-col gap-4">
           {faq.map((question, index) => (
-            <FAQ question={question} index={index} />
+            <FAQ question={question} index={index} key={index}/>
           ))}
         </div>
       </section>

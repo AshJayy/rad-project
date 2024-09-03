@@ -4,6 +4,8 @@ import { HiChevronDown } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaSpinner } from "react-icons/fa";
+
 
 export default function Header() {
   const dropDownItems = [
@@ -25,6 +27,7 @@ export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const location = useLocation();
   const currentPath = location.pathname;
+  const {loading, error: errorMessage} = useSelector(state => state.user);
   const navigate = useNavigate();
 
   const handleSignout = async () => {
@@ -40,6 +43,14 @@ export default function Header() {
       }
     } catch (error) {
       console.log(error.message);
+    }
+  };
+
+  const handleFreeTrialClick = () => {
+    if (currentUser) {
+      navigate("/freetrial");
+    } else {
+      navigate("/signin", { state: { from: "/freetrial" } });
     }
   };
 
@@ -92,17 +103,20 @@ export default function Header() {
       <div className="flex gap-4 items-center text-sm">
         {currentUser ? (
           <>
-            <span className="block text-sm">Hi, {currentUser.username}</span>
+            
             <Dropdown
               arrowIcon={false}
               inline
               label={
+                <>
+                <span className="block text-sm mr-2">Hi, {currentUser.username}</span>
                 <Avatar
                   alt="user"
                   img={currentUser.profilePicture}
                   rounded
                   className="border-blue-500"
                 />
+                </>
               }
             >
               <Dropdown.Header>
@@ -110,7 +124,7 @@ export default function Header() {
                   {currentUser.email}
                 </span>
               </Dropdown.Header>
-              {currentUser.userLevel > 0 && (
+              {currentUser.userLevel >= 0 && (
                 <>
                   <Link to={"/dashboard?tab=dash"}>
                     <Dropdown.Item>Dashboard</Dropdown.Item>
@@ -126,8 +140,20 @@ export default function Header() {
             </Dropdown>
           </>
         ) : (
-          <span>
-            <Link to={"/signin"}>Log In</Link>
+          <span className="flex items-center">
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Loading...
+              </>
+            ) : (
+              <Link
+                to={"/signin"}
+                className="text-sm font-medium text-dark-blue hover:text-mid-blue"
+              >
+                Log In
+              </Link>
+            )}
           </span>
         )}
 
@@ -135,8 +161,19 @@ export default function Header() {
           <>
             {currentUser ? (
           currentUser.userLevel === 0 && (
-            <Button className="bg-mid-blue" pill>
-              <Link to={"/freetrial"}>Start free trial</Link>
+            <Button 
+            className="bg-mid-blue" 
+            pill
+            onClick={handleFreeTrialClick}
+            disabled={loading}>
+            {loading ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  "Start free trial"
+                )}
             </Button>
           )
         ) : (
