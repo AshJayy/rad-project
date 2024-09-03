@@ -20,7 +20,7 @@ export default function Exam() {
   const [loading, setLoading] = useState(false);
   const [marks, setMarks] = useState(0);
   const examTime = 30 * 60; // 30 min
-  const [timeLeft, setTimeLeft] = useState(examTime); 
+  const [timeLeft, setTimeLeft] = useState(examTime);
   const [takenTime, setTakenTime] = useState(120);
   const [startTimer, setStartTimer] = useState(true);
   const [ready, setReady] = useState(false);
@@ -32,7 +32,7 @@ export default function Exam() {
   const examID = params.get("id");
   const [currentPage, setCurrentPage] = useState(0);
   const buttonsPerPage = 10;
-   // const [examStatus, setExamStatus] = useState("unsaved")
+  // const [examStatus, setExamStatus] = useState("unsaved")
 
   //console.log(examNo,examID)
   const startIdx = currentPage * buttonsPerPage;
@@ -43,7 +43,9 @@ export default function Exam() {
     const fetchQuestions = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/question/getuserquestions?userID=${currentUser._id}`);
+        const res = await fetch(
+          `/api/question/getuserquestions?userID=${currentUser._id}`
+        );
         if (res.ok) {
           const question = await res.json();
           const modifiedData = Array.isArray(question)
@@ -68,10 +70,9 @@ export default function Exam() {
     }
   }, [currentUser]);
 
-
   useEffect(() => {
     if (!startTimer || !ready) return;
-  
+
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
@@ -81,9 +82,9 @@ export default function Exam() {
         return prevTime - 1;
       });
     }, 1000);
-  
+
     return () => clearInterval(timer);
-  }, [startTimer, ready]); 
+  }, [startTimer, ready]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -111,10 +112,10 @@ export default function Exam() {
       }
       return acc;
     }, 0);
-    return (totalMarks / questions.length) * 100 ;
+    return (totalMarks / questions.length) * 100;
   };
 
-  const updateExam = async (marks,takenTime) => {
+  const updateExam = async (marks, takenTime) => {
     const data = {
       questions,
       timeTaken: takenTime,
@@ -133,9 +134,7 @@ export default function Exam() {
     if (!res.ok) {
       console.error("Error updating exam:", res.status, res.statusText);
     }
-  }
-
-  
+  };
 
   const handleSubmit = async () => {
     setCompleted(true);
@@ -144,11 +143,11 @@ export default function Exam() {
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0));
-    await updateExam(marks,timeTaken);
+    await updateExam(marks, timeTaken);
   };
 
   useEffect(() => {
-    if(timeLeft === 0){
+    if (timeLeft === 0) {
       handleSubmit();
     }
   }, [timeLeft]);
@@ -172,7 +171,7 @@ export default function Exam() {
               {currentUser && currentUser.userLevel === 0 ? (
                 <div className="min-h-screen">
                   <main className="flex flex-col gap-10 p-10 max-w-6xl mx-auto">
-                    <div className="flex justify-between w-full font-semibold ">
+                    <div className="flex flex-col gap-4 justify-between w-full font-semibold ">
                       {!loading && (
                         <span className="flex items-center gap-2 px-8 py-2 w-fit rounded-full bg-mid-blue text-white">
                           <AiFillClockCircle />
@@ -182,50 +181,73 @@ export default function Exam() {
                       {!loading && (
                         <div className="w-full flex py-2 items-center justify-between">
                           <div className="px-3">
-
                             <button
-                              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                              onClick={() =>
+                                setCurrentPage((prev) => Math.max(prev - 1, 0))
+                              }
                               disabled={currentPage === 0}
                               className={`px-2 py-2 rounded-full  ${
-                                currentPage === 0 ? "bg-gray-300" : "bg-mid-blue text-white"
+                                currentPage === 0
+                                  ? "bg-gray-300"
+                                  : "bg-mid-blue text-white"
                               }`}
                             >
                               {/* <MdOutlineNavigateBefore /> */}
                               <GrFormPrevious />
                             </button>
-                          
                           </div>
-                        <div className="flex">
-                          {currentQuestions.map((question, index) => (
-                            <div className="flex items-center" key={index + startIdx}>
-                              <button
-                                onClick={() => setquestionIdx(index + startIdx)}
-                                className={`w-10 h-10 rounded-full ${
-                                  question.choice > -1 ? "bg-mid-blue text-white" : "bg-light-blue"
-                                } transition-all`}
-                              >
-                                {index + startIdx + 1}
-                              </button>
+                          <div className="flex">
+                            {currentQuestions.map((question, index) => (
                               <div
-                                className={`h-2 w-12 ${
-                                  question.choice > -1 ? "bg-mid-blue text-white" : "bg-light-blue"
-                                } transition-all`}
-                              ></div>
-                            </div>
-                          ))}
+                                className="flex items-center "
+                                key={index + startIdx}
+                              >
+                                <button
+                                  onClick={() =>
+                                    setquestionIdx(index + startIdx)
+                                  }
+                                  className={`w-10 h-10 rounded-full ${
+                                    question.choice > -1
+                                      ? "bg-mid-blue text-white"
+                                      : "bg-light-blue"
+                                  } transition-all`}
+                                >
+                                  {index + startIdx + 1}
+                                </button>
+                                {(index + startIdx + 1) % 10 !== 0 && (
+                                  <div
+                                    className={`h-2 w-12 ${
+                                      question.choice > -1
+                                        ? "bg-mid-blue text-white"
+                                        : "bg-light-blue"
+                                    } transition-all`}
+                                  ></div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(
+                                  prev + 1,
+                                  Math.ceil(questions.length / buttonsPerPage) -
+                                    1
+                                )
+                              )
+                            }
+                            disabled={endIdx >= questions.length}
+                            className={`px-2 py-2 rounded-full  ${
+                              endIdx >= questions.length
+                                ? "bg-gray-300"
+                                : "bg-mid-blue text-white"
+                            }`}
+                          >
+                            {/* <MdOutlineNavigateNext /> */}
+                            <GrFormNext />
+                          </button>
                         </div>
-                      
-                        <button
-                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(questions.length / buttonsPerPage) - 1))}
-                          disabled={endIdx >= questions.length}
-                          className={`px-2 py-2 rounded-full  ${
-                            endIdx >= questions.length ? "bg-gray-300" : "bg-mid-blue text-white"
-                          }`}
-                        >
-                          {/* <MdOutlineNavigateNext /> */}
-                          <GrFormNext />
-                        </button>
-                      </div>
                       )}
                     </div>
                     {!loading && questions.length > 0 ? (

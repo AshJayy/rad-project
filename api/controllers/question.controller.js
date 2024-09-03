@@ -86,25 +86,25 @@ export const getUserQuestions = async (req, res, next) => {
       }
 
 
-      //  // Fetch questions from multiple banks
-      //  const questionSets = await Promise.all([
-      //    getFromBank(1, 8),
-      //    getFromBank(2, 6),
-      //    getFromBank(3, 4),
-      //    getFromBank(4, 4),
-      //    getFromBank(5, 4),
-      //    getFromBank(6, 4),
-      // ]);
+       // Fetch questions from multiple banks
+       const questionSets = await Promise.all([
+         getFromBank(1, 8),
+         getFromBank(2, 6),
+         getFromBank(3, 4),
+         getFromBank(4, 4),
+         getFromBank(5, 4),
+         getFromBank(6, 4),
+      ]);
 
       // TEST
-      const questionSets = await Promise.all([
-         getFromBank(1, 1),
-         getFromBank(2, 1),
-         getFromBank(3, 1),
-         getFromBank(4, 1),
-         getFromBank(5, 1),
-         getFromBank(6, 1),
-      ]);
+      // const questionSets = await Promise.all([
+      //    getFromBank(1, 1),
+      //    getFromBank(2, 1),
+      //    getFromBank(3, 1),
+      //    getFromBank(4, 1),
+      //    getFromBank(5, 1),
+      //    getFromBank(6, 1),
+      // ]);
       
       // Combine all question sets into a single array
       const questions = questionSets.flat();
@@ -232,17 +232,18 @@ export const deleteQuestion = async (req, res, next) => {
 export const getQuestions = async (req, res, next) => {
    try {
        const startIndex = parseInt(req.query.startIndex) || 0;
-       const limit = parseInt(req.query.limit) || 9;
+       const limit = parseInt(req.query.limit) || 6;
        const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
        const questions = await Question.find({
-           ...(req.query.userId && { userId: req.query.userId }),
+           ...(req.query.Id && { _id: req.query.Id }),
            ...(req.query.bank && { category: req.query.bank }),
-           ...(req.query.content && { _id: req.query.content }),
+           ...(req.query.content && { content: req.query.content }),
            ...(req.query.searchTerm && {
                $or: [
-                   { options: { $regex: req.query.options, $options: 'i' } },
-                   { content: { $regex: req.query.searchTerm, $options: 'i' } },
-                   { justification: { $regex: req.query.justification, $options: 'i' } },
+                  //  { _id: { $regex: req.query.Id, $options: 'i' } },
+                   { options: { $elemMatch: { $regex: new RegExp(req.query.searchTerm, 'i') } } },
+                   { content: { $regex: new RegExp(req.query.searchTerm, 'i') } },
+                   { justification: { $regex: new RegExp(req.query.searchTerm, 'i') } },
                ],
            }),
        })

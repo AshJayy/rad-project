@@ -9,37 +9,54 @@ export default function DashQAManagement() {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
   // const [questionID,setQuestionID] = useState([]);
+  const [startIndex, setStartIndex] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
 
+  const fetchQuestions = async (searchTerm = "", startIndex = 0, reset = false) => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `/api/question/getquestions?searchTerm=${searchTerm}&startIndex=${startIndex}`
+      );
+      if (!res.ok) {
+        console.log("Error fetching questions:", res.statusText);
+        return;
+      }
+      const data = await res.json();
+      if (data.questions.length < 6) {
+        setHasMore(false); // No more questions to load if less than limit returned
+      }
+      setQuestions(prevQuestions => reset ? data.questions : [...prevQuestions, ...data.questions]); // Append or reset questions
+    } catch (error) {
+      console.log("Error fetching questions:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
+    setStartIndex(0); // Reset startIndex on a new search
+    setHasMore(true); // Reset hasMore on a new search
     const urlParams = new URLSearchParams(location.search);
-    urlParams.set('searchTerm', searchTerm);
-    const searchQuery = urlParams.toString();
-    navigate(`/dashboard?${searchQuery}`);
-  }
+    urlParams.set("searchTerm", searchTerm);
+    navigate(`/dashboard?${urlParams.toString()}`);
+  };
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/question/getquestions');
-        if (!res.ok) {
-           console.log("Error fetching questions:", res.statusText);
-        }
-        const data = await res.json();
-        console.log(data);
-        setQuestions(data.questions || []);
-      } catch (error) {
-        console.log("Error fetching questions:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const searchParams = new URLSearchParams(location.search);
+    const searchTermFromURL = searchParams.get("searchTerm") || "";
+    setSearchTerm(searchTermFromURL); // Sync the state with the URL
+    fetchQuestions(searchTermFromURL, 0, true); // Fetch with reset on initial load or search
+  }, [location.search]);
 
-    fetchQuestions();
-  }, []);
+  const loadMoreQuestions = () => {
+    const newIndex = startIndex + 6;
+    setStartIndex(newIndex);
+    fetchQuestions(searchTerm, newIndex);
+  };
 
   const handleDeleteQuestion = async (questionID) => {
     //setShowModal(false);
@@ -66,17 +83,17 @@ export default function DashQAManagement() {
   const handleEditQuestion = (questionID) => {
     navigate(`/editQuestion/${questionID}`);
   }
-
+  
   return (
-    <div className='flex sm:flex-col w-full p-4'>
-      <div className='flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between'>
-        <form onSubmit={handleSearch} className='md:flex-1 md:mr-4'>
+    <div className="flex sm:flex-col w-full p-4">
+      <div className="flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between">
+        <form onSubmit={handleSearch} className="md:flex-1 md:mr-4">
           <TextInput
-            type='text'
-            placeholder='Search ...'
+            type="text"
+            placeholder="Search ..."
             rightIcon={AiOutlineSearch}
             value={searchTerm}
-            className='w-full'
+            className="w-full"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </form>
@@ -93,7 +110,7 @@ export default function DashQAManagement() {
           {questions.length === 0 ? (
             <div className="text-gray-500 text-center">No questions</div>
           ) : (
-            <div>
+            <div className="flex flex-col">
               <Table>
                 <Table.Head className="text-center">
                   <Table.HeadCell>Question ID</Table.HeadCell>
@@ -103,12 +120,12 @@ export default function DashQAManagement() {
                   <Table.HeadCell>Delete</Table.HeadCell>
                 </Table.Head>
                 <Table.Body className="divide-y">
-                  {questions.map((question) => (
-                    <Table.Row key={question._id} className="bg-white">
-                      <Table.Cell className="">{question._id}</Table.Cell>
-                      <Table.Cell className="">{question.content}</Table.Cell>
-                      <Table.Cell className="truncate max-w-48">
-                        {question.options && question.options.join(', ')}
+                  {questions.map((question, index) => (
+                    <Table.Row key={index} className="bg-white">
+                      <Table.Cell>{question._id}</Table.Cell>
+                      <Table.Cell className="truncate max-w-xs">{question.content}</Table.Cell>
+                      <Table.Cell className="truncate max-w-xs">
+                        {question.options && question.options.join(", ")}
                       </Table.Cell>
                       <Table.Cell>
                         <Button className="bg-green-600 rounded-xl"
@@ -122,6 +139,15 @@ export default function DashQAManagement() {
                   ))}
                 </Table.Body>
               </Table>
+              {hasMore && (
+                <button 
+                  className="text-center text-s text-mid-blue mt-4" 
+                  onClick={loadMoreQuestions}
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "More"}
+                </button>
+              )}
             </div>
           )}
         </div>
