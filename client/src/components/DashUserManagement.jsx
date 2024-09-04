@@ -108,7 +108,7 @@ export default function DashUsers() {
               {user.email}
             </p>
             <div className='flex flex-col gap-2'>
-              <Button
+              {user.userLevel === 0 ? (<Button
                 className='bg-mid-blue hover:bg-dark-blue text-white py-2 px-4 rounded'
                 onClick={() => {
                   onMakeAdmin(user._id);
@@ -116,7 +116,14 @@ export default function DashUsers() {
                 }}
               >
                 Make Admin
-              </Button>
+              </Button>) : (
+                <h3 className='bg-mid-blue text-white py-4 px-4 rounded-md'
+                
+              >
+                User is an admin
+              </h3>
+              )}
+              
               <span
                 onClick={() => {
                   onDelete(user._id);
