@@ -147,7 +147,7 @@ export default function CreateQuestion() {
                   id={`correct-ans${num}`}
                   name="correct-ans"
                   value={num}
-                  checked={formData.correctAnswer === num}
+                  checked={Number(formData.correctAnswer) === num}
                   className="m-3 mx-12 text-green-500 focus:ring-green-400"
                   onChange={(e) => setFormData({ ...formData, correctAnswer: e.target.value })}
                 />
