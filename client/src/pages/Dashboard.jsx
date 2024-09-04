@@ -50,7 +50,7 @@ export default function Dashboard() {
       {currentUser.userLevel > 0 && (
         <>
           {/* Dashboard */}
-          {tab === "admin" && <DashAdmin />}
+          {tab === "dash" && <DashAdmin />}
           {/* QA Management */}
           {tab === "qaMan" && <DashQAManagement />}
         </>

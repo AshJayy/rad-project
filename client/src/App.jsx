@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard'
 import CreateQuestion from './pages/CreateQuestion'
 import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
 import UpdateQuestion from './pages/UpdateQuestion'
+import QuestionPage from './pages/questionPage'
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
         <Route element={<PrivateRouteOnlyAdmin />}>
           <Route path='/createQuestion' element={<CreateQuestion />} />
           <Route path='/editQuestion/:questionID' element={<UpdateQuestion />} />
+          <Route path='/question/:questionID' element={<QuestionPage />} />
         </Route>
       </Routes>
       <Footer />

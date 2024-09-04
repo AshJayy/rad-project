@@ -234,6 +234,8 @@ export const getQuestions = async (req, res, next) => {
        const startIndex = parseInt(req.query.startIndex) || 0;
        const limit = parseInt(req.query.limit) || 6;
        const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
+       console.log(req.query);
+       
        const questions = await Question.find({
            ...(req.query.Id && { _id: req.query.Id }),
            ...(req.query.bank && { category: req.query.bank }),
@@ -267,15 +269,18 @@ export const getQuestions = async (req, res, next) => {
 
 export const getQuestionById = async (req, res, next) => {
    const questionId = req.params.questionId;
+   
+   
 
    try {
       const question = await Question.findById(questionId)
-
       if (!question) {
          return next(errorHandler(404, 'Question not found'));
       }
 
       res.status(200).json(question);
+      console.log(question);
+      
 
    } catch (error) {
       next(error)
