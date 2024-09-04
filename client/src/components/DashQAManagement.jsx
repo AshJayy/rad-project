@@ -11,9 +11,11 @@ export default function DashQAManagement() {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [showModel, setShowModel] = useState(false);
+  const [modalFunction, setModalFunction] = useState(null);
   // const [questionID,setQuestionID] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [questionIdToDelete, setQuestionIdToDelete] = useState(null);
+  const [questionIdToActive, setQuestionIdToActive] = useState(null);
   
   const [hasMore, setHasMore] = useState(true);
   const location = useLocation();
@@ -91,6 +93,33 @@ export default function DashQAManagement() {
   const handleEditQuestion = (questionID) => {
     navigate(`/editQuestion/${questionID}`);
   };
+  const handleActiveQuestion = async (question) => {
+    try {
+      const res = await fetch(`/api/question/activequestion/${question._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!res.ok) {
+        const data = await res.json();
+        console.log(data.message);
+        return;
+      }
+  
+      // Update the local questions state immediately after a successful API call
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((q) =>
+          q._id === question._id ? { ...q, isActive: !q.isActive } : q
+        )
+      );
+    } catch (error) {
+      console.log("Something went wrong", error.message);
+    }
+  };
+  
+  
 
   return (
     <div className="flex sm:flex-col w-full p-4">
@@ -134,19 +163,23 @@ export default function DashQAManagement() {
                   {questions.map((question, index) => (
                     <Table.Row key={index} className="bg-white">
                       <Table.Cell>{question.bank}</Table.Cell>
-                      <Table.Cell className="truncate max-w-xs">
-                        {question.content}
+                      <Table.Cell className="truncate max-w-xs" >
+                        <Link to = {`/question/${question._id}`}>
+                          {question.content}
+                        </Link>
                       </Table.Cell>
                       <Table.Cell className="truncate max-w-xs">
                         {question.options &&
                           question.options[question.correctAnswer]}
                       </Table.Cell>
-                      <Table.Cell className="max-w-xs">
-                        {question.isActive ? (
-                          <FaCheck className="text-green-500" />
-                        ) : (
-                          <FaTimes className="text-red-600" />
-                        )}
+                      <Table.Cell className="max-w-xs" >
+                        <Button onClick={() => {setModalFunction('ACTIVE');setQuestionIdToActive(question);setShowModel(true);}}>
+                          {question.isActive ? (
+                            <FaCheck className="text-green-500"/>
+                          ) : (
+                            <FaTimes className="text-red-600" />
+                          )}
+                        </Button>
                       </Table.Cell>
                       <Table.Cell>
                         <Button
@@ -160,6 +193,7 @@ export default function DashQAManagement() {
                         <Button
                           className="bg-red-800 rounded-xl"
                           onClick={() => {
+                            setModalFunction('DELETE')
                             setShowModel(true);
                             setQuestionIdToDelete(question._id);
                           }}
@@ -185,11 +219,13 @@ export default function DashQAManagement() {
                       className="h-14 w-14 text-gray-400 dark:text-gray-200 
                mb-4 mx-auto"
                     />
+                    {modalFunction === 'DELETE' &&
+                    <>
                     <h3
                       className="mb-5 text-lg text-gray-500
                 dark:text-gray-400"
                     >
-                      Are you sure you want to delete your account?
+                      Are you sure you want to delete this question?
                     </h3>
                     <div className="flex justify-center gap-4">
                       <Button
@@ -205,6 +241,42 @@ export default function DashQAManagement() {
                         No, Cancel
                       </Button>
                     </div>
+                    </> 
+                  }
+                  {modalFunction === 'ACTIVE' &&
+                    <>
+                    {questionIdToActive.isActive ? (
+                        <h3
+                        className="mb-5 text-lg text-gray-500
+                  dark:text-gray-400"
+                      >
+                        Are you sure you want to deactivate this question?
+                      </h3>
+                    ):(
+                      <h3
+                      className="mb-5 text-lg text-gray-500
+                dark:text-gray-400"
+                    >
+                      Are you sure you want to activate this question?
+                    </h3>
+                    )}
+                    
+                    <div className="flex justify-center gap-4">
+                      <Button
+                        color="failure"
+                        onClick={() => {
+                          handleActiveQuestion(questionIdToActive);
+                          setShowModel(false);
+                        }}
+                      >
+                        Yes, I'm sure
+                      </Button>
+                      <Button color="gray" onClick={() => setShowModel(false)}>
+                        No, Cancel
+                      </Button>
+                    </div>
+                    </> 
+                  }
                   </div>
                 </Modal.Body>
               </Modal>

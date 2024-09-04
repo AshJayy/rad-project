@@ -286,3 +286,29 @@ export const getQuestionById = async (req, res, next) => {
       next(error)
    }
 }
+export const activeQuestion = async (req, res, next) => {
+   if (req.user.userLevel !== 1 && req.user.userLevel !== 2) {
+      return next(errorHandler(403, 'You are not allowed to activate a question'));
+   }
+
+   const questionId = req.params.questionId;
+
+   try {
+      // Fetch the current question
+      const question = await Question.findById(questionId);
+
+      if (!question) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      // Toggle the isActive value
+      question.isActive = !question.isActive;
+
+      // Save the updated question
+      const updatedQuestion = await question.save();
+
+      res.status(200).json(updatedQuestion);
+   } catch (error) {
+      next(error);
+   }
+}
