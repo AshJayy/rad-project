@@ -6,7 +6,6 @@ import { signoutSuccess } from "../redux/user/userSlice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa";
 
-
 export default function Header() {
   const dropDownItems = [
     {
@@ -27,7 +26,7 @@ export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const location = useLocation();
   const currentPath = location.pathname;
-  const {loading, error: errorMessage} = useSelector(state => state.user);
+  const { loading, error: errorMessage } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const handleSignout = async () => {
@@ -103,19 +102,20 @@ export default function Header() {
       <div className="flex gap-4 items-center text-sm">
         {currentUser ? (
           <>
-            
             <Dropdown
               arrowIcon={false}
               inline
               label={
                 <>
-                <span className="block text-sm mr-2">Hi, {currentUser.username}</span>
-                <Avatar
-                  alt="user"
-                  img={currentUser.profilePicture}
-                  rounded
-                  className="border-blue-500"
-                />
+                  <span className="block text-sm mr-2">
+                    Hi, {currentUser.username}
+                  </span>
+                  <Avatar
+                    alt="user"
+                    img={currentUser.profilePicture}
+                    rounded
+                    className="border-blue-500"
+                  />
                 </>
               }
             >
@@ -160,34 +160,32 @@ export default function Header() {
         {currentPath !== "/freetrial" && (
           <>
             {currentUser ? (
-          currentUser.userLevel === 0 && (
-            <Button 
-            className="bg-mid-blue" 
-            pill
-            onClick={handleFreeTrialClick}
-            disabled={loading}>
-            {loading ? (
-                  <>
-                    <FaSpinner className="animate-spin mr-2" />
-                    Loading...
-                  </>
-                ) : (
-                  "Start free trial"
-                )}
-            </Button>
-          )
-        ) : (
-          <Button className="bg-mid-blue" pill>
-            <Link to={"/signin"} state={{ from: "/freetrial" }}>
-              Start free trial
-            </Link>
-          </Button>
-        )}
+              currentUser.userLevel === 0 && (currentUser.userTier === 0 && (
+                <Button
+                  className="bg-mid-blue"
+                  pill
+                  onClick={handleFreeTrialClick}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <FaSpinner className="animate-spin mr-2" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Start free trial"
+                  )}
+                </Button>
+              ))
+            ) : (
+              <Button className="bg-mid-blue" pill>
+                <Link to={"/signin"} state={{ from: "/freetrial" }}>
+                  Start free trial
+                </Link>
+              </Button>
+            )}
           </>
-        )
-
-        }
-        
+        )}
       </div>
     </Navbar>
   );

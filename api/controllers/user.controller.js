@@ -36,6 +36,16 @@ export const updateUser = async (req,res,next) => {
         return next(errorHandler(400, 'Username can contain only letters and numbers'));
      }
   }
+  if(req.body.email){
+     if(!req.body.email.includes('@') || !req.body.email.includes('.')){
+        return next(errorHandler(400, 'Invalid email'));
+     }
+  }
+  if(req.body.phone){
+      if(req.body.phone.length !== 10 ){
+        return next(errorHandler(400, 'Invalid phone number'));
+      }
+  }
   try {
      const updatedUser = await User.findByIdAndUpdate(req.params.userId, {
         $set: {
@@ -43,6 +53,8 @@ export const updateUser = async (req,res,next) => {
            email: req.body.email,
            profilePicture: req.body.profilePicture,
            password: req.body.password,
+           name: req.body.name,
+           phone: req.body.phone,
         },
      }, {new:true});
      const {password, ...rest} = updatedUser._doc;

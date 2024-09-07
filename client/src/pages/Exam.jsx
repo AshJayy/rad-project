@@ -45,6 +45,7 @@ export default function Exam() {
   
   const [currentPage, setCurrentPage] = useState(0);
   const buttonsPerPage = 10;
+
   // const [examStatus, setExamStatus] = useState("unsaved")
 
   //console.log(examNo,examID)
@@ -140,6 +141,8 @@ export default function Exam() {
       totalMarks: marks,
       done: true,
     };
+    console.log(data);
+
     const res = await fetch(`/api/exam/update/${examID}`, {
       method: "PUT",
       headers: {
@@ -174,6 +177,11 @@ export default function Exam() {
       navigate("/");
     }
   }, [currentUser, navigate]);
+  useEffect(() => {
+    // Automatically update currentPage based on the question index
+    const newPage = Math.floor(questionIdx / buttonsPerPage);
+    setCurrentPage(newPage);
+  }, [questionIdx]);
 
   const startExam = () => {
     dispatch(examStart({ examQuestions: questions, remainingTime: examTime }));
@@ -213,7 +221,6 @@ export default function Exam() {
                                   : "bg-mid-blue text-white"
                               }`}
                             >
-                              {/* <MdOutlineNavigateBefore /> */}
                               <GrFormPrevious />
                             </button>
                           </div>
@@ -265,7 +272,6 @@ export default function Exam() {
                                 : "bg-mid-blue text-white"
                             }`}
                           >
-                            {/* <MdOutlineNavigateNext /> */}
                             <GrFormNext />
                           </button>
                         </div>

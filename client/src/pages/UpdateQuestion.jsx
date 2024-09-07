@@ -26,9 +26,9 @@ export default function CreateQuestion() {
   useEffect(() => {
     const fetchQuestionData = async () => {
       try {
-        const res = await fetch(`/api/question/getquestions?questionID=${questionID}`);
-        const questionSelected = await res.json();
-        const data = questionSelected.questions[0];
+        const res = await fetch(`/api/question/getquestion/${questionID}`);
+        const data = await res.json(); 
+        console.log(data);
 
         if (res.ok) {
           setFormData({
@@ -80,7 +80,7 @@ export default function CreateQuestion() {
 
       if (res.ok) {
         setPublishError(null);
-        navigate('/'); // Navigate to another page if needed
+        navigate(`/question/${questionID}`); // Navigate to another page if needed
       }
     } catch (error) {
       setPublishError("Something went wrong");
@@ -165,8 +165,8 @@ export default function CreateQuestion() {
                   id={`correct-ans${num}`}
                   name="correct-ans"
                   value={num}
-                  checked={formData.correctAnswer == num}
-                  className="m-3 mx-12 text-green-500 focus:ring-green-100"
+                  checked={Number(formData.correctAnswer) === num}
+                  className="m-3 mx-12 text-green-500 focus:ring-green-400"
                   onChange={(e) => setFormData({ ...formData, correctAnswer: e.target.value })}
                 />
               </div>
