@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   score: {
     backgroundColor: "#064998",
-    fontSize: '12px',
+    fontSize: "12px",
     color: "#fff",
     maxWidth: 600,
     paddingVertical: "20px",
@@ -160,7 +160,7 @@ const PdfFile = ({ exam, user }) => {
     <Document>
       <Page style={styles.coverPage}>
         <Text style={styles.coverHeading}>EXAM REPORT</Text>
-        <Text style={styles.coverSubHeading}>EXAM No. {exam.examNo + 1}</Text>
+        <Text style={styles.coverSubHeading}>EXAM No. {exam.examNo}</Text>
         <View style={styles.captionDiv}>
           <Text style={styles.captionText}>{user.username}</Text>
           <Text style={styles.captionText}>{exam.createdAt.split("T")[0]}</Text>
@@ -211,7 +211,7 @@ const PdfFile = ({ exam, user }) => {
               <>
                 <View style={[styles.alert, styles.failureAlert]}>
                   <FaTimes />
-                  <Text>Incorrect Answer</Text>``
+                  <Text>Incorrect Answer</Text>
                 </View>
                 <View style={styles.answerContainer}>
                   <Text>

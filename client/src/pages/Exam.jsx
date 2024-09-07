@@ -123,7 +123,7 @@ export default function Exam() {
       totalMarks: marks,
       done: true,
     };
-    console.log(data);
+    //console.log(data);
 
     const res = await fetch(`/api/exam/update/${examID}`, {
       method: "PUT",
