@@ -5,31 +5,44 @@ import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
 import { FcQuestions } from "react-icons/fc";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
+import { 
+  examStart,
+  updateRemainingTime,
+  examSuccess,
+  examFailure,
+  signoutSuccess,
+  updateExamQuestions } from "../redux/exam/examSlice";
 
 export default function Exam() {
+  const { isReady, examQuestions, remainingTime, questionNo } = useSelector((state) => state.exam);
   const { currentUser } = useSelector((state) => state.user);
-  const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]);
-  const [questionIdx, setquestionIdx] = useState(0);
-  const [completed, setCompleted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [marks, setMarks] = useState(0);
-  const examTime = 30 * 60; // 30 min
-  const [timeLeft, setTimeLeft] = useState(examTime);
-  const [takenTime, setTakenTime] = useState(120);
-  const [startTimer, setStartTimer] = useState(true);
-  const [ready, setReady] = useState(false);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-
+  
+  const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const params = new URLSearchParams(location.search);
   const examNo = params.get("no");
   const examID = params.get("id");
+
+  const [questions, setQuestions] = useState(examQuestions || []);
+  const [questionIdx, setquestionIdx] = useState(questionNo || 0);
+  const [completed, setCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [marks, setMarks] = useState(0);
+  const examTime = remainingTime || 30 * 60; // 30 min
+  const [timeLeft, setTimeLeft] = useState(examTime);
+  const [startTimer, setStartTimer] = useState(true);
+  const [takenTime, setTakenTime] = useState(120);
+  const [ready, setReady] = useState(isReady);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  
   const [currentPage, setCurrentPage] = useState(0);
   const buttonsPerPage = 10;
 
@@ -55,8 +68,10 @@ export default function Exam() {
                 choice: -1,
               }))
             : [];
+          dispatch(examStart({ examQuestions: modifiedData, remainingTime: examTime }));
           setQuestions(modifiedData);
         } else {
+          dispatch(examFailure());
           console.log("Failed to fetch questions");
         }
       } catch (error) {
@@ -66,12 +81,12 @@ export default function Exam() {
       }
     };
 
-    if (currentUser) {
-      fetchQuestions(); // Call fetchQuestions only if currentUser is defined
+    if (currentUser && questions.length === 0) {
+      fetchQuestions(); // Call fetchQuestions only if currentUser is defined   
     }
   }, [currentUser]);
 
-  useEffect(() => {
+  useEffect(() => {//update time
     if (!startTimer || !ready) return;
 
     const timer = setInterval(() => {
@@ -80,12 +95,14 @@ export default function Exam() {
           clearInterval(timer);
           return 0;
         }
+        dispatch(updateRemainingTime(prevTime - 1));
         return prevTime - 1;
+
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [startTimer, ready]);
+  }, [startTimer, ready, dispatch]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -103,6 +120,7 @@ export default function Exam() {
       }
       return question;
     });
+    dispatch(updateExamQuestions({ examQuestions: updatedQuestions, questionNo: questionIdx + 1 }));
     setQuestions(updatedQuestions);
   };
 
@@ -144,7 +162,8 @@ export default function Exam() {
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0));
-    await updateExam(marks, timeTaken);
+    // await updateExam(marks, timeTaken);
+    dispatch(examSuccess());
   };
 
   useEffect(() => {
@@ -164,6 +183,10 @@ export default function Exam() {
     setCurrentPage(newPage);
   }, [questionIdx]);
 
+  const startExam = () => {
+    dispatch(examStart({ examQuestions: questions, remainingTime: examTime }));
+    setReady(true)
+  }
   return (
     <>
       {completed ? (
@@ -307,7 +330,7 @@ export default function Exam() {
                 </div>
                 <Button
                   className=" font-semibold bg-mid-blue rounded-full"
-                  onClick={() => setReady(true)}
+                  onClick={startExam}
                 >
                   Start Exam
                 </Button>
