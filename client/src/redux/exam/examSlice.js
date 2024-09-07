@@ -1,9 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    status: 'idle',  // Can be 'idle', 'loading', 'succeeded', 'failed'
-    examQuestions: null,  // Stores the exam questions or status
-    remainingTime: null   // Stores the remaining time for the exam
+    isReady: false,  // Indicates if the exam is ready to start
+    status: 'idle',  // Can be 'idle', 'loading', 'inProgress', 'succeeded', 'failed'
+    examQuestions: [],  // Stores the exam questions or status
+    remainingTime: 0,  // Stores the remaining time for the exam
+    questionNo: 0 // Stores the current question number
 }
 
 const examSlice = createSlice({
@@ -11,31 +13,33 @@ const examSlice = createSlice({
     initialState,
     reducers: {
         examStart: (state, action) => {
-            state.status = 'loading';
-            state.examQuestions = action.payload.examQuestions || 'inProgress'; // Initialize exam questions or status
-            state.remainingTime = action.payload.remainingTime; // Initialize remaining time when exam starts
+            state.isReady = true; 
+            state.status = 'inProgress'; // Set status to inProgress when exam starts
+            state.examQuestions = action.payload.examQuestions || []; // Initialize exam questions or status
+            state.remainingTime = action.payload.remainingTime || 0; // Initialize remaining time when exam starts
         },
         updateRemainingTime: (state, action) => {
-            state.remainingTime = action.payload; // Update remaining time
+            state.remainingTime = action.payload || 0; // Update remaining time
         },
         examSuccess: (state) => {
+            state.isReady = false;
             state.status = 'succeeded';
-            state.examQuestions = 'completed';
-            state.remainingTime = null; // Reset remaining time when the exam is completed
+            state.examQuestions = []; // Consistent reset for exam questions
+            state.remainingTime = 0; // Reset remaining time when the exam is completed
         },
         examFailure: (state, action) => {
             state.status = 'failed';
-            state.examQuestions = 'failed';
-            state.remainingTime = null; // Reset remaining time on exam failure
+            state.examQuestions = []; // Consistent reset for exam questions
+            state.remainingTime = 0; // Reset remaining time on exam failure
         },
         signoutSuccess: (state) => {
             state.status = 'idle';
-            state.examQuestions = null;
-            state.remainingTime = null; // Reset remaining time on sign out
+            state.examQuestions = []; // Reset exam questions on sign out
+            state.remainingTime = 0; // Reset remaining time on sign out
         },
-        resetExamQuestions: (state) => {
-            state.examQuestions = null;
-            state.remainingTime = null; // Reset remaining time when exam status is reset
+        updateExamQuestions: (state, action) => {
+            state.examQuestions = action.payload.examQuestions || state.examQuestions;
+            state.questionNo = action.payload.questionNo || state.questionNo;
         }
     }
 });
@@ -46,7 +50,7 @@ export const {
     examSuccess,
     examFailure,
     signoutSuccess,
-    resetExamQuestions
+    updateExamQuestions
 } = examSlice.actions;
 
 export default examSlice.reducer;
