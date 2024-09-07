@@ -63,12 +63,14 @@ export default function DashExamHistory() {
           console.error("Error fetching exams:", res.status, res.statusText);
         } else {
           const exams = await res.json();
-          setExaminations(exams.map(exam => ({
-            ...exam,
-            questions: exam.questions || [], // Ensure questions is always an array
-            totalMarks: exam.totalMarks || 0,
-            takenTime: exam.takenTime || 0,
-          })));
+          setExaminations(
+            exams.map((exam) => ({
+              ...exam,
+              questions: exam.questions || [], // Ensure questions is always an array
+              totalMarks: exam.totalMarks || 0,
+              takenTime: exam.takenTime || 0,
+            }))
+          );
 
           // If there are no exams, create one
           if (exams.length === 0) {
@@ -162,7 +164,7 @@ export default function DashExamHistory() {
   return (
     <div className="flex flex-col p-4 gap-4 w-full">
       {Array.isArray(examinations) &&
-        examinations.map((exam) => (
+        examinations.map((exam,index) => (
           <div
             className={`w-full rounded-lg px-7 py-5 cursor-pointer shadow-md ${
               exam.done ? "bg-light-blue" : "bg-white"
@@ -197,8 +199,8 @@ export default function DashExamHistory() {
                 <h1>
                   No of correct answers:{" "}
                   <span className="text-gray-500 ml-5">
-                    {(exam.questions.length * exam.totalMarks) / 100} /{" "}
-                    {exam.questions.length}
+                    {(exam.questions?.length || 0) * (exam.totalMarks / 100)} /{" "}
+                    {exam.questions?.length || 0}
                   </span>
                 </h1>
                 <h1>

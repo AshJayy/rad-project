@@ -110,6 +110,11 @@ export default function Answers({ questions, marks, timeTaken }) {
         {questions.map((question, index) => (
           <Answer key={index} question={question} index={index} />
         ))}
+        <button
+          className="rounded-3xl border-2 p-1 px-3 border-mid-blue text-mid-blue hover:bg-mid-blue hover:text-white transition"
+        >
+          <Link to={`/dashboard?tab=dash`}>Go to Dashboard</Link>
+        </button>
       </div>
       
     </div>

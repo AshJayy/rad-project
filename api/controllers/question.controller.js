@@ -279,7 +279,7 @@ export const getQuestionById = async (req, res, next) => {
       }
 
       res.status(200).json(question);
-      console.log(question);
+      //console.log(question);
       
 
    } catch (error) {
