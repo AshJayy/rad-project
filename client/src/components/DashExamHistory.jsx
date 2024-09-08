@@ -169,7 +169,7 @@ export default function DashExamHistory() {
             className={`w-full rounded-lg px-7 py-5 cursor-pointer shadow-md ${
               exam.done ? "bg-light-blue" : "bg-white"
             }`}
-            key={exam._id}
+            key={exam._id || index}
           >
             <span
               className="flex flex-row justify-between w-full font-semibold text-xl cursor-pointer"

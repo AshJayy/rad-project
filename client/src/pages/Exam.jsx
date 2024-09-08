@@ -220,6 +220,7 @@ export default function Exam() {
     // Clear the local storage when the exam is completed
     localStorage.removeItem("examQuestions");
     localStorage.removeItem("remainingTime");
+    localStorage.removeItem("questionIdx");
 
     const timeTaken = examTime - timeLeft;
     console.log(examTime)
