@@ -259,7 +259,7 @@ export default function DashExamHistory() {
                 <h1>
                   No of correct answers:{" "}
                   <span className="text-gray-500 ml-5">
-                    {(exam.questions?.length || 0) * (exam.totalMarks / 100)} /{" "}
+                    {Math.round((exam.questions?.length || 0) * (exam.totalMarks / 100))} /{" "}
                     {exam.questions?.length || 0}
                   </span>
                 </h1>

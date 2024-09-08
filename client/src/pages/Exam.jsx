@@ -38,6 +38,7 @@ export default function Exam() {
   const [startTimer, setStartTimer] = useState(true);
   const [ready, setReady] = useState(isReady);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [correct,setCorrect] = useState(0);
 
   const dispatch = useDispatch();
   const location = useLocation();
@@ -189,6 +190,7 @@ export default function Exam() {
       }
       return acc;
     }, 0);
+    setCorrect(totalMarks);
     return (totalMarks / questions.length) * 100;
   };
 
@@ -264,7 +266,7 @@ export default function Exam() {
     <>
       {completed ? (
         <div>
-          <Answers questions={questions} marks={marks} timeTaken={takenTime} />
+          <Answers questions={questions} marks={marks} timeTaken={takenTime} correct = {correct} />
         </div>
       ) : (
         <>
