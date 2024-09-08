@@ -27,6 +27,7 @@ export default function Exam() {
 
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
+  const [questionNum, setQuestionNum] = useState(0);
   const [questionIdx, setquestionIdx] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -158,25 +159,28 @@ export default function Exam() {
       return question;
     });
     setQuestions(updatedQuestions);
+    setQuestionNum(qNo);
     // Save updated answers to localStorage
   localStorage.setItem("examQuestions", JSON.stringify(updatedQuestions));
   dispatch(updateExamQuestions({ examQuestions: updatedQuestions, questionNo: qNo }));
-
+    
   };
 
   useEffect(() => {
-    // Ensure questions are loaded first before setting the question index
     if (questions.length > 0) {
       const storedQuestionIdx = localStorage.getItem("questionIdx");
       if (storedQuestionIdx) {
         setquestionIdx(parseInt(storedQuestionIdx, 10)); // Restore the question index
       }
     }
-  }, [questions]); // Run this effect only after questions are loaded
+  }, [questions]);  // Run this effect only after questions are loaded
 
   useEffect(() => {
-    localStorage.setItem("questionIdx", questionIdx);
-  }, [questionIdx]);
+    if (questions.length > 0 && questionIdx !== 0) {
+      // Store the current questionIdx in localStorage after questions are loaded and questionIdx is updated
+      localStorage.setItem("questionIdx", questionIdx);
+    }
+  }, [questionIdx, questions]);
 
   const calculateMarks = () => {
     const totalMarks = questions.reduce((acc, question) => {
@@ -242,6 +246,7 @@ export default function Exam() {
     const newPage = Math.floor(questionIdx / buttonsPerPage);
     setCurrentPage(newPage);
   }, [questionIdx]);
+  
 
   const startExam = async () => {
     // Move this outside the rendering phase
@@ -249,6 +254,8 @@ export default function Exam() {
     // Dispatch the exam start
     dispatch(examStart({ examQuestions: questions, remainingTime: timeLeft }));
   };
+
+// console.log(questionNo);
 
   
 
@@ -303,6 +310,8 @@ export default function Exam() {
                                     question.choice > -1
                                       ? "bg-mid-blue text-white"
                                       : "bg-light-blue"
+                                  } 
+                                ${questionIdx === index + startIdx && (" border-4 border-blue-500")
                                   } transition-all`}
                                 >
                                   {index + startIdx + 1}
