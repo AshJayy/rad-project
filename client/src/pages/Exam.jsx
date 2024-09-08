@@ -5,14 +5,26 @@ import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
 import { FcQuestions } from "react-icons/fc";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
+import {
+  examStart,
+  updateRemainingTime,
+  examSuccess,
+  examFailure,
+  signoutSuccess,
+  updateExamQuestions,
+} from "../redux/exam/examSlice";
 
 export default function Exam() {
   const { currentUser } = useSelector((state) => state.user);
+  const { isReady, examQuestions, remainingTime, questionNo } = useSelector(
+    (state) => state.exam
+  );
+
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [questionIdx, setquestionIdx] = useState(0);
@@ -23,9 +35,10 @@ export default function Exam() {
   const [timeLeft, setTimeLeft] = useState(examTime);
   const [takenTime, setTakenTime] = useState(120);
   const [startTimer, setStartTimer] = useState(true);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(isReady);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
+  const dispatch = useDispatch();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const examNo = params.get("no");
@@ -41,8 +54,34 @@ export default function Exam() {
   const currentQuestions = questions.slice(startIdx, endIdx);
 
   useEffect(() => {
+    if (examQuestions.length > 0) {
+      localStorage.setItem("examQuestions", JSON.stringify(examQuestions));
+    }
+    if (remainingTime > 0) {
+      localStorage.setItem("remainingTime", JSON.stringify(remainingTime));
+    }
+  }, [examQuestions, remainingTime]);
+
+  useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
+
+      // Check if questions are in local storage
+      const storedQuestions = localStorage.getItem("examQuestions");
+      const storedTimeLeft = localStorage.getItem("remainingTime");
+
+      if (storedQuestions && storedTimeLeft) {
+        // Parse and set the stored questions and time
+        const parsedQuestions = JSON.parse(storedQuestions);
+        const parsedTimeLeft = JSON.parse(storedTimeLeft);
+
+        setQuestions(parsedQuestions);
+        setTimeLeft(parsedTimeLeft);
+        setReady(true); // Set exam ready if questions are already stored
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(
           `/api/question/getuserquestions?userID=${currentUser._id}`
@@ -55,8 +94,15 @@ export default function Exam() {
                 choice: -1,
               }))
             : [];
+
+          // Save questions and remaining time to local storage
+          localStorage.setItem("examQuestions", JSON.stringify(modifiedData));
+          localStorage.setItem("remainingTime", JSON.stringify(timeLeft));
+
+          dispatch(examStart({ examQuestions: modifiedData, remainingTime: timeLeft })          );
           setQuestions(modifiedData);
         } else {
+          dispatch(examFailure());
           console.log("Failed to fetch questions");
         }
       } catch (error) {
@@ -67,6 +113,7 @@ export default function Exam() {
     };
 
     if (currentUser) {
+      // todo: check question len == 0
       fetchQuestions(); // Call fetchQuestions only if currentUser is defined
     }
   }, [currentUser]);
@@ -87,6 +134,13 @@ export default function Exam() {
     return () => clearInterval(timer);
   }, [startTimer, ready]);
 
+  // Dispatching the action in a separate effect
+  useEffect(() => {
+    if (timeLeft > 0) {
+      dispatch(updateRemainingTime(timeLeft));
+    }
+  }, [timeLeft, dispatch]);
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -104,7 +158,25 @@ export default function Exam() {
       return question;
     });
     setQuestions(updatedQuestions);
+    // Save updated answers to localStorage
+  localStorage.setItem("examQuestions", JSON.stringify(updatedQuestions));
+  dispatch(updateExamQuestions({ examQuestions: updatedQuestions, questionNo: qNo }));
+
   };
+
+  useEffect(() => {
+    // Ensure questions are loaded first before setting the question index
+    if (questions.length > 0) {
+      const storedQuestionIdx = localStorage.getItem("questionIdx");
+      if (storedQuestionIdx) {
+        setquestionIdx(parseInt(storedQuestionIdx, 10)); // Restore the question index
+      }
+    }
+  }, [questions]); // Run this effect only after questions are loaded
+
+  useEffect(() => {
+    localStorage.setItem("questionIdx", questionIdx);
+  }, [questionIdx]);
 
   const calculateMarks = () => {
     const totalMarks = questions.reduce((acc, question) => {
@@ -140,11 +212,18 @@ export default function Exam() {
   const handleSubmit = async () => {
     setCompleted(true);
     setStartTimer(false);
+
+    // Clear the local storage when the exam is completed
+    localStorage.removeItem("examQuestions");
+    localStorage.removeItem("remainingTime");
+
     const timeTaken = examTime - timeLeft;
+    console.log(examTime)
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0));
     await updateExam(marks, timeTaken);
+    dispatch(examSuccess());
   };
 
   useEffect(() => {
@@ -163,6 +242,15 @@ export default function Exam() {
     const newPage = Math.floor(questionIdx / buttonsPerPage);
     setCurrentPage(newPage);
   }, [questionIdx]);
+
+  const startExam = async () => {
+    // Move this outside the rendering phase
+    setReady(true);
+    // Dispatch the exam start
+    dispatch(examStart({ examQuestions: questions, remainingTime: timeLeft }));
+  };
+
+  
 
   return (
     <>
@@ -307,7 +395,10 @@ export default function Exam() {
                 </div>
                 <Button
                   className=" font-semibold bg-mid-blue rounded-full"
-                  onClick={() => setReady(true)}
+                  // onClick={() => setReady(true)}
+                  onClick={() => {
+                    startExam();
+                  }}
                 >
                   Start Exam
                 </Button>
