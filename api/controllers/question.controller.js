@@ -123,8 +123,9 @@ export const getUserQuestions = async (req, res, next) => {
 
 export const getNextExam = async (req, res, next) => {
    try {
+      
      // Get the past exams for the user, extracting the _id of already answered questions
-     const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+     const pastExams = await Exam.find({ userID: req.user.id }).select('questions').lean();
  
      // Extract the IDs of all used questions
      const usedQuestionIds = pastExams.reduce((acc, exam) => {
@@ -146,7 +147,7 @@ export const getNextExam = async (req, res, next) => {
        const availableQuestions = await Question.countDocuments({
          bank: bank,
          isActive: true,
-         _id: { $nin: usedQuestionIds }  // Exclude already used questions
+         id: { $nin: usedQuestionIds }  // Exclude already used questions
        });
        return availableQuestions >= limit;
      };
