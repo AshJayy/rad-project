@@ -16,7 +16,6 @@ import {
   examSuccess,
   examFailure,
   signoutSuccess,
-  updateExamQuestions,
   updateExamQuestions } from "../redux/exam/examSlice";
 
 export default function Exam() {
@@ -46,9 +45,6 @@ export default function Exam() {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [correct,setCorrect] = useState(0);
 
-  const params = new URLSearchParams(location.search);
-  const examNo = params.get("no");
-  const examID = params.get("id");
  
   const [currentPage, setCurrentPage] = useState(0);
   const buttonsPerPage = 10;
@@ -270,11 +266,6 @@ export default function Exam() {
 // console.log(questionNo);
 
   
-
-  const startExam = () => {
-    dispatch(examStart({ examQuestions: questions, remainingTime: examTime }));
-    setReady(true)
-  }
   return (
     <>
       {completed ? (
