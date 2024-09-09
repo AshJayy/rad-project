@@ -123,15 +123,16 @@ export const getUserQuestions = async (req, res, next) => {
 
 export const getNextExam = async (req, res, next) => {
    try {
-     // Get the recent exam details for the user
-     const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+      
+     // Get the past exams for the user, extracting the _id of already answered questions
+     const pastExams = await Exam.find({ userID: req.user.id }).select('questions').lean();
  
-     // Extract IDs of already answered questions
+     // Extract the IDs of all used questions
      const usedQuestionIds = pastExams.reduce((acc, exam) => {
-      return acc.concat(exam.questions.map(q => q._id.toString())); // Extract the _id field
-   }, []);
+       return acc.concat(exam.questions.map(q => q._id.toString()));
+     }, []);
  
-     // Define the criteria for the exam (e.g., total number of questions required from each bank)
+     // Define the required number of questions per bank for the new exam
      const requiredQuestions = {
        1: 8,  // Bank 1 requires 8 questions
        2: 6,  // Bank 2 requires 6 questions
@@ -146,7 +147,7 @@ export const getNextExam = async (req, res, next) => {
        const availableQuestions = await Question.countDocuments({
          bank: bank,
          isActive: true,
-         _id: { $nin: usedQuestionIds }  // Exclude already used questions
+         id: { $nin: usedQuestionIds }  // Exclude already used questions
        });
        return availableQuestions >= limit;
      };
@@ -158,19 +159,21 @@ export const getNextExam = async (req, res, next) => {
        )
      );
  
-     // Determine if all banks have enough questions
-     const enoughQuestionsAvailable = bankAvailability.every((available) => available);
+     // Determine if enough questions are available in all banks
+     const enoughQuestionsAvailable = bankAvailability.every(available => available);
  
      if (enoughQuestionsAvailable) {
        res.status(200).json({ message: "Enough questions are available to create the next exam." });
      } else {
        res.status(400).json({ message: "Not enough questions available to create the next exam." });
      }
+ 
    } catch (error) {
      console.error('Error checking question availability:', error);
      next(error);
    }
  };
+ 
  
 
 

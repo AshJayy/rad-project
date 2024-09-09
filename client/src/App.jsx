@@ -15,6 +15,8 @@ import CreateQuestion from './pages/CreateQuestion'
 import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
 import UpdateQuestion from './pages/UpdateQuestion'
 import QuestionPage from './pages/questionPage'
+import ScrollToTop from './components/ScrollToTop'
+import _404 from './pages/_404'
 
 function App() {
   const location = useLocation();
@@ -26,6 +28,9 @@ function App() {
     <>
       {/* Conditionally render Header and Footer */}
       {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
+    <BrowserRouter>
+    <ScrollToTop />
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="signin" element={<SignIn />} /> 
@@ -43,8 +48,10 @@ function App() {
           <Route path='/editQuestion/:questionID' element={<UpdateQuestion />} />
           <Route path='/question/:questionID' element={<QuestionPage />} />
         </Route>
+        <Route path="*" element={<_404 />} />
       </Routes>
       {!noHeaderFooterRoutes.includes(location.pathname) && <Footer />}
+      </BrowserRouter>
     </>
   )
 }

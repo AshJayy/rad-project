@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const dropDownItems = [
@@ -19,6 +20,41 @@ export default function Header() {
   const currentPath = location.pathname;
   const { loading } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const [sub, setSub] = useState(false);
+  const [subscribed, setsubscribed] = useState(false);
+
+  // useEffect(() => {
+  //   const getSub = async () => {
+  //     try {
+  //       const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
+  //         method: "GET",
+  //       });
+
+  //       if (!res.ok) {
+  //         console.log("something went wrong");
+  //       } else {
+  //         const data = await res.json();
+  //         setSub(data);
+
+  //         const today = new Date();
+  //         today.setHours(0, 0, 0, 0);
+
+  //         const validUntil = new Date(data.validUntil);
+          
+
+  //         if (validUntil > today) {
+  //           setsubscribed(true);
+  //         } // Set the state with the received data
+  //         // console.log("Fetched data:", data); // Debug log for the fetched data
+  //       }
+  //     } catch (error) {
+  //       console.log("Fetch error:", error.message); // Debug log for errors
+  //     }
+  //   };
+
+  //   getSub();
+  // }, []);
+
 
   const handleSignout = async () => {
     try {
@@ -134,6 +170,36 @@ export default function Header() {
             </span>
           )}
 
+        {currentPath !== "/freetrial" && (
+          <>
+            {currentUser ? (
+              currentUser.userLevel === 0 &&
+              currentUser.currentPlan === -1 && (
+                <Button
+                  className="bg-mid-blue"
+                  pill
+                  onClick={handleFreeTrialClick}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <FaSpinner className="animate-spin mr-2" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Start free trial"
+                  )}
+                </Button>
+              )
+            ) : (
+              <Button className="bg-mid-blue" pill>
+                <Link to={"/signin"} state={{ from: "/freetrial" }}>
+                  Start free trial
+                </Link>
+              </Button>
+            )}
+          </>
+        )}
           <div className="hidden lg:block">
             {currentPath !== "/freetrial" && (
               <>
