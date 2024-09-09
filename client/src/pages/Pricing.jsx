@@ -10,19 +10,19 @@ export default function Subscribe() {
   const [subType, setSubType] = useState(null);
   const Items = [
     {
-      type: 1,
+      type: 0,
       name: "Weekly plan",
       price: "500",
       benefits: ["benefits 1", "benefits 2", "benefits 3", "benefits 4"],
     },
     {
-      type: 2,
+      type: 1,
       name: "Monthly plan",
       price: "1500",
       benefits: ["benefits 1", "benefits 2", "benefits 3", "benefits 4"],
     },
     {
-      type: 3,
+      type: 2,
       name: "Annual plan",
       price: "10000",
       benefits: ["benefits 1", "benefits 2", "benefits 3", "benefits 4"],
@@ -59,7 +59,7 @@ export default function Subscribe() {
   // },[])
   return (
     <div className=''>
-      {!subType ? (
+      {!subType && (
         <div className='min-h-screen flex flex-col items-center'>
           <h1 className='text-5xl text-center font-bold mt-9'>
             Pick your <span className='text-blue-800'>perfect</span> plan
@@ -90,6 +90,7 @@ export default function Subscribe() {
                 <button
                   onClick={() => {
                     setSubType(item);
+                    navigate(`/subscribe?plan=${item.type}`);
                   }}
                   className='w-[23vh] mb-3 hover:bg-blue-800 hover:text-white border-solid font-semibold text-blue-800 border-2 p-2 rounded-3xl border-blue-800 '
                 >
@@ -99,59 +100,8 @@ export default function Subscribe() {
             ))}
           </div>
         </div>
-      ) : (
-        <div>
-          <div className='flex gap-16 flex-col min-h-screen justify-center items-center'>
-            <h1 className='text-5xl sm:mt-[-10vh] font-bold text-center'>
-              Choose your <span className='text-blue-800'> payment </span>{" "}
-              method.
-            </h1>
-            <div className='flex flex-col w-full gap-8 justify-center items-center'>
-              <div
-                onClick={() => {
-                  // navigate to payhere page
-                  navigate(`/makepayment?type=${subType.type}`);
-                }}
-                className='hover:scale-110 flex p-3 flex-row text-center justify-center border-solid border-[1px] rounded-[30px] border-gray-200  h-48 w-3/4 sm:w-1/2 shadow-lg transition-transform duration-300 ease-in-out'
-              >
-                <div className='flex  w-1/2 flex-col justify-center items-center'>
-                  <h1 className='text-[3.5vh] font-bold'>Card Payment</h1>
-                  <h1 className='text-gray-400'>Pay with your credit card</h1>
-                </div>
-                <div className='w-1/2 flex justify-center items-center'>
-                  <div className='border-solid  border-[1px] rounded-[10px] border-blue-800 bg-blue-800 sm:w-[30vh] w-[21vh] sm:h-full h-[15vh]'>
-                    <div className='bg-gray-700 h-6 mt-8'></div>
-                    <div className='flex flex-row'>
-                      <div className='bg-white h-2 m-2 w-2/4 mt-3'></div>
-                      <div className='bg-white h-2 m-2 w-1/4 mt-3'></div>
-                    </div>
-                    <div className='bg-white h-2 m-2 w-1/4 mt-8'></div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => {
-                  navigate(`/maketranfer?type=${subType.type}`);
-                }}
-                className='hover:scale-110 flex p-3 flex-row  justify-center border-solid border-[1px] rounded-[30px] border-gray-200  h-48 w-3/4 sm:w-1/2 shadow-lg transition-transform duration-300 ease-in-out'
-              >
-                <div className='flex w-1/2 flex-col justify-center items-center'>
-                  <h1 className='text-[3.5vh] text-center font-bold'>
-                    Bank Tranfer
-                  </h1>
-                  <h1 className='text-gray-400 text-center'>
-                    Make a bank tranfer and subscribe
-                  </h1>
-                </div>
-                <div className='w-1/2'>
-                  <IoDocumentTextOutline className='h-full w-full' />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      ) 
+      }
     </div>
   );
 }
