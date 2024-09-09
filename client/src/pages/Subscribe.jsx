@@ -1,157 +1,129 @@
-import { Button } from "flowbite-react";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { FaCheck } from "react-icons/fa";
-import { IoDocumentTextOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { checkout } from '../../lib/PayhereTest';
+import md5 from 'crypto-js/md5';
+import { useSelector } from 'react-redux';
 
-export default function Subscribe() {
-  const { currentUser } = useSelector((state) => state.user);
-  const [subType, setSubType] = useState(null);
-  const Items = [
-    {
-      type: 1,
-      name: "Weekly plan",
-      price: "500",
-      benefits: ["benefits 1", "benefits 2", "benefits 3", "benefits 4"],
-    },
-    {
-      type: 2,
-      name: "Monthly plan",
-      price: "1500",
-      benefits: ["benefits 1", "benefits 2", "benefits 3", "benefits 4"],
-    },
-    {
-      type: 3,
-      name: "Annual plan",
-      price: "10000",
-      benefits: ["benefits 1", "benefits 2", "benefits 3", "benefits 4"],
-    },
-  ];
-  const navigate = useNavigate();
-  console.log(subType);
-  // useEffect(() => {
-  //   const getsubs = async () => {
-  //     const res = await fetch('/api/sub/makepayment', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         userId : currentUser._id,
-  //         type: '1',
-  //       }),
-  //     });
-  //     const data = await res.json();
-  //     if(!res.ok) {
-  //       console.log(res.error)
-  //     }
-  //     if(res.ok) {
-  //       console.log(data)
-  //       // navigate(`/home`);
-  //     }
-  //   }
-  //   try {
-  //     getsubs();
-  // } catch (error) {
-  //     console.log(error);
-  // }
-  // },[])
+const secret_key = import.meta.env.VITE_PAYHERE_SECRET;
+const merchant_id = '1228064'
+const hash = md5( 
+  merchant_id +
+  '11223' +
+  '100.00' +
+  'LKR' +
+  md5(secret_key).toString().toUpperCase()
+).toString().toUpperCase();
+
+
+
+console.log('Generated Hash:', hash);
+
+
+const customerAttributes = {
+  first_name: 'John',
+  last_name: 'Doe',
+  phone: '+94771234567',
+  email: 'john@johndoe.com',
+  address: 'No. 50, Highlevel Road',
+  city: 'Panadura',
+  country: 'Sri Lanka',
+};
+
+const checkoutAttributes = {
+  sandbox: true,
+  merchant_id: merchant_id,
+  returnUrl: 'http://localhost:3000/return',
+  cancelUrl: 'http://localhost:3000/cancel',
+  notifyUrl: 'http://localhost:8080/notify',
+  order_id: '11223',
+  itemTitle: ['Demo Item'],
+  currency: 'LKR',
+  amount: 100,
+  hash: hash,
+};
+
+const Checkout = () => {
+
+  const user = useSelector((state) => state.user.currentUser);
+
+  async function handleCheckout() {
+    console.log("func called");
+
+    try {
+      const checkoutData = {
+        returnUrl: 'http://localhost:5173/dashboard',
+        cancelUrl: 'http://localhost:5173/pricing',
+        notifyUrl: 'http://localhost:5173/about',
+        order_id: '11223',
+        items: 'Demo Item',
+        currency: 'LKR',
+        plan: 1,
+      };
+
+      const checkoutObj = {
+        ...customerAttributes,
+        ...checkoutData
+      }
+      console.log('checkoutObj:', checkoutObj);
+      
+
+      checkout(checkoutObj, user);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+
   return (
-    <div className=''>
-      {!subType ? (
-        <div className='min-h-screen flex flex-col items-center'>
-          <h1 className='text-5xl text-center font-bold mt-9'>
-            Pick your <span className='text-blue-800'>perfect</span> plan
-          </h1>
-          <h1 className='text-2xl font-bold mt-5'>14 days free trial</h1>
-          <h1 className='text-1xl text-center text-gray-400 '>
-            Get the right plan for you. Plans can be upgraded in the future.
-          </h1>
-          <div className='flex flex-col mb-10 mt-[-18px] sm:my-6 mx-10 md:flex-row justify-center items-center w-[95%]  gap-5 '>
-            {Items.map((item) => (
-              <div
-                key={item.type}
-                className='flex flex-col flex-1 p-3 shadow-lg w-80 max-w-80 mt-10 sm:mt-6 gap-4 border-[1px] rounded-3xl border-gray-200 justify-between items-center hover:scale-105 transition-transform duration-300 ease-in-out'
-              >
-                <h1 className='text-[20px] mt-3 font-bold'>{item.name}</h1>
-                <h1 className=' font-bold text-5xl'>{item.price}LKR</h1>
-                <ul className=''>
-                  {item.benefits.map((benefit) => (
-                    <li
-                      className='flex flex-row  gap-3 mt-2'
-                      key={benefit}
-                    >
-                      <FaCheck className='text-blue-800 mt-1 mr-3 ' />
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => {
-                    setSubType(item);
-                  }}
-                  className='w-[23vh] mb-3 hover:bg-blue-800 hover:text-white border-solid font-semibold text-blue-800 border-2 p-2 rounded-3xl border-blue-800 '
-                >
-                  Choose Plan
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div className='flex gap-16 flex-col min-h-screen justify-center items-center'>
-            <h1 className='text-5xl sm:mt-[-10vh] font-bold text-center'>
-              Choose your <span className='text-blue-800'> payment </span>{" "}
-              method.
-            </h1>
-            <div className='flex flex-col w-full gap-8 justify-center items-center'>
-              <div
-                onClick={() => {
-                  // navigate to payhere page
-                  navigate(`/makepayment?type=${subType.type}`);
-                }}
-                className='hover:scale-110 flex p-3 flex-row text-center justify-center border-solid border-[1px] rounded-[30px] border-gray-200  h-48 w-3/4 sm:w-1/2 shadow-lg transition-transform duration-300 ease-in-out'
-              >
-                <div className='flex  w-1/2 flex-col justify-center items-center'>
-                  <h1 className='text-[3.5vh] font-bold'>Card Payment</h1>
-                  <h1 className='text-gray-400'>Pay with your credit card</h1>
-                </div>
-                <div className='w-1/2 flex justify-center items-center'>
-                  <div className='border-solid  border-[1px] rounded-[10px] border-blue-800 bg-blue-800 sm:w-[30vh] w-[21vh] sm:h-full h-[15vh]'>
-                    <div className='bg-gray-700 h-6 mt-8'></div>
-                    <div className='flex flex-row'>
-                      <div className='bg-white h-2 m-2 w-2/4 mt-3'></div>
-                      <div className='bg-white h-2 m-2 w-1/4 mt-3'></div>
-                    </div>
-                    <div className='bg-white h-2 m-2 w-1/4 mt-8'></div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => {
-                  navigate(`/maketranfer?type=${subType.type}`);
-                }}
-                className='hover:scale-110 flex p-3 flex-row  justify-center border-solid border-[1px] rounded-[30px] border-gray-200  h-48 w-3/4 sm:w-1/2 shadow-lg transition-transform duration-300 ease-in-out'
-              >
-                <div className='flex w-1/2 flex-col justify-center items-center'>
-                  <h1 className='text-[3.5vh] text-center font-bold'>
-                    Bank Tranfer
-                  </h1>
-                  <h1 className='text-gray-400 text-center'>
-                    Make a bank tranfer and subscribe
-                  </h1>
-                </div>
-                <div className='w-1/2'>
-                  <IoDocumentTextOutline className='h-full w-full' />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>First name</td>
+            <td>{ customerAttributes.first_name }</td>
+          </tr>
+          <tr>
+            <td>Last name</td>
+            <td>{ customerAttributes.last_name }</td>
+          </tr>
+          <tr>
+            <td>Phone</td>
+            <td>{ customerAttributes.phone }</td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td>{ customerAttributes.email }</td>
+          </tr>
+          <tr>
+            <td>Address</td>
+            <td>{ customerAttributes.address }</td>
+          </tr>
+          <tr>
+            <td>City</td>
+            <td>{ customerAttributes.city }</td>
+          </tr>
+          <tr>
+            <td>Country</td>
+            <td>{ customerAttributes.country }</td>
+          </tr>
+          <tr>
+            <td>Product name</td>
+            <td>{ checkoutAttributes.itemTitle }</td>
+          </tr>
+          <tr>
+            <td>Price</td>
+            <td>{ checkoutAttributes.amount }</td>
+          </tr>
+        </tbody>
+      </table>
+        <button onClick={handleCheckout} style={{ cursor: "pointer" }}>Pay with Payhere</button>
     </div>
   );
-}
+};
+
+export default Checkout;
