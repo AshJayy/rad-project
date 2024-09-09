@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
+import Logo from '../components/Logo';
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
@@ -44,7 +45,13 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex">
+      
+      <div className="absolute top-0 left-0 mt-10 ml-10">
+        <Logo />
+      </div>
+      
       <div className="flex-1 flex flex-col justify-center items-center p-5">
+        
         <h1 className="text-xl font-bold mb-6">LOG IN</h1>
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
           {/* Increased spacing between form fields */}
