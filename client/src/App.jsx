@@ -15,12 +15,14 @@ import CreateQuestion from './pages/CreateQuestion'
 import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
 import UpdateQuestion from './pages/UpdateQuestion'
 import QuestionPage from './pages/questionPage'
+import ScrollToTop from './components/ScrollToTop'
 import _404 from './pages/_404'
 
 function App() {
 
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
