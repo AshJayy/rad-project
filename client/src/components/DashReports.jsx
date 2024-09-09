@@ -75,7 +75,7 @@ export default function DashReports() {
   const handleDownloadClick = (exam) => {
     setSelectedExam(exam);
   };
-  if (!subscribed) {
+  if (currentUser.currentPlan === -1) {
     return (
         <div className="flex flex-col p-4 gap-4 w-full items-center">
             <h3>Please subscribe to view this information.</h3>

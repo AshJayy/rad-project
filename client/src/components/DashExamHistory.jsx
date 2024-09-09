@@ -44,38 +44,38 @@ export default function DashExamHistory() {
   const [selectedExam, setSelectedExam] = useState(null);
   const [sub, setSub] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
-  useEffect(() => {
-    const getSub = async () => {
-      try {
-        const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
-          method: "GET",
-        });
-        if (!res.ok) {
-          console.log("Error:", res.status, res.statusText);
-        } else {
-          const data = await res.json();
-          setSub(data);
+  // useEffect(() => {
+  //   const getSub = async () => {
+  //     try {
+  //       const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
+  //         method: "GET",
+  //       });
+  //       if (!res.ok) {
+  //         console.log("Error:", res.status, res.statusText);
+  //       } else {
+  //         const data = await res.json();
+  //         setSub(data);
   
-          const today = new Date();
-          const validUntil = new Date(data.validUntil);
+  //         const today = new Date();
+  //         const validUntil = new Date(data.validUntil);
   
-          if (validUntil.getTime() > today.getTime()) {
-            setSubscribed(true);
-            console.log("Subscription valid: true");
-          } else {
-            setSubscribed(false);
-            console.log("Subscription valid: false");
-          }
-        }
-      } catch (error) {
-        console.log("Fetch error:", error.message);
-      }
-    };
+  //         if (validUntil.getTime() > today.getTime()) {
+  //           setSubscribed(true);
+  //           console.log("Subscription valid: true");
+  //         } else {
+  //           setSubscribed(false);
+  //           console.log("Subscription valid: false");
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.log("Fetch error:", error.message);
+  //     }
+  //   };
   
-    if (currentUser?._id) {
-      getSub();
-    }
-  }, [currentUser]); 
+  //   if (currentUser?._id) {
+  //     getSub();
+  //   }
+  // }, [currentUser]); 
 
   const createExam = async (examNum) => {
     try {
@@ -247,7 +247,7 @@ export default function DashExamHistory() {
       </div>
     );
   }
-  if (!subscribed) {
+  if (currentUser.currentPlan === -1) {
     return (
         <div className="flex flex-col p-4 gap-4 w-full items-center ">
             <h3>Please subscribe to view this information.</h3>

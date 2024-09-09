@@ -32,37 +32,37 @@ export default function Header() {
   const [sub, setSub] = useState(false);
   const [subscribed, setsubscribed] = useState(false);
 
-  useEffect(() => {
-    const getSub = async () => {
-      try {
-        const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
-          method: "GET",
-        });
+  // useEffect(() => {
+  //   const getSub = async () => {
+  //     try {
+  //       const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
+  //         method: "GET",
+  //       });
 
-        if (!res.ok) {
-          console.log("something went wrong");
-        } else {
-          const data = await res.json();
-          setSub(data);
+  //       if (!res.ok) {
+  //         console.log("something went wrong");
+  //       } else {
+  //         const data = await res.json();
+  //         setSub(data);
 
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
+  //         const today = new Date();
+  //         today.setHours(0, 0, 0, 0);
 
-          const validUntil = new Date(data.validUntil);
+  //         const validUntil = new Date(data.validUntil);
           
 
-          if (validUntil > today) {
-            setsubscribed(true);
-          } // Set the state with the received data
-          // console.log("Fetched data:", data); // Debug log for the fetched data
-        }
-      } catch (error) {
-        console.log("Fetch error:", error.message); // Debug log for errors
-      }
-    };
+  //         if (validUntil > today) {
+  //           setsubscribed(true);
+  //         } // Set the state with the received data
+  //         // console.log("Fetched data:", data); // Debug log for the fetched data
+  //       }
+  //     } catch (error) {
+  //       console.log("Fetch error:", error.message); // Debug log for errors
+  //     }
+  //   };
 
-    getSub();
-  }, []);
+  //   getSub();
+  // }, []);
 
 
   const handleSignout = async () => {
@@ -197,7 +197,7 @@ export default function Header() {
           <>
             {currentUser ? (
               currentUser.userLevel === 0 &&
-              !subscribed && (
+              currentUser.currentPlan === -1 && (
                 <Button
                   className="bg-mid-blue"
                   pill
