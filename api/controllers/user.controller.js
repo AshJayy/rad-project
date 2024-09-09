@@ -160,15 +160,17 @@ export const makeUserAdmin = async (req, res) => {
 export const searchUsers = async (req, res, next) => {
   try {
     const { searchTerm } = req.query;
+    console.log(searchTerm);
+
     const users = await User.find({
+      
       $or: [
-        { username: { $regex: query, $options: 'i' } },
-        { email: { $regex: query, $options: 'i' } },
-        { name: { $regex: query, $options: 'i' } },
-        { phone: { $regex: query, $options: 'i' } },
+        { username: { $regex: searchTerm, $options: 'i' } },
+        { email: { $regex: searchTerm, $options: 'i' } },
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { phone: { $regex: searchTerm, $options: 'i' } },
       ],
     });
-
     res.status(200).json(users);
   } catch (error) {
     next(error);
