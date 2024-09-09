@@ -1,6 +1,59 @@
 import { errorHandler } from "../utils/error.js"
 import Sub from "../models/sub.model.js";
 
+export const subscribe = async (req, res, next) => {
+    try {
+      // Check if user is allowed to subscribe
+      if (req.user.userLevel === 1 || req.user.userLevel === 2) {
+        return next(errorHandler(403, 'You are not allowed to subscribe'));
+      }
+  
+      const { userId, plan } = req.body;
+  
+      // Calculate the validUntil date based on the plan
+      const startDate = new Date();
+      let validUntil;
+  
+      switch (plan) {
+        case 0:
+          validUntil = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from startDate
+          break;
+        case 1:
+          validUntil = new Date(startDate.getTime() + 28 * 24 * 60 * 60 * 1000); // 28 days from startDate
+          break;
+        case 2:
+          validUntil = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate()); // 1 year from startDate
+          break;
+        default:
+          return next(errorHandler(400, 'Invalid plan')); // Handle invalid plan
+      }
+  
+      // Create the subscription object
+      const newSubscription = new Sub({
+        userId,
+        startDate,
+        validUntil,
+        status: 1,// Set status to pending initially
+        history: [
+          {
+            paymentDate: startDate,
+            type: plan, // Store the type of subscription (plan)
+          },
+        ],
+      });
+  
+      // Save the subscription to the database
+      await newSubscription.save();
+  
+      // Send success response
+      return res.status(201).json({
+        message: 'Subscription created successfully',
+        subscription: newSubscription,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
 
 export const makePayment = async (req, res, next) => {
     if (!req.body.userId || !req.body.type) {
@@ -78,6 +131,7 @@ export const makePayment = async (req, res, next) => {
         next(error);
     }
 }
+
 export const payhere = async (req, res, next) => {
     return res.status(200).json({message: "payhere works"})
     try {

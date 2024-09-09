@@ -5,12 +5,13 @@ import {
     getSubs, 
     deleteSub, 
     updateSub, 
-    payhere
+    payhere,
+    subscribe
 } from '../controllers/sub.controller.js';
 
 const router = express.Router();
 
-router.post('/makepayment', verifyToken, makePayment);
+router.post('/makepayment', verifyToken, subscribe);
 router.post('/payhere', payhere);
 router.get('/getsubs/:userId', getSubs);
 router.delete('/deletesub/:subId', verifyToken, deleteSub);
