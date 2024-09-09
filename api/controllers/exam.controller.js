@@ -83,7 +83,7 @@ export const getUserExams = async (req, res, next) => {
       ...(userID && {userID: userID}), // get all exams of a user
       ...(examID && {_id: examID}) //get a single exam
     }).sort({ examNo: 1 });
-
+    
     res.status(200).json(exams);
   } catch (error) {
     next(error);

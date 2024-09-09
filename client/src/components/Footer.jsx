@@ -7,11 +7,11 @@ import Logo from './Logo.jsx'
 export default function FooterComp() {
   return (
     <Footer className='p-16 flex flex-col max-w-6xl shadow-none mx-auto text-dark-blue'>
-        <div className='flex flex-row justify-between w-full'>
+        <div className='flex flex-row md:flex-row justify-between w-full'>
             <div>
                 <Logo />
             </div>
-            <div className='grid grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
                 <div>
                     <Footer.LinkGroup col>
                         <Footer.Link
@@ -81,7 +81,7 @@ export default function FooterComp() {
             </div>
         </div>
         <Footer.Divider className="border-dark-blue" />
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row gap-2 mb-4 md:mb-0">
             <div className="flex flex-row gap-2">
                 <Link>
                     <FaLinkedin className="w-6 h-6" />

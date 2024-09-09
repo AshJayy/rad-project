@@ -6,6 +6,28 @@ import { useNavigate } from "react-router-dom";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PdfFile from "./PdfFile";
 import { AiOutlineDownload } from "react-icons/ai";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function DashExamHistory() {
   const { currentUser } = useSelector((state) => state.user);
@@ -20,6 +42,40 @@ export default function DashExamHistory() {
   const navigate = useNavigate();
 
   const [selectedExam, setSelectedExam] = useState(null);
+  const [sub, setSub] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  // useEffect(() => {
+  //   const getSub = async () => {
+  //     try {
+  //       const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
+  //         method: "GET",
+  //       });
+  //       if (!res.ok) {
+  //         console.log("Error:", res.status, res.statusText);
+  //       } else {
+  //         const data = await res.json();
+  //         setSub(data);
+  
+  //         const today = new Date();
+  //         const validUntil = new Date(data.validUntil);
+  
+  //         if (validUntil.getTime() > today.getTime()) {
+  //           setSubscribed(true);
+  //           console.log("Subscription valid: true");
+  //         } else {
+  //           setSubscribed(false);
+  //           console.log("Subscription valid: false");
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.log("Fetch error:", error.message);
+  //     }
+  //   };
+  
+  //   if (currentUser?._id) {
+  //     getSub();
+  //   }
+  // }, [currentUser]); 
 
   const createExam = async (examNum) => {
     try {
@@ -56,34 +112,36 @@ export default function DashExamHistory() {
 
   useEffect(() => {
     const getExams = async () => {
-      setLoading(true); // Start loading when fetching exams
+      setLoading(true);
       try {
         const res = await fetch(`/api/exam/getuserexams?userID=${user._id}`);
         if (!res.ok) {
           console.error("Error fetching exams:", res.status, res.statusText);
         } else {
           const exams = await res.json();
-          setExaminations(exams.map(exam => ({
-            ...exam,
-            questions: exam.questions || [], // Ensure questions is always an array
-            totalMarks: exam.totalMarks || 0,
-            takenTime: exam.takenTime || 0,
-          })));
+          setExaminations(
+            exams.map((exam) => ({
+              ...exam,
+              questions: exam.questions || [],
+              totalMarks: exam.totalMarks || 0,
+              takenTime: exam.takenTime || 0,
+            }))
+          );
 
-          // If there are no exams, create one
+          // Create a new exam if none exist
           if (exams.length === 0) {
-            await createExam(examNumber); // Call createExam if no exams found
+            await createExam(examNumber);
           }
         }
       } catch (error) {
         console.error("An error occurred while fetching exams:", error);
       } finally {
-        setLoading(false); // Ensure loading state is always updated
+        setLoading(false);
       }
     };
 
-    if (user?._id) {
-      getExams();
+    if (user?._id && examinations.length === 0) {
+      getExams(); // Only fetch exams once when user data is available
     }
   }, [user?._id]);
 
@@ -123,10 +181,9 @@ export default function DashExamHistory() {
 
   useEffect(() => {
     if (nextExam === 1 && !creatingExam) {
-      // Check if nextExam is 1 and an exam is not already being created
-      const unfinishedExam = examinations.some((exam) => !exam.done); // Check if there is any unfinished exam
+      const unfinishedExam = examinations.some((exam) => !exam.done);
       if (!unfinishedExam) {
-        createExam(examNumber); // Create a new exam if there are no unfinished exams
+        createExam(examNumber); // Only create an exam if no unfinished exams exist
       }
     }
   }, [nextExam, creatingExam, examinations]); // Add creatingExam and examinations as dependencies
@@ -149,6 +206,38 @@ export default function DashExamHistory() {
   const handleDownloadClick = (exam) => {
     setSelectedExam(exam);
   };
+  const lineChartData = {
+    labels: examinations.slice(-10).map((item) => item.examNo),
+    datasets: [
+      {
+        label: "Score",
+        data: examinations.slice(-10).map((item) => item.totalMarks),
+        fill: false,
+        backgroundColor: "rgba(6, 73, 152,0.5)",
+        borderColor: "rgba(6, 73, 152,1)",
+        tension: 0.5,
+      },
+    ],
+  };
+  const options = {
+    animation: {
+      duration: 1000, // 1 second animation duration
+      easing: "easeInOutQuad", // Smooth easing function
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false, // Remove x-axis grid lines
+        },
+      },
+      y: {
+        grid: {
+          display: false, // Remove y-axis grid lines
+        },
+        beginAtZero: true, // Always start the y-axis at 0
+      },
+    },
+  };
 
   if (loading) {
     // Show a spinner while loading
@@ -158,16 +247,35 @@ export default function DashExamHistory() {
       </div>
     );
   }
-
+  if (currentUser.currentPlan === -1) {
+    return (
+        <div className="flex flex-col p-4 gap-4 w-full items-center ">
+            <h3>Please subscribe to view this information.</h3>
+            <button
+                className="mt-4 rounded-md h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue"
+                onClick={() => navigate('/pricing')}
+            >
+                subscribe
+            </button>
+        </div>
+    );
+}
   return (
-    <div className="flex flex-col p-4 gap-4 w-full">
+    <div className="flex flex-col p-4 gap-4 w-full items-center">
+      {!loading && (
+        <div className="flex flex-col w-auto md:w-2/3 shadow-md p-2 rounded-md dark:bg-gray-800 bg-white">
+          {/* Line Chart */}
+          <Line data={lineChartData} options={options} />
+        </div>
+      )}
+
       {Array.isArray(examinations) &&
-        examinations.map((exam) => (
+        examinations.map((exam, index) => (
           <div
             className={`w-full rounded-lg px-7 py-5 cursor-pointer shadow-md ${
               exam.done ? "bg-light-blue" : "bg-white"
             }`}
-            key={exam._id}
+            key={exam._id || index}
           >
             <span
               className="flex flex-row justify-between w-full font-semibold text-xl cursor-pointer"
@@ -197,8 +305,10 @@ export default function DashExamHistory() {
                 <h1>
                   No of correct answers:{" "}
                   <span className="text-gray-500 ml-5">
-                    {(exam.questions.length * exam.totalMarks) / 100} /{" "}
-                    {exam.questions.length}
+                    {Math.round(
+                      (exam.questions?.length || 0) * (exam.totalMarks / 100)
+                    )}{" "}
+                    / {exam.questions?.length || 0}
                   </span>
                 </h1>
                 <h1>

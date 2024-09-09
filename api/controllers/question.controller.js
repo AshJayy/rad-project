@@ -86,25 +86,25 @@ export const getUserQuestions = async (req, res, next) => {
       }
 
 
-      //  // Fetch questions from multiple banks
-      //  const questionSets = await Promise.all([
-      //    getFromBank(1, 8),
-      //    getFromBank(2, 6),
-      //    getFromBank(3, 4),
-      //    getFromBank(4, 4),
-      //    getFromBank(5, 4),
-      //    getFromBank(6, 4),
-      // ]);
+       // Fetch questions from multiple banks
+       const questionSets = await Promise.all([
+         getFromBank(1, 8),
+         getFromBank(2, 6),
+         getFromBank(3, 4),
+         getFromBank(4, 4),
+         getFromBank(5, 4),
+         getFromBank(6, 4),
+      ]);
 
       // TEST
-      const questionSets = await Promise.all([
-         getFromBank(1, 1),
-         getFromBank(2, 1),
-         getFromBank(3, 1),
-         getFromBank(4, 1),
-         getFromBank(5, 1),
-         getFromBank(6, 1),
-      ]);
+      // const questionSets = await Promise.all([
+      //    getFromBank(1, 1),
+      //    getFromBank(2, 1),
+      //    getFromBank(3, 1),
+      //    getFromBank(4, 1),
+      //    getFromBank(5, 1),
+      //    getFromBank(6, 1),
+      // ]);
       
       // Combine all question sets into a single array
       const questions = questionSets.flat();
@@ -123,15 +123,16 @@ export const getUserQuestions = async (req, res, next) => {
 
 export const getNextExam = async (req, res, next) => {
    try {
-     // Get the recent exam details for the user
-     const pastExams = await Exam.find({ userID: req.user._id }).select('questions').lean();
+      
+     // Get the past exams for the user, extracting the _id of already answered questions
+     const pastExams = await Exam.find({ userID: req.user.id }).select('questions').lean();
  
-     // Extract IDs of already answered questions
+     // Extract the IDs of all used questions
      const usedQuestionIds = pastExams.reduce((acc, exam) => {
-      return acc.concat(exam.questions.map(q => q._id.toString())); // Extract the _id field
-   }, []);
+       return acc.concat(exam.questions.map(q => q._id.toString()));
+     }, []);
  
-     // Define the criteria for the exam (e.g., total number of questions required from each bank)
+     // Define the required number of questions per bank for the new exam
      const requiredQuestions = {
        1: 8,  // Bank 1 requires 8 questions
        2: 6,  // Bank 2 requires 6 questions
@@ -146,7 +147,7 @@ export const getNextExam = async (req, res, next) => {
        const availableQuestions = await Question.countDocuments({
          bank: bank,
          isActive: true,
-         _id: { $nin: usedQuestionIds }  // Exclude already used questions
+         id: { $nin: usedQuestionIds }  // Exclude already used questions
        });
        return availableQuestions >= limit;
      };
@@ -158,19 +159,21 @@ export const getNextExam = async (req, res, next) => {
        )
      );
  
-     // Determine if all banks have enough questions
-     const enoughQuestionsAvailable = bankAvailability.every((available) => available);
+     // Determine if enough questions are available in all banks
+     const enoughQuestionsAvailable = bankAvailability.every(available => available);
  
      if (enoughQuestionsAvailable) {
        res.status(200).json({ message: "Enough questions are available to create the next exam." });
      } else {
        res.status(400).json({ message: "Not enough questions available to create the next exam." });
      }
+ 
    } catch (error) {
      console.error('Error checking question availability:', error);
      next(error);
    }
  };
+ 
  
 
 
@@ -180,10 +183,11 @@ export const editQuestion = async (req, res, next) => {
    }
 
    const { bank, content, options, correctAnswer, justification } = req.body;
-   const questionId = req.body._id;
+   const questionId = req.params.questionId;
+
 
    // Making sure all fields are filled
-   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null || !questionId) {
+   if (!bank || !content || !Array.isArray(options) || options.length === 0 || correctAnswer === null) {
       return next(errorHandler(400, 'Please provide all required fields'));
    }
 
@@ -231,17 +235,20 @@ export const deleteQuestion = async (req, res, next) => {
 export const getQuestions = async (req, res, next) => {
    try {
        const startIndex = parseInt(req.query.startIndex) || 0;
-       const limit = parseInt(req.query.limit) || 9;
+       const limit = parseInt(req.query.limit) || 6;
        const sortDirrection = req.query.sort === 'asc' ? 1 : -1;
-       const posts = await Question.find({
-           ...(req.query.userId && { userId: req.query.userId }),
+       console.log(req.query);
+       
+       const questions = await Question.find({
+           ...(req.query.Id && { _id: req.query.Id }),
            ...(req.query.bank && { category: req.query.bank }),
-           ...(req.query.content && { _id: req.query.content }),
+           ...(req.query.content && { content: req.query.content }),
            ...(req.query.searchTerm && {
                $or: [
-                   { options: { $regex: req.query.options, $options: 'i' } },
-                   { content: { $regex: req.query.searchTerm, $options: 'i' } },
-                   { justification: { $regex: req.query.justification, $options: 'i' } },
+                  //  { _id: { $regex: req.query.Id, $options: 'i' } },
+                   { options: { $elemMatch: { $regex: new RegExp(req.query.searchTerm, 'i') } } },
+                   { content: { $regex: new RegExp(req.query.searchTerm, 'i') } },
+                   { justification: { $regex: new RegExp(req.query.searchTerm, 'i') } },
                ],
            }),
        })
@@ -253,7 +260,7 @@ export const getQuestions = async (req, res, next) => {
        res
            .status(200)
            .json({ 
-               posts, 
+               questions, 
                totalQuestions, 
            });
        
@@ -265,17 +272,46 @@ export const getQuestions = async (req, res, next) => {
 
 export const getQuestionById = async (req, res, next) => {
    const questionId = req.params.questionId;
+   
+   
 
    try {
       const question = await Question.findById(questionId)
-
       if (!question) {
          return next(errorHandler(404, 'Question not found'));
       }
 
       res.status(200).json(question);
+      //console.log(question);
+      
 
    } catch (error) {
       next(error)
+   }
+}
+export const activeQuestion = async (req, res, next) => {
+   if (req.user.userLevel !== 1 && req.user.userLevel !== 2) {
+      return next(errorHandler(403, 'You are not allowed to activate a question'));
+   }
+
+   const questionId = req.params.questionId;
+
+   try {
+      // Fetch the current question
+      const question = await Question.findById(questionId);
+
+      if (!question) {
+         return next(errorHandler(404, 'Question not found'));
+      }
+
+      // Toggle the isActive value
+      question.isActive = !question.isActive;
+
+      // Save the updated question
+      const updatedQuestion = await question.save();
+
+      res.status(200).json(updatedQuestion);
+   } catch (error) {
+      next(error);
    }
 }

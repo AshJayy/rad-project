@@ -22,6 +22,7 @@ import {
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { Link } from "react-router-dom";
+import { FiEdit } from "react-icons/fi";
 
 const customFloatingLabelTheme = {
   input: {
@@ -54,6 +55,8 @@ export default function DashProfile() {
   const [showModel, setShowModel] = useState(false);
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
+  const [edit, setEdit] = useState(false);
+  const usernameRef = useRef(null);
   //console.log(imageFileUploadProgress,imageFileUploadError);
   const filePickerRef = useRef();
   const handleImageChange = (e) => {
@@ -69,6 +72,12 @@ export default function DashProfile() {
       uploadImage();
     }
   }, [imageFile]);
+
+  useEffect(() => {
+    if (edit && usernameRef.current) {
+      usernameRef.current.focus(); // Focus on the input field
+    }
+  }, [edit]); 
 
   const uploadImage = async () => {
     //console.log('uploading image.....');
@@ -160,7 +169,7 @@ export default function DashProfile() {
 
   const handleSignout = async () => {
     try {
-      const res = await fetch("/api/user/signout", {
+      const res = await fetch("/api/users/signout", {
         method: "POST",
       });
       const data = await res.json();
@@ -178,70 +187,100 @@ export default function DashProfile() {
     <div className="p-3 w-full lg:ml-10 lg:mr-20">
       <h1 className="my-7 font-semibold text-2xl mb-10">Profile</h1>
       {imageFileUploadError && (
-            <Alert color="failure">{imageFileUploadError}</Alert>
-          )}
-      <form className="flex flex-col gap-4 mt-5 " onSubmit={handleSubmit}>
-        <div className="bg-white p-5 rounded-xl shadow-md flex">
-          <input
-            type="file"
-            accept="images/*"
-            onChange={handleImageChange}
-            ref={filePickerRef}
-            hidden
-          />
-          <div
-            className="relative w-28 h-28 cursor-pointer  overflow-hidden rounded-full ml-5"
-            onClick={() => filePickerRef.current.click()}
-          >
-            {imageFileUploadProgress && (
-              <CircularProgressbar
-                value={imageFileUploadProgress || 0}
-                text={`${imageFileUploadProgress}%`}
-                strokeWidth={5}
-                styles={{
-                  root: {
-                    width: "100%",
-                    height: "100%",
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  },
-                  path: {
-                    stroke: `rgba(62, 152, 199, ${
-                      imageFileUploadProgress / 100
-                    })`,
-                  },
-                }}
-              />
-            )}
-            <img
-              src={imageFileUrl || currentUser.profilePicture}
-              alt="user"
-              className={`rounded-full w-full h-full border-8 object-cover border-transparent 
-               ${
-                 imageFileUploadProgress &&
-                 imageFileUploadProgress < 100 &&
-                 "opacity-60"
-               }`}
-            />
-          </div>
-          <div className="my-auto ml-10">
-            <h1 className="font-semibold text-xl mb-2">
-              {currentUser.username}
-            </h1>
-            <h1 className="text-gray-400 text-sm ">
-              {currentUser.userLevel > 0 ? "Admin" : "Student"}
-            </h1>
-          </div>
-          
-          <div className="text-red-500 ml-auto mr-2">
-            <span onClick={handleSignout} className="cursor-pointer">
-          Sign Out
-        </span>
-      </div>
-        </div>
-        <div className="bg-white p-10 rounded-xl shadow-md flex-row space-y-5 space-x-4">
-          <h1 className="font-semibold text-xl mb-10">Personal Information</h1>
+        <Alert color="failure">{imageFileUploadError}</Alert>
+      )}
+      <form className="flex flex-col gap-4 mt-5 ">
+      <div className="bg-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-center">
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleImageChange}
+    ref={filePickerRef}
+    hidden
+  />
+  <div
+    className="relative w-28 h-28 cursor-pointer overflow-hidden rounded-full mt-4 sm:mt-0 sm:ml-5"
+    onClick={() => filePickerRef.current.click()}
+  >
+    {imageFileUploadProgress && (
+      <CircularProgressbar
+        value={imageFileUploadProgress || 0}
+        text={`${imageFileUploadProgress}%`}
+        strokeWidth={5}
+        styles={{
+          root: {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          },
+          path: {
+            stroke: `rgba(62, 152, 199, ${
+              imageFileUploadProgress / 100
+            })`,
+          },
+        }}
+      />
+    )}
+    <img
+      src={imageFileUrl || currentUser.profilePicture}
+      alt="user"
+      className={`rounded-full w-full h-full border-8 object-cover border-transparent ${
+        imageFileUploadProgress &&
+        imageFileUploadProgress < 100 &&
+        "opacity-60"
+      }`}
+    />
+  </div>
+  <div className="my-auto ml-0 sm:ml-10 text-center sm:text-left">
+    <h1 className="font-semibold text-xl mb-2">
+      {currentUser.username}
+    </h1>
+    <h1 className="text-gray-400 text-sm">
+      {currentUser.userLevel > 0 ? "Admin" : "Student"}
+    </h1>
+  </div>
+
+  <div className="flex flex-col sm:flex-row sm:ml-auto gap-4 mt-4 sm:mt-0 items-center">
+    <span
+      onClick={handleSignout}
+      className="cursor-pointer text-red-500"
+    >
+      Sign Out
+    </span>
+    <Button
+      type="submit"
+      disabled={loading || imageFileUploading}
+      color="blue"
+      pill
+      className="mt-4 sm:mt-0"
+      onClick={handleSubmit}
+    >
+      {loading ? "Loading..." : "Update Image"}
+    </Button>
+  </div>
+</div>
+
+
+
+        <div
+          className={`${
+            !edit ? "" : "bg-white"
+          } transition p-10 rounded-xl shadow-md flex-row space-y-5 space-x-4`}
+        >
+          <span className="font-semibold text-xl mb-10 flex felx-row">
+            Personal Information
+            <button
+              className={`ml-auto ${!edit ? "" : "text-mid-blue"}`}
+              type="button"
+              onClick={() => {
+                edit ? setEdit(false) : setEdit(true);
+              }}
+            >
+              <FiEdit />
+            </button>
+          </span>
 
           <FloatingLabel
             theme={customFloatingLabelTheme}
@@ -249,9 +288,13 @@ export default function DashProfile() {
             id="username"
             variant="standard"
             label="Username"
+            // className={`${!edit ? "" : ""}`}
+            ref={usernameRef} 
             defaultValue={currentUser.username}
             onChange={handleChange}
+            disabled={!edit}
           />
+
           <FloatingLabel
             theme={customFloatingLabelTheme}
             type="text"
@@ -260,6 +303,7 @@ export default function DashProfile() {
             label="Full Name"
             defaultValue={currentUser.name ? currentUser.name : "No Name"}
             onChange={handleChange}
+            disabled={!edit}
           />
           <FloatingLabel
             theme={customFloatingLabelTheme}
@@ -269,17 +313,19 @@ export default function DashProfile() {
             label="Email Address"
             defaultValue={currentUser.email}
             onChange={handleChange}
+            disabled={!edit}
           />
           <FloatingLabel
             theme={customFloatingLabelTheme}
             type="phone"
-            id="number"
+            id="phone"
             variant="standard"
             label="Phone Number"
             defaultValue={
-              currentUser.number ? currentUser.number : "+94 xxx xxx xxx"
+              currentUser.phone ? currentUser.phone : "+94 xxx xxx xxx"
             }
             onChange={handleChange}
+            disabled={!edit}
           />
           <FloatingLabel
             theme={customFloatingLabelTheme}
@@ -288,6 +334,7 @@ export default function DashProfile() {
             variant="standard"
             label="New Password"
             onChange={handleChange}
+            disabled={!edit}
           />
         </div>
         <div className="flex gap-5 w-full justify-end">
@@ -296,7 +343,8 @@ export default function DashProfile() {
             disabled={loading || imageFileUploading}
             color="blue"
             pill
-            className=""
+            className={!edit ? "hidden " : ""}
+            onClick={handleSubmit}
           >
             {loading ? "Loading..." : "Update Profile"}
           </Button>
@@ -305,7 +353,7 @@ export default function DashProfile() {
           </Button>
         </div>
       </form>
-      
+
       {updateUserSuccess && (
         <Alert color="success" className="mt-5">
           {updateUserSuccess}
