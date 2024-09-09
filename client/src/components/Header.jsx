@@ -170,36 +170,7 @@ export default function Header() {
             </span>
           )}
 
-        {currentPath !== "/freetrial" && (
-          <>
-            {currentUser ? (
-              currentUser.userLevel === 0 &&
-              currentUser.currentPlan === -1 && (
-                <Button
-                  className="bg-mid-blue"
-                  pill
-                  onClick={handleFreeTrialClick}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <FaSpinner className="animate-spin mr-2" />
-                      Loading...
-                    </>
-                  ) : (
-                    "Start free trial"
-                  )}
-                </Button>
-              )
-            ) : (
-              <Button className="bg-mid-blue" pill>
-                <Link to={"/signin"} state={{ from: "/freetrial" }}>
-                  Start free trial
-                </Link>
-              </Button>
-            )}
-          </>
-        )}
+        
           <div className="hidden lg:block">
             {currentPath !== "/freetrial" && (
               <>
