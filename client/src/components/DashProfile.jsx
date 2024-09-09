@@ -190,78 +190,80 @@ export default function DashProfile() {
         <Alert color="failure">{imageFileUploadError}</Alert>
       )}
       <form className="flex flex-col gap-4 mt-5 ">
-        <div className="bg-white p-5 rounded-xl shadow-md flex">
-          <input
-            type="file"
-            accept="images/*"
-            onChange={handleImageChange}
-            ref={filePickerRef}
-            hidden
-          />
-          <div
-            className="relative w-28 h-28 cursor-pointer  overflow-hidden rounded-full ml-5"
-            onClick={() => filePickerRef.current.click()}
-          >
-            {imageFileUploadProgress && (
-              <CircularProgressbar
-                value={imageFileUploadProgress || 0}
-                text={`${imageFileUploadProgress}%`}
-                strokeWidth={5}
-                styles={{
-                  root: {
-                    width: "100%",
-                    height: "100%",
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  },
-                  path: {
-                    stroke: `rgba(62, 152, 199, ${
-                      imageFileUploadProgress / 100
-                    })`,
-                  },
-                }}
-              />
-            )}
-            <img
-              src={imageFileUrl || currentUser.profilePicture}
-              alt="user"
-              className={`rounded-full w-full h-full border-8 object-cover border-transparent 
-               ${
-                 imageFileUploadProgress &&
-                 imageFileUploadProgress < 100 &&
-                 "opacity-60"
-               }`}
-            />
-          </div>
-          <div className="my-auto ml-10">
-            <h1 className="font-semibold text-xl mb-2">
-              {currentUser.username}
-            </h1>
-            <h1 className="text-gray-400 text-sm ">
-              {currentUser.userLevel > 0 ? "Admin" : "Student"}
-            </h1>
-          </div>
+      <div className="bg-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-center">
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleImageChange}
+    ref={filePickerRef}
+    hidden
+  />
+  <div
+    className="relative w-28 h-28 cursor-pointer overflow-hidden rounded-full mt-4 sm:mt-0 sm:ml-5"
+    onClick={() => filePickerRef.current.click()}
+  >
+    {imageFileUploadProgress && (
+      <CircularProgressbar
+        value={imageFileUploadProgress || 0}
+        text={`${imageFileUploadProgress}%`}
+        strokeWidth={5}
+        styles={{
+          root: {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          },
+          path: {
+            stroke: `rgba(62, 152, 199, ${
+              imageFileUploadProgress / 100
+            })`,
+          },
+        }}
+      />
+    )}
+    <img
+      src={imageFileUrl || currentUser.profilePicture}
+      alt="user"
+      className={`rounded-full w-full h-full border-8 object-cover border-transparent ${
+        imageFileUploadProgress &&
+        imageFileUploadProgress < 100 &&
+        "opacity-60"
+      }`}
+    />
+  </div>
+  <div className="my-auto ml-0 sm:ml-10 text-center sm:text-left">
+    <h1 className="font-semibold text-xl mb-2">
+      {currentUser.username}
+    </h1>
+    <h1 className="text-gray-400 text-sm">
+      {currentUser.userLevel > 0 ? "Admin" : "Student"}
+    </h1>
+  </div>
 
-          <div className="felx ml-auto gap-4">
-            <span onClick={handleSignout} className="cursor-pointer text-red-500 ml-16 ">
-              Sign Out
-            </span>
-            <Button
-            type="submit"
-            disabled={loading || imageFileUploading}
-            color="blue"
-            pill
-            className="mt-10"
-            onClick={handleSubmit}
-          >
-            {loading ? "Loading..." : "Update Image"}
-          </Button>
-          </div>
-          <div className="flex flex-col mt-auto mr-2">
-          
-          </div>
-        </div>
+  <div className="flex flex-col sm:flex-row sm:ml-auto gap-4 mt-4 sm:mt-0 items-center">
+    <span
+      onClick={handleSignout}
+      className="cursor-pointer text-red-500"
+    >
+      Sign Out
+    </span>
+    <Button
+      type="submit"
+      disabled={loading || imageFileUploading}
+      color="blue"
+      pill
+      className="mt-4 sm:mt-0"
+      onClick={handleSubmit}
+    >
+      {loading ? "Loading..." : "Update Image"}
+    </Button>
+  </div>
+</div>
+
+
+
         <div
           className={`${
             !edit ? "" : "bg-white"

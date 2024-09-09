@@ -53,8 +53,9 @@ export default function DashSidebar() {
   return (
     <Sidebar className="w-full md:w-72" theme={customSidebarTheme}>
       <Sidebar.Items className="">
-        <Sidebar.ItemGroup className="flex flex-col gap-1 ">
+        <Sidebar.ItemGroup className="flex flex-col gap-1 pt-12">
           {currentUser.userLevel >= 0 && (
+            
             <Link to="/dashboard?tab=dash">
               <Sidebar.Item
                 active={tab === "dash" || !tab}

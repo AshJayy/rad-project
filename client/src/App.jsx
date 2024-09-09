@@ -1,4 +1,4 @@
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import FreeTrial from './pages/FreeTrial'
 import Exam from './pages/Exam'
@@ -15,25 +15,31 @@ import CreateQuestion from './pages/CreateQuestion'
 import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
 import UpdateQuestion from './pages/UpdateQuestion'
 import QuestionPage from './pages/questionPage'
+import ScrollToTop from './components/ScrollToTop'
 import _404 from './pages/_404'
 
 function App() {
+  const location = useLocation();
+
+  // Pages where Header and Footer should not be displayed
+  const noHeaderFooterRoutes = ['/signin', '/signup'];
 
   return (
-    <BrowserRouter>
-      <Header />
+    <>
+      {/* Conditionally render Header and Footer */}
+      {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
+    <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="signin" element={<SignIn />} /> 
+        <Route path="signup" element={<SignUp />} />
         <Route path="freetrial" element={<FreeTrial />} />
         <Route path="exam" element={<Exam />} />
-        <Route path="signin" element={<SignIn />} />
-        <Route path="signup" element={<SignUp />} />
         <Route path="subscribe" element={<Subscribe />} />
         <Route path="about" element={<About />} />
         <Route path="pricing" element={<Pricing />} />
         <Route element={<PrivateRoute />}>
           <Route path='/dashboard' element={<Dashboard />} />
-          
         </Route>
         <Route element={<PrivateRouteOnlyAdmin />}>
           <Route path='/createQuestion' element={<CreateQuestion />} />
@@ -42,9 +48,15 @@ function App() {
         </Route>
         <Route path="*" element={<_404 />} />
       </Routes>
-      <Footer />
-    </BrowserRouter>
+      {!noHeaderFooterRoutes.includes(location.pathname) && <Footer />}
+    </>
   )
 }
 
-export default App
+export default function AppWrapper() {
+  return (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  )
+}

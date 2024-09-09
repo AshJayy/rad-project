@@ -59,7 +59,22 @@ export default function QuestionPage() {
 
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
-      <h1 className="text-center text-3xl my-7 font-semibold">View Question</h1>
+      <div className="flex flex-row ">
+      <Button
+            className="my-auto text-black  border-gray-400 bg-gray-100 border-2 "
+            onClick={() => {
+              navigate(`/dashboard?tab=qaMan`);
+            }}
+            
+          >
+           {`<`} 
+          </Button>
+          <div className="flex justify-center items-center mx-auto">
+          <h1 className="text-center text-3xl my-7 font-semibold">View Question</h1>
+
+          </div>
+      </div>
+      
       <form className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 mb-5 justify-between">
           <div className="flex-1 mb-5">

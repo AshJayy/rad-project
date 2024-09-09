@@ -6,8 +6,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 
-export default function Answers({ questions, marks, timeTaken }) {
-  const correctAnswers = Math.round((questions.length * marks) / 100);
+export default function Answers({ questions, marks, timeTaken, correct }) {
+  // const correctAnswers = Math.round((questions.length * marks) / 100);
   const { currentUser } = useSelector((state) => state.user);
 
   const location = useLocation();
@@ -70,7 +70,7 @@ export default function Answers({ questions, marks, timeTaken }) {
           Your Score : {marks} %{" "}
         </h3>
         <p className="text-white opacity-50 ">
-          Correct Answers: {correctAnswers} / {questions.length}
+          Correct Answers: {correct} / {questions.length}
         </p>
         <p className="text-white opacity-50 ">
           Time Taken: {timeTaken}

@@ -5,7 +5,7 @@ import { HiChevronRight } from "react-icons/hi";
 import Question from "../components/Question";
 import Answers from "./Answers";
 import { FcQuestions } from "react-icons/fc";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 // import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
@@ -32,17 +32,20 @@ export default function Exam() {
 
   const [questions, setQuestions] = useState(examQuestions || []);
   const [questionIdx, setquestionIdx] = useState(questionNo || 0);
+  
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [marks, setMarks] = useState(0);
   const examTime = remainingTime || 30 * 60; // 30 min
   const [timeLeft, setTimeLeft] = useState(examTime);
   const [startTimer, setStartTimer] = useState(true);
+
   const [takenTime, setTakenTime] = useState(120);
   const [ready, setReady] = useState(isReady);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [correct,setCorrect] = useState(0);
 
-  
+ 
   const [currentPage, setCurrentPage] = useState(0);
   const buttonsPerPage = 10;
 
@@ -54,8 +57,34 @@ export default function Exam() {
   const currentQuestions = questions.slice(startIdx, endIdx);
 
   useEffect(() => {
+    if (examQuestions.length > 0) {
+      localStorage.setItem("examQuestions", JSON.stringify(examQuestions));
+    }
+    if (remainingTime > 0) {
+      localStorage.setItem("remainingTime", JSON.stringify(remainingTime));
+    }
+  }, [examQuestions, remainingTime]);
+
+  useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
+
+      // Check if questions are in local storage
+      const storedQuestions = localStorage.getItem("examQuestions");
+      const storedTimeLeft = localStorage.getItem("remainingTime");
+
+      if (storedQuestions && storedTimeLeft) {
+        // Parse and set the stored questions and time
+        const parsedQuestions = JSON.parse(storedQuestions);
+        const parsedTimeLeft = JSON.parse(storedTimeLeft);
+
+        setQuestions(parsedQuestions);
+        setTimeLeft(parsedTimeLeft);
+        setReady(true); // Set exam ready if questions are already stored
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(
           `/api/question/getuserquestions?userID=${currentUser._id}`
@@ -68,7 +97,11 @@ export default function Exam() {
                 choice: -1,
               }))
             : [];
-          dispatch(examStart({ examQuestions: modifiedData, remainingTime: examTime }));
+          // Save questions and remaining time to local storage
+          localStorage.setItem("examQuestions", JSON.stringify(modifiedData));
+          localStorage.setItem("remainingTime", JSON.stringify(timeLeft));
+
+          dispatch(examStart({ examQuestions: modifiedData, remainingTime: timeLeft })          );
           setQuestions(modifiedData);
         } else {
           dispatch(examFailure());
@@ -81,8 +114,10 @@ export default function Exam() {
       }
     };
 
-    if (currentUser && questions.length === 0) {
-      fetchQuestions(); // Call fetchQuestions only if currentUser is defined   
+    if (currentUser) {
+      // todo: check question len == 0
+      fetchQuestions(); // Call fetchQuestions only if currentUser is defined
+
     }
   }, [currentUser]);
 
@@ -104,6 +139,13 @@ export default function Exam() {
     return () => clearInterval(timer);
   }, [startTimer, ready, dispatch]);
 
+  // Dispatching the action in a separate effect
+  useEffect(() => {
+    if (timeLeft > 0) {
+      dispatch(updateRemainingTime(timeLeft));
+    }
+  }, [timeLeft, dispatch]);
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -122,7 +164,28 @@ export default function Exam() {
     });
     dispatch(updateExamQuestions({ examQuestions: updatedQuestions, questionNo: questionIdx + 1 }));
     setQuestions(updatedQuestions);
+    setQuestionNum(qNo);
+    // Save updated answers to localStorage
+  localStorage.setItem("examQuestions", JSON.stringify(updatedQuestions));
+  dispatch(updateExamQuestions({ examQuestions: updatedQuestions, questionNo: qNo }));
+    
   };
+
+  useEffect(() => {
+    if (questions.length > 0) {
+      const storedQuestionIdx = localStorage.getItem("questionIdx");
+      if (storedQuestionIdx) {
+        setquestionIdx(parseInt(storedQuestionIdx, 10)); // Restore the question index
+      }
+    }
+  }, [questions]);  // Run this effect only after questions are loaded
+
+  useEffect(() => {
+    if (questions.length > 0 && questionIdx !== 0) {
+      // Store the current questionIdx in localStorage after questions are loaded and questionIdx is updated
+      localStorage.setItem("questionIdx", questionIdx);
+    }
+  }, [questionIdx, questions]);
 
   const calculateMarks = () => {
     const totalMarks = questions.reduce((acc, question) => {
@@ -131,6 +194,7 @@ export default function Exam() {
       }
       return acc;
     }, 0);
+    setCorrect(totalMarks);
     return (totalMarks / questions.length) * 100;
   };
 
@@ -158,11 +222,19 @@ export default function Exam() {
   const handleSubmit = async () => {
     setCompleted(true);
     setStartTimer(false);
+
+    // Clear the local storage when the exam is completed
+    localStorage.removeItem("examQuestions");
+    localStorage.removeItem("remainingTime");
+    localStorage.removeItem("questionIdx");
+
     const timeTaken = examTime - timeLeft;
+    console.log(examTime)
     setTakenTime(formatTime(timeTaken));
     const marks = calculateMarks();
     setMarks(marks.toFixed(0));
-    // await updateExam(marks, timeTaken);
+    await updateExam(marks, timeTaken);
+
     dispatch(examSuccess());
   };
 
@@ -182,16 +254,23 @@ export default function Exam() {
     const newPage = Math.floor(questionIdx / buttonsPerPage);
     setCurrentPage(newPage);
   }, [questionIdx]);
+  
 
-  const startExam = () => {
-    dispatch(examStart({ examQuestions: questions, remainingTime: examTime }));
-    setReady(true)
-  }
+  const startExam = async () => {
+    // Move this outside the rendering phase
+    setReady(true);
+    // Dispatch the exam start
+    dispatch(examStart({ examQuestions: questions, remainingTime: timeLeft }));
+  };
+
+// console.log(questionNo);
+
+  
   return (
     <>
       {completed ? (
         <div>
-          <Answers questions={questions} marks={marks} timeTaken={takenTime} />
+          <Answers questions={questions} marks={marks} timeTaken={takenTime} correct = {correct} />
         </div>
       ) : (
         <>
@@ -238,6 +317,8 @@ export default function Exam() {
                                     question.choice > -1
                                       ? "bg-mid-blue text-white"
                                       : "bg-light-blue"
+                                  } 
+                                ${questionIdx === index + startIdx && (" border-4 border-blue-500")
                                   } transition-all`}
                                 >
                                   {index + startIdx + 1}
@@ -330,7 +411,11 @@ export default function Exam() {
                 </div>
                 <Button
                   className=" font-semibold bg-mid-blue rounded-full"
-                  onClick={startExam}
+                  // onClick={() => setReady(true)}
+                  onClick={() => {
+                    startExam();
+                  }}
+
                 >
                   Start Exam
                 </Button>

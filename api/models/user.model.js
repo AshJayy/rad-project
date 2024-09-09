@@ -36,14 +36,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    userTier: {
+    currentPlan: {
       type: Number,
       required: true,
-      default: 0,
-      // 0: unsubscribed
-      // 1: plan 1
-      // 2: plan 2
-      // 3: plan 3
+      enum: [-1,0,1,2],
+      default: -1,
+      // -1: unsubscribe
+      // 0: weekly
+      // 1: monthly
+      // 2: annuall
     },
 
   },
