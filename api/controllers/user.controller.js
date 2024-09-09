@@ -160,7 +160,7 @@ export const makeUserAdmin = async (req, res) => {
 export const searchUsers = async (req, res, next) => {
   try {
     const { searchTerm } = req.query;
-    console.log(searchTerm);
+    // console.log(searchTerm);
 
     const users = await User.find({
       
@@ -171,7 +171,11 @@ export const searchUsers = async (req, res, next) => {
         { phone: { $regex: searchTerm, $options: 'i' } },
       ],
     });
-    res.status(200).json(users);
+    const updatedUser = users.map((user) => {
+      const { password, ...rest } = user._doc;
+      return rest;
+    });
+    res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }

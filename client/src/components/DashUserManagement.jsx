@@ -1,19 +1,57 @@
-import { Table, Button } from "flowbite-react";
+import { Table, Button, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { IoClose } from "react-icons/io5"; // Import close icon
-import { set } from "mongoose";
+import { AiOutlineSearch } from "react-icons/ai";
+import { useLocation, useNavigate } from "react-router-dom";
+
+
 
 export default function DashUsers() {
   const { currentUser } = useSelector((state) => state.user);
   const [users, setUsers] = useState([]);
   const [showMore, setShowMore] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null); // Track the selected user for the modal
-  const [userLimit, setUserLimit] = useState(5);
+  const [userLimit, setUserLimit] = useState(9);
   const [totalUsers, setTotalUsers] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+
 
   // setUserLimit(5);
+
+  const handleSearch = (e) => {
+    e.preventDefault(); // Prevent form from submitting
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("searchTerm", searchTerm);
+    navigate(`/dashboard?${urlParams}`);
+  };
+  
+  
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const searchTermFromURL = searchParams.get("searchTerm") || "";
+    setSearchTerm(searchTermFromURL); // Sync the state with the URL
+
+    const searchUsers = async () => {
+      try {
+        const res = await fetch(`/api/users/search/?searchTerm=${searchTerm}`);
+        const data = await res.json();
+        if (res.ok) {
+          setUsers(data);
+          // console.log(data);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    searchUsers();
+
+  }, [location.search]);
 
   useEffect(() => {
     const fetchLimitUsers = async () => {
@@ -51,7 +89,7 @@ export default function DashUsers() {
       setUsers(data.users);
       // setUserLimit(data.users.length);
       // console.log("hello");
-      console.log(data.users);
+      // console.log(data.users);
       
       if (data.users.length < totalUsers) {
         setShowMore(true);
@@ -162,8 +200,21 @@ export default function DashUsers() {
 
   return (
     <div className="table-auto overflow-x-scroll md:mx-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 dark:scrollbar-track-slate-700 dark:scrollbar-thumb-slate-500">
+      <form onSubmit={handleSearch} className="md:flex-1 md:mr-4 mb-3">
+            <TextInput
+              type="text"
+              placeholder="Search ..."
+              rightIcon={AiOutlineSearch}
+              value={searchTerm}
+              className="w-full"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </form>
+      
       {currentUser.userLevel > 0 && users.length > 0 ? (
         <>
+          
+
           <Table hoverable className="shadow-md">
             <Table.Head>
               <Table.HeadCell>Date created</Table.HeadCell>
