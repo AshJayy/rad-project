@@ -122,7 +122,7 @@ export default function DashQAManagement() {
   
 
   return (
-    <div className="flex sm:flex-col w-full p-4">
+    <div className="flex flex-col w-full p-4">
       <div className="flex flex-col gap-4 w-full h-12 md:flex-row md:items-center md:justify-between">
         <form onSubmit={handleSearch} className="md:flex-1 md:mr-4">
           <TextInput
@@ -143,9 +143,9 @@ export default function DashQAManagement() {
         </button>
       </div>
       {loading ? (
-        <div className="text-gray-500 mt-4 text-center">Loading...</div>
+        <div className="text-gray-500 mt-20 lg:mt-4 text-center">Loading...</div>
       ) : (
-        <div className="mt-4 flex flex-col">
+        <div className="lg:mt-4 flex mt-16 flex-col">
           {questions.length === 0 ? (
             <div className="text-gray-500 text-center">No questions</div>
           ) : (
@@ -153,8 +153,8 @@ export default function DashQAManagement() {
               <Table>
                 <Table.Head className="">
                   <Table.HeadCell>Bank</Table.HeadCell>
-                  <Table.HeadCell>Question</Table.HeadCell>
-                  <Table.HeadCell>Correct Answers</Table.HeadCell>
+                  <Table.HeadCell className="truncate lg:max-w-xs max-w-2">Question</Table.HeadCell>
+                  <Table.HeadCell className="hidden lg:block">Correct Answers</Table.HeadCell>
                   <Table.HeadCell>Active</Table.HeadCell>
                   <Table.HeadCell>Edit</Table.HeadCell>
                   <Table.HeadCell>Delete</Table.HeadCell>
@@ -163,12 +163,12 @@ export default function DashQAManagement() {
                   {questions.map((question, index) => (
                     <Table.Row key={index} className="bg-white">
                       <Table.Cell>{question.bank}</Table.Cell>
-                      <Table.Cell className="truncate max-w-xs" >
+                      <Table.Cell className="truncate lg:max-w-xs max-w-2" >
                         <Link to = {`/question/${question._id}`}>
                           {question.content}
                         </Link>
                       </Table.Cell>
-                      <Table.Cell className="truncate max-w-xs">
+                      <Table.Cell className="truncate max-w-xs hidden lg:block">
                         {question.options &&
                           question.options[question.correctAnswer]}
                       </Table.Cell>
