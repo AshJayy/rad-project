@@ -157,5 +157,23 @@ export const makeUserAdmin = async (req, res) => {
   }
 };
 
+export const searchUsers = async (req, res, next) => {
+  try {
+    const { searchTerm } = req.query;
+    const users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } },
+        { name: { $regex: query, $options: 'i' } },
+        { phone: { $regex: query, $options: 'i' } },
+      ],
+    });
+
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+}
+
 
  
