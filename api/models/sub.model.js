@@ -7,6 +7,10 @@ const subSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    startDate: {
+      type: Date,
+      required: true,
+    },
     validUntil: {
       type: Date,
       required: true,
@@ -36,6 +40,17 @@ const subSchema = new mongoose.Schema(
       ],
       default: [], 
     },
+    currentPlan: {
+      type: Number,
+      required: true,
+      enum: [-1,0,1,2],
+      default: -1,
+      // -1: unsubscribe
+      // 0: weekly
+      // 1: monthly
+      // 2: annuall
+    },
+
   },
   { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );

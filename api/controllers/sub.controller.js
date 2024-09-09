@@ -1,6 +1,7 @@
 import { errorHandler } from "../utils/error.js"
 import Sub from "../models/sub.model.js";
 
+
 export const makePayment = async (req, res, next) => {
     if (!req.body.userId || !req.body.type) {
         return next(errorHandler(400, 'User ID and subscription type required'));
@@ -88,10 +89,27 @@ export const payhere = async (req, res, next) => {
 };
 
 
+// Controller function to get a subscription by userId
 export const getSubs = async (req, res, next) => {
-    console.log("works")
-    
+    const userId = req.params.userId;  // Ensure userId is passed correctly
+
+    try {
+        // Check if userId is a valid MongoDB ObjectId or change to findOne if using userId as a field
+        const sub = await Sub.findOne({ userId: userId });
+
+        // If no subscription is found, return a 404 error
+        if (!sub) {
+            return next(errorHandler(400, 'Subscription not found'));
+        }
+
+        // Respond with the found subscription
+        res.status(200).json(sub);
+    } catch (error) {
+        // Pass any errors to the error-handling middleware
+        next(error);
+    }
 };
+
 
 export const deleteSub = async (req, res, next) => {
     console.log("works")

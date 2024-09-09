@@ -42,6 +42,40 @@ export default function DashExamHistory() {
   const navigate = useNavigate();
 
   const [selectedExam, setSelectedExam] = useState(null);
+  const [sub, setSub] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  useEffect(() => {
+    const getSub = async () => {
+      try {
+        const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
+          method: "GET",
+        });
+        if (!res.ok) {
+          console.log("Error:", res.status, res.statusText);
+        } else {
+          const data = await res.json();
+          setSub(data);
+  
+          const today = new Date();
+          const validUntil = new Date(data.validUntil);
+  
+          if (validUntil.getTime() > today.getTime()) {
+            setSubscribed(true);
+            console.log("Subscription valid: true");
+          } else {
+            setSubscribed(false);
+            console.log("Subscription valid: false");
+          }
+        }
+      } catch (error) {
+        console.log("Fetch error:", error.message);
+      }
+    };
+  
+    if (currentUser?._id) {
+      getSub();
+    }
+  }, [currentUser]); 
 
   const createExam = async (examNum) => {
     try {
@@ -213,7 +247,19 @@ export default function DashExamHistory() {
       </div>
     );
   }
-
+  if (!subscribed) {
+    return (
+        <div className="flex flex-col p-4 gap-4 w-full items-center ">
+            <h3>Please subscribe to view this information.</h3>
+            <button
+                className="mt-4 rounded-md h-[35px] w-[120px] border-2 border-mid-blue hover:text-white hover:bg-mid-blue"
+                onClick={() => navigate('/pricing')}
+            >
+                subscribe
+            </button>
+        </div>
+    );
+}
   return (
     <div className="flex flex-col p-4 gap-4 w-full items-center">
       {!loading && (
@@ -259,8 +305,10 @@ export default function DashExamHistory() {
                 <h1>
                   No of correct answers:{" "}
                   <span className="text-gray-500 ml-5">
-                    {Math.round((exam.questions?.length || 0) * (exam.totalMarks / 100))} /{" "}
-                    {exam.questions?.length || 0}
+                    {Math.round(
+                      (exam.questions?.length || 0) * (exam.totalMarks / 100)
+                    )}{" "}
+                    / {exam.questions?.length || 0}
                   </span>
                 </h1>
                 <h1>

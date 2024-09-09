@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post('/makepayment', verifyToken, makePayment);
 router.post('/payhere', payhere);
-router.get('/getsubs', getSubs);
+router.get('/getsubs/:userId', getSubs);
 router.delete('/deletesub/:subId', verifyToken, deleteSub);
 router.put('/updatesub/:subId', verifyToken, updateSub);
 
