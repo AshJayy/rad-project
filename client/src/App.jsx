@@ -35,9 +35,8 @@ function App() {
         <Route path="signup" element={<SignUp />} />
         <Route path="freetrial" element={<FreeTrial />} />
         <Route path="exam" element={<Exam />} />
-        <Route path="subscribe" element={<Subscribe />} />
         <Route path="about" element={<About />} />
-        <Route path="pricing" element={<Pricing />} />
+        <Route path="pricing" element={<Subscribe />} />
         <Route element={<PrivateRoute />}>
           <Route path='/dashboard' element={<Dashboard />} />
         </Route>

@@ -1,9 +1,15 @@
 import { errorHandler } from "../utils/error.js"
 import Sub from "../models/sub.model.js";
+import Stripe from 'stripe';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const subscribe = async (req, res, next) => {
     try {
       // Check if user is allowed to subscribe
+      console.log(req)
       if (req.user.userLevel === 1 || req.user.userLevel === 2) {
         return next(errorHandler(403, 'You are not allowed to subscribe'));
       }
@@ -55,82 +61,229 @@ export const subscribe = async (req, res, next) => {
     }
   };
 
-export const makePayment = async (req, res, next) => {
-    if (!req.body.userId || !req.body.type) {
-        return next(errorHandler(400, 'User ID and subscription type required'));
+
+
+
+
+// Reusable function for handling subscription updates
+const handleSubscriptionUpdate = async (userId, type, sessionId, status = 2) => {
+    const getUpdatedValidityDate = (currentDate, subscriptionType) => {
+        switch (subscriptionType) {
+            case 1: // Weekly
+                return new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from startDate
+            case 2: // Monthly
+                return new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from startDate
+            case 3: // Yearly
+                return new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate()); // 1 year from startDate
+            default:
+                return currentDate;
+        }
+    };
+
+    const sub = await Sub.findOne({ userId });
+    const now = new Date();
+    const valid = new Date(sub.validUntil);
+    let startDate;
+    if (valid < now) {
+        startDate = now;
+    }else{
+        startDate = valid;
+    }
+    const validityDate = getUpdatedValidityDate(startDate, type);
+    // console.log('start date is '+ startDate);
+    // console.log('extended date is '+ validityDate);
+    if (sub) {
+        // Update existing subscription
+        const updatedSub = await Sub.findByIdAndUpdate(
+            sub._id,
+            {
+                $set: {
+                    validUntil: validityDate,
+                    status,
+                    sessionId,
+                },
+                $push: {
+                    history: {
+                        paymentDate: now,
+                        type,
+                    }
+                }
+            },
+            { new: true }
+        );
+        await updatedSub.save();
+        // console.log(updatedSub);
+    } else {
+        // Create new subscription
+        const newSub = new Sub({
+            userId,
+            validUntil: validityDate,
+            status,
+            sessionId,
+            history: [{
+                paymentDate: now,
+                type,
+            }]
+        });
+        await newSub.save();
+        // console.log(newSub);
+    }
+};
+
+// checkoutSession function to handle stripe session
+export const checkoutSession = async (req, res, next) => {
+    const { product, type, userId } = req.body;
+    
+    if (!product || typeof product !== 'object' || !userId || !type) {
+        return res.status(400).json({ error: 'Product, userId, and type are required' });
     }
 
-    if (!['1', '2', '3'].includes(req.body.type)) { // Ensure valid subscription type
-        return next(errorHandler(400, 'Invalid subscription type'));
-    }
-
-    if(!req.body.status === '1') {
-        req.body.status = 2;
-    }
+    const lineItem = {
+        price_data: {
+            currency: 'lkr',
+            product_data: {
+                name: product.name,
+            },
+            unit_amount: Math.round(product.price) * 100,
+        },
+        quantity: 1,
+    };
 
     try {
-        const { userId, type } = req.body;
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [lineItem],
+            mode: 'payment',
+            success_url: `${process.env.CLIENT_URL}/pricing?cancelled=false&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL}/pricing?cancelled=true&session_id={CHECKOUT_SESSION_ID}`,
+        });
+
+        // Call the reusable function for subscription handling
+        await handleSubscriptionUpdate(userId, type, session.id, 2); // Default status is 2 (Pending)
+
+        res.json({ id: session.id });
+    } catch (error) {
+        console.log(error.message);
+        next(error);
+    }
+};
+
+// makePayment function to call handleSubscriptionUpdate
+export const makePayment = async (req, res, next) => {
+    try {
+        // Check if user is allowed to subscribe
+        if (req.user.userLevel === 1 || req.user.userLevel === 2) {
+            return next(errorHandler(403, 'You are not allowed to subscribe'));
+        }
+
+        const { userId, type, status = 2 } = req.body;
+
+        // Check for required fields
+        if (!userId || !type) {
+            return next(errorHandler(400, 'User ID and subscription type required'));
+        }
+
+        if (!['1', '2', '3'].includes(type)) {
+            return next(errorHandler(400, 'Invalid subscription type'));
+        }
+
+        // Call the reusable function for subscription handling
+        await handleSubscriptionUpdate(userId, type, req.body.sessionId, status);
+        console.log("payment initailaied1")
+        res.status(200).json({ message: "Subscription processed. Confirmation required!" });
+    } catch (error) {
+        console.log(error.message);
+        next(error);
+    }
+};
+
+// function to confirm payment
+export const confirmPayment = async (req, res, next) => {
+    try {
+        const { userId, sessionId } = req.body;
+
+        // Validate required fields
+        if (!userId || !sessionId) {
+            return next(errorHandler(400, 'User ID, subscription type, and session ID required'));
+        }
+
+        // Find subscription by user ID
         const sub = await Sub.findOne({ userId });
-
-        const getUpdatedValidityDate = (currentDate, subscriptionType) => {
-            switch (subscriptionType) {
-                case '1': // Weekly
-                    return new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7);
-                case '2': // Monthly
-                    return new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
-                case '3': // Yearly
-                    return new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), currentDate.getDate());
-                default:
-                    return currentDate;
-            }
-        };
-
+        const now = new Date();  // Define the current date for history
 
         if (sub) {
-            const updatedValidityDate = getUpdatedValidityDate(new Date(sub.validUntil), type);
-            
+            // Update existing subscription
             const updatedSub = await Sub.findByIdAndUpdate(
                 sub._id,
-                { 
-                    $set: { 
-                        validUntil: updatedValidityDate, 
-                        status: req.body.status //default is pending
+                {
+                    $set: {
+                        status: 1,           // Confirmed status
+                        sessionId: 0,        // Reset session ID after confirmation
                     },
-                    $push: { 
-                        history: { 
-                            paymentDate: new Date(), 
-                            type, 
-                        } 
-                    }
                 },
                 { new: true }
             );
 
             await updatedSub.save();
-            return res.status(200).json({ message: "User subscription extended" });
+            console.log("payment confirmed!")
+            return res.status(200).json({ message: "Subscription confirmed!" });
         } else {
-            const now = new Date();
-            const validityDate = getUpdatedValidityDate(now, type);
-
-            const newSub = new Sub({
-                userId,
-                validUntil: validityDate,
-                status: 1,
-                history: [{
-                    paymentDate: now,
-                    type,
-                }]
-            });
-
-            await newSub.save();
-            return res.status(200).json({ message: "Subscription created" });
+            // Handle case where subscription does not exist
+            return next(errorHandler(404, 'Subscription not found for this user'));
         }
-
     } catch (error) {
         console.log(error.message);
         next(error);
     }
-}
+};
+
+export const cancelPayment = async (req, res, next) => {
+    try {
+        const { userId, sessionId } = req.body;
+        // console.log("cancle payment loaded");
+
+        // Validate required fields
+        if (!userId || !sessionId) {
+            return next(errorHandler(400, 'User ID and session ID required'));
+        }
+
+        // Find subscription by user ID
+        const sub = await Sub.findOne({ userId });
+        
+        if (sub) {
+            // console.log("inside sub if");
+
+            // Update existing subscription to canceled
+            const updatedSub = await Sub.findByIdAndUpdate(
+                sub._id,
+                {
+                    $set: {
+                        status: 0,           // Canceled status
+                        sessionId: 0,        // Reset session ID
+                    },
+                    $pop: { history: 1 }   // Remove the last item from the history array
+                },
+                { new: true }
+            );
+
+            await updatedSub.save();
+            // console.log(updatedSub);
+            console.log("payment canceled!")
+            return res.status(200).json({ message: "Subscription canceled successfully, last history entry removed!" });
+        } else {
+            // Handle case where subscription does not exist
+            return next(errorHandler(404, 'Subscription not found for this user'));
+        }
+    } catch (error) {
+        console.log(error.message);
+        next(error);
+    }
+};
+
+
+
+
+
 
 export const payhere = async (req, res, next) => {
     return res.status(200).json({message: "payhere works"})

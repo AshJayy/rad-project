@@ -6,7 +6,10 @@ import {
     deleteSub, 
     updateSub, 
     payhere,
-    subscribe
+    subscribe,
+    checkoutSession,
+    confirmPayment,
+    cancelPayment
 } from '../controllers/sub.controller.js';
 
 const router = express.Router();
@@ -16,6 +19,8 @@ router.post('/payhere', payhere);
 router.get('/getsubs/:userId', getSubs);
 router.delete('/deletesub/:subId', verifyToken, deleteSub);
 router.put('/updatesub/:subId', verifyToken, updateSub);
-
+router.post('/create-checkout-session', verifyToken, checkoutSession);
+router.post('/confirmpayment', verifyToken, confirmPayment);
+router.post('/cancelpayment', verifyToken, cancelPayment);
 
 export default router;

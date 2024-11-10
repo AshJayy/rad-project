@@ -7,9 +7,9 @@ const subSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    startDate: {
-      type: Date,
-      required: true,
+    sessionId: {
+      type: String,
+      default: null,
     },
     validUntil: {
       type: Date,
@@ -34,7 +34,7 @@ const subSchema = new mongoose.Schema(
           type: {
             type: String,
             required: true,
-            enum: [0, 1, 2],
+            enum: [1, 2, 3],
           },
         },
       ],

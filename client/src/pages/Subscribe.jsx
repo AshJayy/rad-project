@@ -3,11 +3,21 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { FaCheck } from "react-icons/fa";
 import { IoDocumentTextOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { loadStripe } from '@stripe/stripe-js';
+import { SuccessCard } from "../components/SuccessCard";
+import { useLocation } from 'react-router-dom';
 
 export default function Subscribe() {
   const { currentUser } = useSelector((state) => state.user);
+  // console.log( currentUser );
   const [subType, setSubType] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const queryParams = new URLSearchParams(location.search);
+  const sessionId = queryParams.get('session_id');
+  const cancelled = queryParams.get('cancelled');
+  // console.log(cancelled);
+
   const Items = [
     {
       type: 1,
@@ -29,37 +39,69 @@ export default function Subscribe() {
     },
   ];
   const navigate = useNavigate();
-  console.log(subType);
-  // useEffect(() => {
-  //   const getsubs = async () => {
-  //     const res = await fetch('/api/sub/makepayment', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         userId : currentUser._id,
-  //         type: '1',
-  //       }),
-  //     });
-  //     const data = await res.json();
-  //     if(!res.ok) {
-  //       console.log(res.error)
-  //     }
-  //     if(res.ok) {
-  //       console.log(data)
-  //       // navigate(`/home`);
-  //     }
-  //   }
-  //   try {
-  //     getsubs();
-  // } catch (error) {
-  //     console.log(error);
-  // }
-  // },[])
+  useEffect(() => {
+
+    const subscribe = async => {
+      fetch('/api/sub/confirmpayment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          userId: currentUser._id,
+        }),
+      })
+      navigate('/dashboard');
+    }
+
+    const cancel = async => {
+      fetch('/api/sub/cancelpayment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          userId: currentUser._id,
+        }),
+      })
+      navigate('/dashboard');
+
+    }
+
+    if(cancelled == 'false' ){
+      console.log('subscribed');
+      subscribe(sessionId);
+    }else if ( cancelled == 'true' ){
+      console.log('cancelled');
+      cancel(sessionId);
+    }
+  },[sessionId, cancelled, currentUser._id]);
+
+  const makePayment = async (subtype, type, userId) => {
+      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLICALLY_KEY);
+      const response = await fetch('/api/sub/create-checkout-session',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product : subtype,
+          userId: userId,
+          type: type,
+        }),
+      })
+
+      const session = await response.json();
+      console.log(session);
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+  }
   return (
     <div className=''>
-      {!subType ? (
+      {/* { paymentMethod ?  */}
         <div className='min-h-screen flex flex-col items-center'>
           <h1 className='text-5xl text-center font-bold mt-9'>
             Pick your <span className='text-blue-800'>perfect</span> plan
@@ -90,6 +132,10 @@ export default function Subscribe() {
                 <button
                   onClick={() => {
                     setSubType(item);
+                    // console.log(item);
+                    if(subType !== null) {
+                      makePayment(item, item.type, currentUser._id);
+                    }
                   }}
                   className='w-[23vh] mb-3 hover:bg-blue-800 hover:text-white border-solid font-semibold text-blue-800 border-2 p-2 rounded-3xl border-blue-800 '
                 >
@@ -99,7 +145,7 @@ export default function Subscribe() {
             ))}
           </div>
         </div>
-      ) : (
+      {/* ) : (
         <div>
           <div className='flex gap-16 flex-col min-h-screen justify-center items-center'>
             <h1 className='text-5xl sm:mt-[-10vh] font-bold text-center'>
@@ -109,8 +155,9 @@ export default function Subscribe() {
             <div className='flex flex-col w-full gap-8 justify-center items-center'>
               <div
                 onClick={() => {
+                  setPaymentMethod('card');
                   // navigate to payhere page
-                  navigate(`/makepayment?type=${subType.type}`);
+                  // navigate(`/makepayment?type=${subType.type}`);
                 }}
                 className='hover:scale-110 flex p-3 flex-row text-center justify-center border-solid border-[1px] rounded-[30px] border-gray-200  h-48 w-3/4 sm:w-1/2 shadow-lg transition-transform duration-300 ease-in-out'
               >
@@ -132,7 +179,8 @@ export default function Subscribe() {
 
               <div
                 onClick={() => {
-                  navigate(`/maketranfer?type=${subType.type}`);
+                  setPaymentMethod('banktranfer');
+                  // navigate(`/maketranfer?type=${subType.type}`);
                 }}
                 className='hover:scale-110 flex p-3 flex-row  justify-center border-solid border-[1px] rounded-[30px] border-gray-200  h-48 w-3/4 sm:w-1/2 shadow-lg transition-transform duration-300 ease-in-out'
               >
@@ -151,7 +199,7 @@ export default function Subscribe() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
