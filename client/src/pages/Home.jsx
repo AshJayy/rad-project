@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "flowbite-react";
 import { HiChevronRight } from "react-icons/hi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Home() {
@@ -87,6 +87,8 @@ export default function Home() {
       </div>
     )
   }
+  const [ subEnd, setSubEnd ] = useState('');
+  const [ subStart, setSubStart ] = useState('');
 
   const FAQ = ({index, question}) => {
     return (
@@ -113,6 +115,55 @@ export default function Home() {
       </div>
 )
   }
+  
+  useEffect(() => {  
+    const getSub = async () => {
+      try {
+        const res = await fetch(`/api/sub/getsubs/${currentUser._id}`, {
+          method: "GET",
+        });
+  
+        if (!res.ok) {
+          console.log("something went wrong");
+        } else {
+          const data = await res.json();          
+          setSubEnd(data.validUntil);
+          setSubStart(data.startDate);
+          console.log(subEnd,subStart);
+          
+        }
+      } catch (error) {
+        console.log("Fetch error:", error.message); // Debug log for errors
+      }
+    };
+  
+    getSub();
+    handleUserPlan();
+  }, []);
+  const handleUserPlan = async () => {
+    try {
+      console.log(subEnd,subStart);
+      
+      const res = await fetch(`/api/users/currentPlan/${currentUser._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          validUntil: subEnd,
+          startDate: subStart,
+        }),
+      });
+  
+      if (!res.ok) {
+        const data = await res.json();
+        console.log(data.message);
+        return;
+      }
+    } catch (error) {
+      console.log("Something went wrong", error.message);
+    }
+  };
 
   return (
     <main className="flex flex-col">

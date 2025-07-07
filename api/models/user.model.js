@@ -38,7 +38,6 @@ const userSchema = new mongoose.Schema(
     },
     currentPlan: {
       type: Number,
-      required: true,
       enum: [-1,0,1,2],
       default: -1,
       // -1: unsubscribe
