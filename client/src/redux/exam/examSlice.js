@@ -53,4 +53,6 @@ export const {
     updateExamQuestions
 } = examSlice.actions;
 
+
 export default examSlice.reducer;
+

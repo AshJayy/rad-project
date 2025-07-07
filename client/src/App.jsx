@@ -16,7 +16,7 @@ import PrivateRouteOnlyAdmin from './components/PrivateRouteOnlyAdmin'
 import UpdateQuestion from './pages/UpdateQuestion'
 import QuestionPage from './pages/questionPage'
 import ScrollToTop from './components/ScrollToTop'
-
+import _404 from './pages/_404'
 
 function App() {
 
@@ -42,6 +42,7 @@ function App() {
           <Route path='/editQuestion/:questionID' element={<UpdateQuestion />} />
           <Route path='/question/:questionID' element={<QuestionPage />} />
         </Route>
+        <Route path="*" element={<_404 />} />
       </Routes>
       <Footer />
     </BrowserRouter>
